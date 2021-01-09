@@ -64,6 +64,35 @@ module.exports = {
     res.status(200).json({ user: req.user });
   },
 
+  updateAdminProfile: async (req, res, next) => {
+    const { id } = req.body;
+    const {
+      name,
+      contact_number,
+      address,
+      username,
+      password,
+      role,
+    } = req.body;
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        name,
+        contact_number,
+        address,
+        username,
+        password,
+        role,
+        date_updated: Date.now(),
+      },
+      { new: true, useFindAndModify: false }
+    );
+    if (!user) {
+      res.status(400).json({ err: "User doesn't exist", success: false });
+    } else {
+      res.status(200).json({ user: user, success: true });
+    }
+  },
   usersProfile: async (req, res, next) => {
     const role = req.query.role;
     const permission = roles.can(role).readAny("profile");

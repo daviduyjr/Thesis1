@@ -14,6 +14,12 @@ router.post(
   adminController.register
 );
 
+router.put(
+  "/updateAdminProfile",
+  adminController.grantAccess("updateAny", "profile"),
+  adminController.updateAdminProfile
+);
+
 router.get("/newUser/", adminController.usersProfile);
 
 module.exports = router;
