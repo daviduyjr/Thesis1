@@ -28,6 +28,11 @@ const UserSchema = new Schema({
     default: "basic",
     enum: ["user", "supervisor", "admin"],
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+    required: true,
+  },
   date_created: {
     type: Date,
     default: Date.now,

@@ -22,7 +22,13 @@
                 Address :<strong> {{ newUser.address }}</strong>
               </li>
             </ul>
-            <button class="btn btn-primary btn-lg">Edit</button>
+            <button
+              class="btn btn-primary btn-lg"
+              to="/editProfile"
+              @click="editUsersInfo()"
+            >
+              Edit
+            </button>
           </div>
         </div>
       </div>
@@ -53,7 +59,11 @@ export default {
     // ...mapState(["newUser"])
   },
   methods: {
-    ...mapActions(["newUserInfo"])
+    ...mapActions(["newUserInfo"]),
+    editUsersInfo() {
+      alert("adsfasdf");
+      this.$router.push({ path: "/editProfile" });
+    }
   },
   created() {},
   // },

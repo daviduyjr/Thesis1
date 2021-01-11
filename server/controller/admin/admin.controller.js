@@ -20,6 +20,28 @@ module.exports = {
       }
     };
   },
+  profile: async (req, res, next) => {
+    res.status(200).json({ user: req.user });
+  },
+
+  usersList: async (req, res, next) => {
+    const role = req.query.role;
+    const permission = roles.can(role).readAny("profile");
+    if (permission.granted) {
+      const users = await User.find();
+
+      if (users.length === 0) {
+        res.status(200).json({ users: "No Data Available", success: true });
+      } else {
+        res.status(200).json({ users: users, success: true });
+      }
+    } else {
+      res
+        .status(403)
+        .json({ msg: "You dont have access in this files", success: false })
+        .end();
+    }
+  },
 
   register: async (req, res, next) => {
     let { name, contact_number, address, username, password, role } = req.body;
@@ -58,10 +80,6 @@ module.exports = {
         user: user,
       });
     });
-  },
-
-  profile: async (req, res, next) => {
-    res.status(200).json({ user: req.user });
   },
 
   updateAdminProfile: async (req, res, next) => {

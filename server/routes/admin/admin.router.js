@@ -8,6 +8,8 @@ const passportSignIn = passport.authenticate("jwt", { session: false });
 
 router.route("/profile").get(passportSignIn, adminController.profile);
 
+router.get("/usersList", adminController.usersList);
+
 router.post(
   "/register",
   adminController.grantAccess("createAny", "profile"),

@@ -34,16 +34,21 @@
           </b-collapse>
         </li>
         <li class="nav-item" v-if="isAdmin">
-          <a class="nav-link" v-b-toggle="'auth'">
+          <a class="nav-link" v-b-toggle="'admin'">
             <i class="menu-icon typcn typcn-document-add"></i>
             <span class="menu-title">User Pages</span>
             <i class="menu-arrow"></i>
           </a>
-          <b-collapse id="auth" v-if="user">
+          <b-collapse id="admin" v-if="user">
             <ul class="nav flex-column sub-menu">
               <li class="nav-item">
                 <router-link class="nav-link" to="/profile"
                   >Profile</router-link
+                >
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/usersList"
+                  >Users List</router-link
                 >
               </li>
               <li class="nav-item">
@@ -60,12 +65,34 @@
           </b-collapse>
         </li>
         <li class="nav-item" v-if="isSupervisor">
-          <a class="nav-link" v-b-toggle="'auth'">
+          <a class="nav-link" v-b-toggle="'SV'">
             <i class="menu-icon typcn typcn-document-add"></i>
             <span class="menu-title">User Pages</span>
             <i class="menu-arrow"></i>
           </a>
-          <b-collapse id="auth" v-if="user">
+          <b-collapse id="SV" v-if="user">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item">
+                <router-link class="nav-link" to="/userProfile"
+                  >User Profile</router-link
+                >
+              </li>
+              <!-- <li class="nav-item">
+                <router-link class="nav-link" to="/buttons"
+                  >Buttons</router-link
+                >
+              </li> -->
+            </ul>
+          </b-collapse>
+        </li>
+
+        <li class="nav-item" v-if="isUser">
+          <a class="nav-link" v-b-toggle="'user'">
+            <i class="menu-icon typcn typcn-document-add"></i>
+            <span class="menu-title">User Pages</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <b-collapse id="user">
             <ul class="nav flex-column sub-menu">
               <li class="nav-item">
                 <router-link class="nav-link" to="/userProfile"

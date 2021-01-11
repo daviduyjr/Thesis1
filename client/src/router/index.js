@@ -16,8 +16,10 @@ import login from "../views/samples/user-pages/login";
 
 // admin
 import adminProfile from "../views/admin/profile.admin";
+import usersList from "@/views/admin/usersList";
 import addUser from "../views/admin/addUser";
 import userinfo from "@/components/admin/manageUser/user.profile";
+import editProfile from "@/views/admin/editProfile";
 
 // user
 import userProfile from "../views/user/userProfile";
@@ -48,9 +50,27 @@ const router = new Router({
           }
         },
         {
+          path: "/usersList",
+          name: "usersList",
+          component: usersList,
+          meta: {
+            requiresAuth: true,
+            requiresOnlyAdmin: true
+          }
+        },
+        {
           path: "/addUser",
           name: "addUser",
           component: addUser,
+          meta: {
+            requiresAuth: true,
+            requiresOnlyAdmin: true
+          }
+        },
+        {
+          path: "/editProfile",
+          name: "editProfile",
+          component: editProfile,
           meta: {
             requiresAuth: true,
             requiresOnlyAdmin: true
