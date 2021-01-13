@@ -4,7 +4,7 @@
       <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
           <div class="card-body">
-            <h2 class="card-title">Add User</h2>
+            <h2 class="card-title text-center">Add User</h2>
             <!-- <p class="card-description">
               For displaying tabular data. <code>&lt;b-table&gt;</code> supports pagination, filtering, sorting, custom rendering, events, and asynchronous data.
               </p> -->

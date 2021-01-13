@@ -4,7 +4,7 @@
       <div class="col-lg-12 grid-margin stretch-card">
         <div class="card" v-if="newUser">
           <div class="card-body">
-            <h2 class="card-title">User Profile</h2>
+            <h2 class="card-title text-center">User Profile</h2>
             <ul class="list group">
               <li class="list-group-item">
                 Username :<strong> {{ newUser.username }}</strong>
@@ -76,3 +76,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+.card-title {
+  font-size: 27px;
+}
+</style>

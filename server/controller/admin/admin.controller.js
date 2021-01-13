@@ -30,6 +30,16 @@ module.exports = {
     if (permission.granted) {
       const users = await User.find();
 
+      // users.map((result) => {
+      //   return (usersToPass = {
+      //     id: result.id,
+      //     name: result.name,
+      //     contact_number: users.contact_number,
+      //     address: result.address,
+      //     role: result.role,
+      //   });
+      // });
+
       if (users.length === 0) {
         res.status(200).json({ users: "No Data Available", success: true });
       } else {

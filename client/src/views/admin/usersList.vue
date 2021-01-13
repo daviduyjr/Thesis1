@@ -4,9 +4,73 @@
       <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
           <div class="card-body">
-            <h2 class="card-title">Users List</h2>
-            <b-table striped hover :items="users"></b-table>
-            {{ users }}
+            <h2 class="card-title text-center">Users List</h2>
+            <b-row md="3">
+              <b-col cols="4">
+                <b-form-input
+                  v-model="filter"
+                  type="search"
+                  placeholder="Search"
+                >
+                </b-form-input>
+              </b-col>
+            </b-row>
+            <b-row md="3">
+              <b-col cols="12">
+                <div class="table-responsive mt-2 mb-2">
+                  <b-table
+                    class="table"
+                    :fixed="true"
+                    :bordered="true"
+                    :hover="true"
+                    :items="users"
+                    :fields="fields"
+                    :head-variant="tableVariants"
+                    sort-icon-left
+                    :filter="filter"
+                    :per-page="perPage"
+                    :current-page="currentPage"
+                    :busy.sync="isBusy"
+                    :actions="[]"
+                  >
+                  </b-table>
+                </div>
+              </b-col>
+            </b-row>
+            <b-row md="3">
+              <b-col cols="12">
+                <b-pagination
+                  v-model="currentPage"
+                  :total-rows="rows"
+                  :per-page="perPage"
+                >
+                </b-pagination>
+              </b-col>
+            </b-row>
+            <!-- {{ users }} -->
+            <!-- <table
+              id="example"
+              class="table table-striped table-bordered"
+              style="width:100%"
+            >
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Contact Number</th>
+                  <th>Address</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="user in users" :key="user._id">
+                  <td :key="user._id" style="display:none;">{{ user._id }}</td>
+                  <td>{{ user.name }}</td>
+                  <td>{{ user.contact_number }}</td>
+                  <td>{{ user.address }}</td>
+                  <td>{{ user.role }}</td>
+                </tr>
+              </tbody>
+            </table> -->
           </div>
         </div>
       </div>
@@ -22,23 +86,38 @@ export default {
   name: "usersList",
   data() {
     return {
-      //   items: [
-      //     { age: 40, first_name: "Dickerson", last_name: "Macdonald" },
-      //     { age: 21, first_name: "Larsen", last_name: "Shaw" },
-      //     { age: 89, first_name: "Geneva", last_name: "Wilson" },
-      //     { age: 38, first_name: "Jami", last_name: "Carney" }
-      //   ]
-      users: [
+      filter: "",
+      tableVariants: "dark",
+      perPage: 2,
+      currentPage: 1,
+      isBusy: false,
+      fields: [
+        { key: "_id" },
+        { key: "name", sortable: true, label: "Full Name" },
+        { key: "contact_number" },
+        { key: "address" },
+        { key: "role" },
+        "Actions"
+      ],
+      actions: [
         {
-          name: "",
-          contact_number: "",
-          address: "",
-          role: ""
+          text: "Delete",
+          color: "danger",
+          action: (row, index) => {
+            alert(`about to delete ${row.first_name} ${row.last_name}`);
+          }
         }
-      ]
+      ],
+      users: []
     };
   },
+  computed: {
+    rows() {
+      return this.users.length;
+    }
+  },
   mounted() {
+    this.isBusy = true;
     axios
       .get("http://localhost:5000/api/admin/usersList", {
         params: {
@@ -46,16 +125,12 @@ export default {
         }
       })
       .then(({ data }) => {
-        debugger;
+        this.isBusy = false;
         if (data.lenght === 0) {
           alert("no data");
         }
-        // this.users.name = data.users[0].name;
-        // this.users.contact_number = data.users[1].contact_number;
-        // this.users.address = data.users[2].address;
-        // this.users.role = data.users[3].role;
         this.users = data.users;
-        console.log(data.users[0].name);
+        console.log("data", data.users.length);
       })
       .catch(err => {
         console.log("may error");
@@ -64,4 +139,15 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.table {
+  width: 100%;
+  color: #212529;
+}
+table {
+  border-collapse: collapse;
+}
+.card-title {
+  font-size: 27px;
+}
+</style>
