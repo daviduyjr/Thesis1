@@ -32,7 +32,29 @@
                     :current-page="currentPage"
                     :busy.sync="isBusy"
                     :actions="[]"
+                    primary-key="_id"
                   >
+                    <template #cell(actions)="row">
+                      <b-button
+                        size="sm"
+                        @click="info(row.item, row.index, $event.target)"
+                        class="mr-1"
+                      >
+                        Info modal
+                      </b-button>
+                      <b-button size="sm" @click="row.toggleDetails">
+                        {{ row.detailsShowing ? "Hide" : "Show" }} Details
+                      </b-button>
+                    </template>
+                    <template #row-details="row">
+                      <b-card>
+                        <ul>
+                          <li v-for="(value, key) in row.item" :key="key">
+                            {{ key }}: {{ value }}
+                          </li>
+                        </ul>
+                      </b-card>
+                    </template>
                   </b-table>
                 </div>
               </b-col>
@@ -47,31 +69,43 @@
                 </b-pagination>
               </b-col>
             </b-row>
-            <!-- {{ users }} -->
-            <!-- <table
-              id="example"
-              class="table table-striped table-bordered"
-              style="width:100%"
-            >
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Contact Number</th>
-                  <th>Address</th>
-                  <th>Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="user in users" :key="user._id">
-                  <td :key="user._id" style="display:none;">{{ user._id }}</td>
-                  <td>{{ user.name }}</td>
-                  <td>{{ user.contact_number }}</td>
-                  <td>{{ user.address }}</td>
-                  <td>{{ user.role }}</td>
-                </tr>
-              </tbody>
-            </table> -->
           </div>
+          <b-modal
+            hide-footer
+            :id="infoModal.id"
+            title="USERS INFO"
+            @hide="resetInfoModal"
+          >
+            <ul class="list group">
+              <li class="list-group-item">
+                Username :<strong> {{ infoModal.content.username }}</strong>
+              </li>
+              <li class="list-group-item">
+                Role :<strong> {{ infoModal.content.role }}</strong>
+              </li>
+              <li class="list-group-item">
+                Name :<strong> {{ infoModal.content.name }}</strong>
+              </li>
+              <li class="list-group-item">
+                Contact :<strong>
+                  {{ infoModal.content.contact_number }}</strong
+                >
+              </li>
+              <li class="list-group-item">
+                Address :<strong> {{ infoModal.content.address }}</strong>
+              </li>
+              <li class="list-group-item">
+                Is Active :<strong> {{ infoModal.content.isActive }}</strong>
+              </li>
+            </ul>
+            <b-button
+              class="mt-3"
+              variant="outline-success"
+              block
+              @click="editUser"
+              >EDIT</b-button
+            >
+          </b-modal>
         </div>
       </div>
     </div>
@@ -92,12 +126,17 @@ export default {
       currentPage: 1,
       isBusy: false,
       fields: [
-        { key: "_id" },
         { key: "name", sortable: true, label: "Full Name" },
         { key: "contact_number" },
         { key: "address" },
         { key: "role" },
-        "Actions"
+        {
+          key: "isActive",
+          formatter: (value, key, item) => {
+            return value ? "Yes" : "No";
+          }
+        },
+        { key: "actions", label: "Actions" }
       ],
       actions: [
         {
@@ -108,7 +147,12 @@ export default {
           }
         }
       ],
-      users: []
+      users: [],
+      infoModal: {
+        id: "info-modal",
+        title: "",
+        content: {}
+      }
     };
   },
   computed: {
@@ -135,6 +179,20 @@ export default {
       .catch(err => {
         console.log("may error");
       });
+  },
+  methods: {
+    info(item, index, button) {
+      this.infoModal.title = "INFO";
+      this.infoModal.content = item;
+      this.$root.$emit("bv::show::modal", this.infoModal.id, button);
+    },
+    resetInfoModal() {
+      this.infoModal.title = "";
+      this.infoModal.content = "";
+    },
+    editUser() {
+      alert("edit");
+    }
   }
 };
 </script>

@@ -58,16 +58,17 @@ module.exports = {
 
     const foundUser = await User.findOne({ username: username });
     if (foundUser) {
-      return res
-        .status(400)
-        .json({ msg: "username is already in use", success: false });
+      return res.status(400).json({
+        msg: `Username "${username}" is already in use`,
+        success: false,
+      });
     }
 
     const foundName = await User.findOne({ name: name });
     if (foundName) {
       return res
         .status(400)
-        .json({ msg: `${name} has already a role`, success: false });
+        .json({ msg: `${name} has already a role.`, success: false });
     }
 
     const salt = await bcrypt.genSalt(10);

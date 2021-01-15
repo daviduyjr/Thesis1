@@ -216,10 +216,13 @@
         </div>
       </div>
     </div>
-    <b-modal hide-footer ref="my-modal" title="Add User">
-      <p class="my-4">Are you sure you want to add this {{ this.username }}</p>
-      <div class="alert alert-danger" v-if="errorManageUser">
-        {{ errorManageUser }}
+    <b-modal hide-footer @hide="onCancel()" ref="my-modal" title="Add User">
+      <p class="my-4">Are you sure you want to add this {{ this.username }}?</p>
+      <!-- <div class="alert alert-danger" v-if="errorManageUser">
+        <h5 id="errMsg">{{ errMsg }}</h5>
+      </div> -->
+      <div class="alert alert-danger" v-if="errMsg">
+        {{ errMsg }}
       </div>
       <b-button
         class="mt-3"
@@ -228,38 +231,41 @@
         @click="registerUserFinal"
         >Yes</b-button
       >
-      <b-button class="mt-3" variant="outline-danger" block>No</b-button>
+      <b-button class="mt-3" variant="outline-danger" @click="onCancel()" block
+        >No</b-button
+      >
     </b-modal>
   </section>
 </template>
 
-<script lang="js">
+<script>
 /* eslint-disable */
-import { mapActions, mapGetters, mapState } from 'vuex'
-import store from '@/store'
+import { mapActions, mapGetters, mapState } from "vuex";
+import store from "@/store";
 import { mask } from "vue-the-mask";
 
 export default {
   directives: { mask },
-  name: 'addUser',
-  data () {
+  name: "addUser",
+  data() {
     return {
       username: null,
-      password: '',
-      name: '',
-      contactNumber: '',
-      address: '',
+      password: "",
+      name: "",
+      contactNumber: "",
+      address: "",
       selected: null,
       options: [
-        { value: null, text: 'Please select a role' },
-        { value: 'user', text: 'User' },
-        { value: 'supervisor', text: 'Supervisor' },
-        { value: 'admin', text: 'Administrator' },
-      ]
-    }
+        { value: null, text: "Please select a role" },
+        { value: "user", text: "User" },
+        { value: "supervisor", text: "Supervisor" },
+        { value: "admin", text: "Administrator" }
+      ],
+      errMsg: ""
+    };
   },
   methods: {
-    ...mapActions(['register', "newUserInfo"]),
+    ...mapActions(["register", "newUserInfo"]),
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
@@ -272,27 +278,36 @@ export default {
         address: this.address,
         role: this.selected,
         currentUserRole: store.state.Auth.currentUserRole
-      }
+      };
       this.register(user)
-      .then(res => {
-        if(res.data.success){
-          this.$refs['my-modal'].hide()
-          // this.newUserInfo(res.data.user)
-          // this.$router.push('/pages/login')
-        }
-      })
-      .catch(err =>{
-        console.log(err);
-      });
+        .then(res => {
+          if (res.data.success === true) {
+            this.$refs["my-modal"].hide();
+          }
+          // } else if (res.data.success === false) {
+          //   this.errMsg = res.data.msg;
+          //   console.log(this.errMsg);
+          // }
+          if (res.data.success === false) {
+            this.errMsg = res.data.msg;
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
     onSubmit() {
-        this.$refs['my-modal'].show()
+      this.$refs["my-modal"].show();
+    },
+    onCancel() {
+      this.errMsg = "";
+      this.$refs["my-modal"].hide();
     }
   },
   computed: {
-   ...mapGetters(['user','errorManageUser'])
-  },
-}
+    ...mapGetters(["user", "errorManageUser"])
+  }
+};
 </script>
 
 <style scoped>
