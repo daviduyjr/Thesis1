@@ -23,7 +23,7 @@ const actions = {
         "http://localhost:5000/api/admin/register",
         userData
       );
-      if (res.data.success === "true") {
+      if (res.data.success === true) {
         commit("register_success", res.data.user);
         const newUserId = res.data.user._id;
         router.push({ name: "newUserInfo", params: { id: newUserId } });

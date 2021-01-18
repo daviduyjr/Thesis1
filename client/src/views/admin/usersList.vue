@@ -35,22 +35,41 @@
                     primary-key="_id"
                   >
                     <template #cell(actions)="row">
+                      <b-button size="sm" @click="row.toggleDetails">
+                        {{ row.detailsShowing ? "Hide" : "Show" }} Details
+                      </b-button>
                       <b-button
                         size="sm"
                         @click="info(row.item, row.index, $event.target)"
                         class="mr-1"
                       >
-                        Info modal
-                      </b-button>
-                      <b-button size="sm" @click="row.toggleDetails">
-                        {{ row.detailsShowing ? "Hide" : "Show" }} Details
+                        Edit
                       </b-button>
                     </template>
                     <template #row-details="row">
                       <b-card>
                         <ul>
-                          <li v-for="(value, key) in row.item" :key="key">
-                            {{ key }}: {{ value }}
+                          <li>
+                            Username : <strong>{{ row.item.username }}</strong>
+                          </li>
+                          <li>
+                            Role : <strong>{{ row.item.role }}</strong>
+                          </li>
+                          <li>
+                            Name : <strong>{{ row.item.name }}</strong>
+                          </li>
+                          <li>
+                            Contact Number :
+                            <strong>{{ row.item.contact_number }}</strong>
+                          </li>
+                          <li>
+                            Address : <strong>{{ row.item.address }}</strong>
+                          </li>
+                          <li>
+                            Is Active :
+                            <strong>{{
+                              row.item.isActive ? "YES" : "NO"
+                            }}</strong>
                           </li>
                         </ul>
                       </b-card>
@@ -70,7 +89,7 @@
               </b-col>
             </b-row>
           </div>
-          <b-modal
+          <!-- <b-modal
             hide-footer
             :id="infoModal.id"
             title="USERS INFO"
@@ -94,8 +113,14 @@
               <li class="list-group-item">
                 Address :<strong> {{ infoModal.content.address }}</strong>
               </li>
-              <li class="list-group-item">
-                Is Active :<strong> {{ infoModal.content.isActive }}</strong>
+              <li
+                class="list-group-item"
+                v-if="infoModal.content.isActive === true"
+              >
+                Is Active :<strong> YES </strong>
+              </li>
+              <li class="list-group-item" v-else>
+                Is Active :<strong> NO </strong>
               </li>
             </ul>
             <b-button
@@ -105,6 +130,14 @@
               @click="editUser"
               >EDIT</b-button
             >
+          </b-modal> -->
+          <b-modal
+            hide-footer
+            :id="infoModal.id"
+            title="EDIT USERS INFO"
+            @hide="resetInfoModal"
+          >
+            <editUsersProfile :userProps="infoModal.content" />
           </b-modal>
         </div>
       </div>
@@ -114,21 +147,22 @@
 
 <script>
 /* eslint-disable */
+
+import editUsersProfile from "@/components/admin/manageUser/editUsersProfile";
 import axios from "axios";
 import store from "@/store";
 export default {
   name: "usersList",
+  components: { editUsersProfile },
   data() {
     return {
       filter: "",
       tableVariants: "dark",
-      perPage: 2,
+      perPage: 3,
       currentPage: 1,
       isBusy: false,
       fields: [
         { key: "name", sortable: true, label: "Full Name" },
-        { key: "contact_number" },
-        { key: "address" },
         { key: "role" },
         {
           key: "isActive",
