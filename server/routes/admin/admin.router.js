@@ -17,9 +17,9 @@ router.post(
 );
 
 router.put(
-  "/updateAdminProfile",
+  "/updateUsersProfile",
   adminController.grantAccess("updateAny", "profile"),
-  adminController.updateAdminProfile
+  adminController.updateUsersProfile
 );
 
 router.get("/newUser/", adminController.usersProfile);

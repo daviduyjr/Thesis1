@@ -188,7 +188,7 @@
           </validation-provider>
           <div class="input-group switch">
             <b-form-checkbox v-model="isActive" name="check-button" switch>
-              Is Active <b>(Checked: {{ isActive }})</b>
+              Is Active : <b>{{ isActive ? "YES" : "NO" }}</b>
             </b-form-checkbox>
           </div>
           <button type="submit" class="btn btn-primary btn-lg">
@@ -207,7 +207,7 @@
           class="mt-3"
           variant="outline-success"
           block
-          @click="registerUserFinal"
+          @click="editUserFinal"
           >Yes</b-button
         >
         <b-button
@@ -233,6 +233,7 @@ export default {
   name: "editUsersProfile",
   data() {
     return {
+      id: "",
       username: null,
       password: "",
       name: "",
@@ -251,29 +252,28 @@ export default {
   },
   props: { userProps: {} },
   methods: {
-    ...mapActions(["register", "newUserInfo"]),
+    ...mapActions(["editUserInfo", "newUserInfo"]),
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
-    async registerUserFinal() {
+    async editUserFinal() {
       let user = {
+        id: this.id,
         username: this.username,
         password: this.password,
         name: this.name,
         contact_number: this.contactNumber,
         address: this.address,
         role: this.selected,
-        currentUserRole: store.state.Auth.currentUserRole
+        currentUserRole: store.state.Auth.currentUserRole,
+        isActive: this.isActive
       };
-      this.register(user)
+      console.log(user);
+      this.editUserInfo(user)
         .then(res => {
           if (res.data.success === true) {
             this.$refs["my-modal"].hide();
           }
-          // } else if (res.data.success === false) {
-          //   this.errMsg = res.data.msg;
-          //   console.log(this.errMsg);
-          // }
           if (res.data.success === false) {
             this.errMsg = res.data.msg;
           }
@@ -283,7 +283,7 @@ export default {
         });
     },
     onSubmit() {
-      //   this.$refs["my-modal"].show();
+      this.$refs["my-modal"].show();
       console.log(this.username);
     },
     onCancel() {
@@ -296,6 +296,7 @@ export default {
   },
   mounted() {
     console.log(this.userProps);
+    this.id = this.userProps._id;
     this.username = this.userProps.username;
     this.password = "";
     this.selected = this.userProps.role;

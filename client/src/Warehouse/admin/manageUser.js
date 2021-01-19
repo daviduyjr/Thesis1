@@ -56,6 +56,28 @@ const actions = {
     } catch (err) {
       commit("new_user_profile_error", err);
     }
+  },
+
+  async editUserInfo({ commit }, userData) {
+    try {
+      let res = await axios.put(
+        "http://localhost:5000/api/admin/updateUsersProfile",
+        userData
+      );
+      debugger;
+      if (res.data.success === true) {
+        commit("register_success", res.data.user);
+        const newUserId = res.data.user._id;
+        router.push({ name: "newUserInfo", params: { id: newUserId } });
+        return res;
+      }
+      if (res.data.success === false) {
+        return res;
+      }
+    } catch (err) {
+      const error = { data: err.response.data };
+      return error;
+    }
   }
 };
 

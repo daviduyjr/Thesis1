@@ -93,7 +93,7 @@ module.exports = {
     });
   },
 
-  updateAdminProfile: async (req, res, next) => {
+  updateUsersProfile: async (req, res, next) => {
     const { id } = req.body;
     const {
       name,
@@ -102,6 +102,7 @@ module.exports = {
       username,
       password,
       role,
+      isActive,
     } = req.body;
     const user = await User.findByIdAndUpdate(
       id,
@@ -112,6 +113,7 @@ module.exports = {
         username,
         password,
         role,
+        isActive,
         date_updated: Date.now(),
       },
       { new: true, useFindAndModify: false }
