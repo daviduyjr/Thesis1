@@ -6,9 +6,7 @@ module.exports = {
   grantAccess: (action, resource) => {
     return async (req, res, next) => {
       try {
-        const permission = roles
-          .can(req.body.currentUserRole)
-          [action](resource);
+        const permission = roles.can(req.user.role)[action](resource);
         if (!permission.granted) {
           return res.status(401).json({
             error: "You don't have enough permission to perform this action",
@@ -25,7 +23,7 @@ module.exports = {
   },
 
   usersList: async (req, res, next) => {
-    const role = req.query.role;
+    const role = req.user.role;
     const permission = roles.can(role).readAny("profile");
     if (permission.granted) {
       const users = await User.find();
@@ -127,7 +125,7 @@ module.exports = {
     }
   },
   usersProfile: async (req, res, next) => {
-    const role = req.query.role;
+    const role = req.user.role;
     const permission = roles.can(role).readAny("profile");
     if (permission.granted) {
       console.log("newUser got called");

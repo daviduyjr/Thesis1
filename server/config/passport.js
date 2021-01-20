@@ -13,6 +13,7 @@ const opt = {
 
 module.exports = (passport) => {
   passport.use(
+    "login",
     new JwtStrategy(opt, async (payload, done) => {
       const user = await User.findById(payload.sub.id);
 

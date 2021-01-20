@@ -67,7 +67,6 @@ const actions = {
       }
       return res;
     } catch (err) {
-      debugger;
       commit("auth_error", err);
     }
   },

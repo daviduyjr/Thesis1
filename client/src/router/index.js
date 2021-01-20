@@ -123,7 +123,7 @@ const router = new Router({
       },
       children: [
         {
-          name: "SVProfile",
+          name: "userProfile",
           path: "/userProfile",
           component: adminProfile
         }
@@ -156,7 +156,6 @@ router.beforeEach((to, from, next) => {
     }
     if (to.matched.some(record => record.meta.requiresOnlyAdmin)) {
       if (role !== admin) {
-        console.log(to.path);
         return next("pages/login");
       } else {
         return next();

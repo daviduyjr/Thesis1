@@ -11,28 +11,30 @@
                   v-model="filter"
                   type="search"
                   placeholder="Search"
+                  debounce="0"
                 >
                 </b-form-input>
               </b-col>
             </b-row>
             <b-row md="3">
               <b-col cols="12">
-                <div class="table-responsive mt-2 mb-2">
+                <div class="mt-2 mb-2">
                   <b-table
                     class="table"
-                    :fixed="true"
-                    :bordered="true"
+                    :bordered="bordered"
                     :hover="true"
                     :items="users"
                     :fields="fields"
-                    :head-variant="tableVariants"
-                    sort-icon-left
+                    :head-variant="headVariant"
                     :filter="filter"
+                    :fixed="fixed"
                     :per-page="perPage"
                     :current-page="currentPage"
                     :busy.sync="isBusy"
-                    :actions="[]"
                     primary-key="_id"
+                    responsive="sm"
+                    :sort-by.sync="sortBy"
+                    :sort-desc.sync="sortDesc"
                   >
                     <template #cell(actions)="row">
                       <b-button size="sm" @click="row.toggleDetails">
@@ -67,9 +69,7 @@
                           </li>
                           <li>
                             Is Active :
-                            <strong>{{
-                              row.item.isActive ? "YES" : "NO"
-                            }}</strong>
+                            <strong>{{ row.item.isActive }}</strong>
                           </li>
                         </ul>
                       </b-card>
@@ -89,48 +89,6 @@
               </b-col>
             </b-row>
           </div>
-          <!-- <b-modal
-            hide-footer
-            :id="infoModal.id"
-            title="USERS INFO"
-            @hide="resetInfoModal"
-          >
-            <ul class="list group">
-              <li class="list-group-item">
-                Username :<strong> {{ infoModal.content.username }}</strong>
-              </li>
-              <li class="list-group-item">
-                Role :<strong> {{ infoModal.content.role }}</strong>
-              </li>
-              <li class="list-group-item">
-                Name :<strong> {{ infoModal.content.name }}</strong>
-              </li>
-              <li class="list-group-item">
-                Contact :<strong>
-                  {{ infoModal.content.contact_number }}</strong
-                >
-              </li>
-              <li class="list-group-item">
-                Address :<strong> {{ infoModal.content.address }}</strong>
-              </li>
-              <li
-                class="list-group-item"
-                v-if="infoModal.content.isActive === true"
-              >
-                Is Active :<strong> YES </strong>
-              </li>
-              <li class="list-group-item" v-else>
-                Is Active :<strong> NO </strong>
-              </li>
-            </ul>
-            <b-button
-              class="mt-3"
-              variant="outline-success"
-              block
-              @click="editUser"
-              >EDIT</b-button
-            >
-          </b-modal> -->
           <b-modal
             hide-footer
             :id="infoModal.id"
@@ -157,29 +115,24 @@ export default {
   data() {
     return {
       filter: "",
-      tableVariants: "dark",
+      headVariant: "dark",
       perPage: 3,
       currentPage: 1,
       isBusy: false,
+      sortBy: "name",
+      sortDesc: false,
+      bordered: true,
+      fixed: false,
       fields: [
+        { key: "username", sortable: true, label: "User Name" },
         { key: "name", sortable: true, label: "Full Name" },
-        { key: "role" },
+        { key: "role", sortable: false },
         {
           key: "isActive",
-          formatter: (value, key, item) => {
-            return value ? "Yes" : "No";
-          }
+          sortable: false,
+          thStyle: { width: "20%" }
         },
-        { key: "actions", label: "Actions" }
-      ],
-      actions: [
-        {
-          text: "Delete",
-          color: "danger",
-          action: (row, index) => {
-            alert(`about to delete ${row.first_name} ${row.last_name}`);
-          }
-        }
+        { key: "actions", label: "Actions", thStyle: { width: "18%" } }
       ],
       users: [],
       infoModal: {
@@ -232,14 +185,10 @@ export default {
 </script>
 
 <style scoped>
-.table {
-  width: 100%;
-  color: #212529;
-}
-table {
-  border-collapse: collapse;
-}
 .card-title {
   font-size: 27px;
+}
+.actionClass {
+  max-width: 50px;
 }
 </style>

@@ -29,8 +29,9 @@ const UserSchema = new Schema({
     enum: ["user", "supervisor", "admin"],
   },
   isActive: {
-    type: Boolean,
-    default: true,
+    type: String,
+    default: "Yes",
+    enum: ["Yes", "No"],
     required: true,
   },
   date_created: {

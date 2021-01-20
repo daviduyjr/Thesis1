@@ -202,7 +202,7 @@
               switch
               @change="switchChange"
             >
-              Is Active : <b>{{ isActive ? "YES" : "NO" }}</b>
+              Is Active : <b>{{ isActive ? "Yes" : "No" }}</b>
             </b-form-checkbox>
           </div>
           <button type="submit" class="btn btn-primary btn-lg">
@@ -261,7 +261,7 @@ export default {
         { value: "admin", text: "Administrator" }
       ],
       errMsg: "",
-      isActive: false,
+      isActive: "",
       checkIfActive: false
     };
   },
@@ -281,7 +281,7 @@ export default {
         address: this.address,
         role: this.selected,
         currentUserRole: store.state.Auth.currentUserRole,
-        isActive: this.isActive
+        isActive: this.isActive ? "Yes" : "No"
       };
       console.log(user);
       this.editUserInfo(user)
@@ -328,9 +328,12 @@ export default {
     this.contactNumber = this.userProps.contact_number;
     this.name = this.userProps.name;
     this.isActive = this.userProps.isActive;
-    if (this.isActive === true) {
+    console.log(this.isActive);
+    if (this.isActive === "Yes") {
+      this.isActive = true;
       this.checkIfActive = false;
     } else {
+      this.isActive = false;
       this.checkIfActive = true;
     }
   }
