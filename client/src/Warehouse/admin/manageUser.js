@@ -64,7 +64,7 @@ const actions = {
         "http://localhost:5000/api/admin/updateUsersProfile",
         userData
       );
-      debugger;
+
       if (res.data.success === true) {
         commit("register_success", res.data.user);
         const newUserId = res.data.user._id;

@@ -104,6 +104,8 @@ module.exports = {
       role,
       isActive,
     } = req.body;
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
     const user = await User.findByIdAndUpdate(
       id,
       {
@@ -111,7 +113,7 @@ module.exports = {
         contact_number,
         address,
         username,
-        password,
+        password: passwordHash,
         role,
         isActive,
         date_updated: Date.now(),

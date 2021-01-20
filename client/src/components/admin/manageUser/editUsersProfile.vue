@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-lg-12">
       <validation-observer ref="observer" v-slot="{ handleSubmit }">
-        <form @submit.stop.prevent="handleSubmit(onSubmit)">
+        <form class="editForm" @submit.stop.prevent="handleSubmit(onSubmit)">
           <validation-provider
             name="UserName"
             :rules="{ required: true, min: 5 }"
@@ -22,11 +22,12 @@
                   id="username"
                   name="username"
                   type="text"
-                  class="form-control"
+                  class="form-control editFormInput"
                   placeholder="Username"
                   v-model="username"
                   :state="getValidationState(usernameValidation)"
                   aria-describedby="input-1-live-feedback"
+                  :disabled="checkIfActive"
                 ></b-form-input>
                 <b-form-invalid-feedback id="input-1-live-feedback">{{
                   usernameValidation.errors[0]
@@ -53,12 +54,13 @@
                   id="password"
                   name="password"
                   type="password"
-                  class="form-control"
+                  class="form-control editFormInput"
                   placeholder="Password"
                   v-model="password"
                   :state="getValidationState(passwordValidation)"
                   aria-describedby="input-2-live-feedback"
                   data-vv-as="Username"
+                  :disabled="checkIfActive"
                 ></b-form-input>
                 <b-form-invalid-feedback id="input-2-live-feedback">{{
                   passwordValidation.errors[0]
@@ -85,12 +87,13 @@
                   id="name"
                   name="name"
                   type="text"
-                  class="form-control"
+                  class="form-control editFormInput"
                   placeholder="FullName"
                   v-model="name"
                   :state="getValidationState(nameValidation)"
                   aria-describedby="input-3-live-feedback"
                   data-vv-as="Name"
+                  :disabled="checkIfActive"
                 ></b-form-input>
 
                 <b-form-invalid-feedback id="input-3-live-feedback">{{
@@ -118,13 +121,14 @@
                   id="contactNumber"
                   name="contactNumber"
                   type="text"
-                  class="form-control"
+                  class="form-control editFormInput"
                   placeholder="Contact Number (+63)-###-####-###"
                   v-model="contactNumber"
                   :state="getValidationState(contactNumberValidation)"
                   aria-describedby="input-4-live-feedback"
                   data-vv-as="contactNumber"
                   v-mask="['(+63) ###-####-###', '(+63) ###-####-###']"
+                  :disabled="checkIfActive"
                 ></b-form-input>
                 <b-form-invalid-feedback id="input-3-live-feedback"
                   >The Contact Number field is required</b-form-invalid-feedback
@@ -148,12 +152,13 @@
                   id="address"
                   name="address"
                   type="text"
-                  class="form-control"
+                  class="form-control editFormInput"
                   placeholder="Address"
                   v-model="address"
                   :state="getValidationState(addressValidation)"
                   aria-describedby="input-5-live-feedback"
                   data-vv-as="Name"
+                  :disabled="checkIfActive"
                 ></b-form-input>
 
                 <b-form-invalid-feedback id="input-5-live-feedback">{{
@@ -171,13 +176,15 @@
               <div class="input-group">
                 <div class="col-md-7">
                   <b-form-select
-                    id="role"
+                    id="roleSelect"
                     name="role"
+                    class="editFormInput"
                     v-model="selected"
                     :options="options"
                     :state="getValidationState(roleValidation)"
                     aria-describedby="input-6-live-feedback"
                     data-vv-as="Role"
+                    :disabled="checkIfActive"
                   ></b-form-select>
                 </div>
               </div>
@@ -187,7 +194,14 @@
             </div>
           </validation-provider>
           <div class="input-group switch">
-            <b-form-checkbox v-model="isActive" name="check-button" switch>
+            <b-form-checkbox
+              id="isActiveSwitch"
+              class="editFormInput"
+              v-model="isActive"
+              name="check-button"
+              switch
+              @change="switchChange"
+            >
               Is Active : <b>{{ isActive ? "YES" : "NO" }}</b>
             </b-form-checkbox>
           </div>
@@ -247,7 +261,8 @@ export default {
         { value: "admin", text: "Administrator" }
       ],
       errMsg: "",
-      isActive: false
+      isActive: false,
+      checkIfActive: false
     };
   },
   props: { userProps: {} },
@@ -289,13 +304,22 @@ export default {
     onCancel() {
       this.errMsg = "";
       this.$refs["my-modal"].hide();
+    },
+    switchChange(e) {
+      this.$nextTick(() => {
+        if (e === false) {
+          this.checkIfActive = true;
+        } else {
+          this.checkIfActive = false;
+        }
+      });
     }
   },
   computed: {
     ...mapGetters(["user", "errorManageUser"])
   },
   mounted() {
-    console.log(this.userProps);
+    const inputEl = document.querySelectorAll(".editFormInput");
     this.id = this.userProps._id;
     this.username = this.userProps.username;
     this.password = "";
@@ -304,6 +328,11 @@ export default {
     this.contactNumber = this.userProps.contact_number;
     this.name = this.userProps.name;
     this.isActive = this.userProps.isActive;
+    if (this.isActive === true) {
+      this.checkIfActive = false;
+    } else {
+      this.checkIfActive = true;
+    }
   }
 };
 </script>

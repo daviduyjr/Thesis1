@@ -114,6 +114,22 @@ const router = new Router({
       ]
     },
     {
+      //para sa user
+      path: "/user",
+      redirect: "/userProfile",
+      component: mainView,
+      meta: {
+        requiresAuth: true
+      },
+      children: [
+        {
+          name: "SVProfile",
+          path: "/userProfile",
+          component: adminProfile
+        }
+      ]
+    },
+    {
       path: "*",
       redirect: "/pages/error_404",
       component: {
