@@ -212,7 +212,7 @@
       </validation-observer>
       <b-modal hide-footer @hide="onCancel()" ref="my-modal" title="Add User">
         <p class="my-4">
-          Are you sure you want to add this {{ this.username }}?
+          Are you sure you want to edit {{ this.username }} profile?
         </p>
         <div class="alert alert-danger" v-if="errMsg">
           {{ errMsg }}

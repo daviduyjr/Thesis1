@@ -4,7 +4,7 @@
       <div class="col-lg-12 grid-margin stretch-card">
         <div class="card" v-if="user">
           <div class="card-body">
-            <h2 class="card-title">Profile</h2>
+            <h2 class="card-title text-center">Profile</h2>
             <ul class="list group">
               <li class="list-group-item">
                 Username :<strong> {{ user.username }}</strong>
@@ -48,3 +48,10 @@ export default {
   // }
 }
 </script>
+
+<style scoped>
+.card-title {
+  font-size: 35px;
+  color: black;
+}
+</style>

@@ -64,6 +64,22 @@
             </ul>
           </b-collapse>
         </li>
+        <li class="nav-item" v-if="isAdmin">
+          <a class="nav-link" v-b-toggle="'product'">
+            <i class="menu-icon typcn typcn-document-add"></i>
+            <span class="menu-title">Product</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <b-collapse id="product" v-if="user">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item">
+                <router-link class="nav-link" to="/categories"
+                  >Categories</router-link
+                >
+              </li>
+            </ul>
+          </b-collapse>
+        </li>
         <li class="nav-item" v-if="isSupervisor">
           <a class="nav-link" v-b-toggle="'SV'">
             <i class="menu-icon typcn typcn-document-add"></i>

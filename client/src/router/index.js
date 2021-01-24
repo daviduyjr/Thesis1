@@ -20,6 +20,7 @@ import usersList from "@/views/admin/usersList";
 import addUser from "../views/admin/addUser";
 import userinfo from "@/components/admin/manageUser/user.profile";
 import editProfile from "@/views/admin/editProfile";
+import addCategories from "@/views/admin/manageProdView/addCategoriesView";
 
 // user
 import userProfile from "../views/user/userProfile";
@@ -89,6 +90,15 @@ const router = new Router({
           path: "/profile",
           name: "profile",
           component: adminProfile,
+          meta: {
+            requiresAuth: true,
+            requiresOnlyAdmin: true
+          }
+        },
+        {
+          path: "/categories",
+          name: "addCategories",
+          component: addCategories,
           meta: {
             requiresAuth: true,
             requiresOnlyAdmin: true

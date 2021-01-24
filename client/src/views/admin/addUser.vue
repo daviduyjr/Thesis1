@@ -34,6 +34,7 @@
                         v-model="username"
                         :state="getValidationState(usernameValidation)"
                         aria-describedby="input-1-live-feedback"
+                        autocomplete="off"
                       ></b-form-input>
                       <b-form-invalid-feedback id="input-1-live-feedback">{{
                         usernameValidation.errors[0]
@@ -98,6 +99,7 @@
                         :state="getValidationState(nameValidation)"
                         aria-describedby="input-3-live-feedback"
                         data-vv-as="Name"
+                        autocomplete="off"
                       ></b-form-input>
 
                       <b-form-invalid-feedback id="input-3-live-feedback">{{
@@ -132,6 +134,7 @@
                         aria-describedby="input-4-live-feedback"
                         data-vv-as="contactNumber"
                         v-mask="['(+63) ###-####-###', '(+63) ###-####-###']"
+                        autocomplete="off"
                       ></b-form-input>
                       <b-form-invalid-feedback id="input-3-live-feedback"
                         >The Contact Number field is
@@ -165,6 +168,7 @@
                         :state="getValidationState(addressValidation)"
                         aria-describedby="input-5-live-feedback"
                         data-vv-as="Name"
+                        autocomplete="off"
                       ></b-form-input>
 
                       <b-form-invalid-feedback id="input-5-live-feedback">{{
