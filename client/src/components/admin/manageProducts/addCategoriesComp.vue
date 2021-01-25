@@ -147,34 +147,38 @@ export default {
     }
   },
   mounted() {
-    // const cat = store.state.manageProduct.categories;
-    // store.dispatch("categoryList");
-    // debugger;
-    // this.categories = cat;
-    // cat.forEach(catRes => {
-    //   this.categories.push = catRes;
-    // });
-    // console.log(this.categories);
-    this.isBusy = true;
-    axios
-      .get("http://localhost:5000/api/admin/categoryList")
-      .then(({ data }) => {
-        debugger;
-        this.isBusy = false;
-        if (data.categories.lenght === 0) {
-          alert("no data");
-        }
-        this.categories = data.categories;
-        console.log(this.categories);
-      })
-      .catch(err => {
-        console.log("may error");
-      });
+    this.getCatList();
   },
   methods: {
-    ...mapActions(["categoryList"]),
+    ...mapActions(["categoryList", "addCategory"]),
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
+    },
+
+    async getCatList() {
+      this.isBusy = true;
+      axios
+        .get("http://localhost:5000/api/admin/categoryList")
+        .then(({ data }) => {
+          this.isBusy = false;
+          if (data.categories.lenght === 0) {
+            alert("no data");
+          }
+          this.categories = data.categories;
+          console.log(this.categories);
+        })
+        .catch(err => {
+          console.log("may error");
+        });
+    },
+
+    async onSubmit() {
+      const catName = this.categoryName;
+      this.addCategory(catName).then(result => {
+        debugger;
+        console.log(result);
+        getCatList();
+      });
     }
   }
 };

@@ -4,6 +4,7 @@ import router from "../../router";
 
 const state = {
   categories: {},
+  catName: "",
   errorManageProduct: ""
 };
 
@@ -23,6 +24,23 @@ const actions = {
     } catch (err) {
       commit("CATEGORY_LIST_ERROR", err);
     }
+  },
+
+  async addCategory({ commit }, catData) {
+    try {
+      let res = await axios.post(
+        "http://localhost:5000/api/admin/addCategory",
+        { categoryName: catData }
+      );
+
+      if (res.data.success === true) {
+        commit("NEW_CATEGGORY_SUCCESS", res);
+        return res;
+      }
+    } catch (err) {
+      const error = { data: err.response.data };
+      return error;
+    }
   }
 };
 
@@ -33,6 +51,9 @@ const mutations = {
   CATEGORY_LIST_RESULT(state, catData) {
     state.categories = catData.data.categories;
     state.errorManageProduct = null;
+  },
+  NEW_CATEGGORY_SUCCESS(state, catData) {
+    this.catName = catData.data.categories;
   }
 };
 
