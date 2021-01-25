@@ -78,9 +78,9 @@
                   :sort-desc.sync="sortDesc"
                 >
                   <template #cell(actions)="row">
-                    <b-button size="sm" @click="row.toggleDetails">
+                    <!-- <b-button size="sm" @click="row.toggleDetails">
                       {{ row.detailsShowing ? "Hide" : "Show" }} Details
-                    </b-button>
+                    </b-button> -->
                     <b-button
                       size="sm"
                       @click="info(row.item, row.index, $event.target)"
@@ -106,9 +106,9 @@
         </div>
       </div>
     </div>
-    <b-row class="mb-3">
+    <!-- <b-row class="mb-3">
       <b-col md="3"> </b-col>
-    </b-row>
+    </b-row> -->
   </section>
 </template>
 
@@ -126,7 +126,7 @@ export default {
     return {
       filter: "",
       headVariant: "dark",
-      perPage: 3,
+      perPage: 5,
       currentPage: 1,
       isBusy: false,
       sortBy: "name",
@@ -137,7 +137,13 @@ export default {
       categories: [],
       fields: [
         { key: "category_name", sortable: true, label: "Category" },
-        { key: "actions", label: "Actions", thStyle: { width: "18%" } }
+        {
+          key: "isActive",
+          sortable: false,
+          label: "Is Active",
+          thStyle: { width: "18%" }
+        },
+        { key: "actions", label: "Actions", thStyle: { width: "20%" } }
       ]
     };
   },
@@ -177,7 +183,7 @@ export default {
       this.addCategory(catName).then(result => {
         debugger;
         console.log(result);
-        getCatList();
+        this.getCatList();
       });
     }
   }
@@ -187,5 +193,8 @@ export default {
 <style scoped>
 .card-title {
   font-size: 27px;
+}
+.btn-sm {
+  padding: 0.5rem 4.81rem;
 }
 </style>
