@@ -11,17 +11,27 @@ import VueSweetalert2 from "vue-sweetalert2";
 import VueGoodWizard from "vue-good-wizard";
 import axios from "axios";
 import VueTheMask from "vue-the-mask";
-
 import {
   ValidationObserver,
   ValidationProvider,
   extend,
   localize
 } from "vee-validate";
-import en from "vee-validate/dist/locale/en.json";
 import * as rules from "vee-validate/dist/rules";
+import en from "vee-validate/dist/locale/en.json";
+
+// install rules and localization
+Object.keys(rules).forEach(rule => {
+  extend(rule, rules[rule]);
+});
+
+localize("en", en);
+
+Vue.component("ValidationObserver", ValidationObserver);
+Vue.component("ValidationProvider", ValidationProvider);
 
 import store from "./store/index";
+import vueSlideBarMin from "vue-slide-bar";
 // eslint-disable-next-line
 let $ = JQuery;
 
@@ -31,15 +41,14 @@ const options = {
 };
 
 // Install VeeValidate rules and localization
-Object.keys(rules).forEach(rule => {
-  extend(rule, rules[rule]);
-});
+// Object.keys(rules).forEach(rule => {
+//   extend(rule, rules[rule]);
+// });
 
-localize("en", en);
+// localize("en", en);
 
 // Install VeeValidate components globally
-Vue.component("ValidationObserver", ValidationObserver);
-Vue.component("ValidationProvider", ValidationProvider);
+// Vue.component("ValidationObserver", ValidationObserver);
 
 Vue.use(BootstrapVue);
 Vue.use(VueSweetalert2, options);

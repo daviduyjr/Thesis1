@@ -33,4 +33,6 @@ router.get("/categoryList", adminProductsController.categoryList);
 
 router.post("/addCategory", adminProductsController.addCategory);
 
+router.put("/updateCategoryName", adminProductsController.updateCategoryName);
+
 module.exports = router;

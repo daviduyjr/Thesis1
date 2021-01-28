@@ -35,4 +35,23 @@ module.exports = {
       });
     });
   },
+
+  updateCategoryName: async (req, res, next) => {
+    const { category_name, id } = req.body;
+    // let result = await Character.findOneAndUpdate(
+    //   id,
+    //   { category_name },
+    //   {
+    //     new: true,
+    //     useFindAndModify: false,
+    //   }
+    // );
+    // if (!result) {
+    //   res.status(400).json({ err: "User doesn't exist", success: false });
+    // } else {
+    //   res.status(200).json({ catName: result, success: true });
+    // }
+    console.log(category_name);
+    res.json("update");
+  },
 };

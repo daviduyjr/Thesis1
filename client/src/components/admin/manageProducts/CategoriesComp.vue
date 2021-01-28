@@ -1,0 +1,304 @@
+<template>
+  <section class="register">
+    <div class="row">
+      <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title text-center">Categories</h2>
+            <ValidationObserver ref="form">
+              <form @submit.stop.prevent="onSubmit">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <ValidationProvider
+                        name="Category Name"
+                        rules="required|min:3"
+                        v-slot="{ errors }"
+                      >
+                        <div class="input-group">
+                          <b-form-input
+                            id="categoryName"
+                            name="categoryName"
+                            type="text"
+                            class="form-control"
+                            placeholder="Category"
+                            v-model="categoryName"
+                            autocomplete="off"
+                            v-on:change="checkIfValid($event)"
+                          ></b-form-input>
+                        </div>
+                        <span id="errorMsg">{{ errors[0] }}</span>
+                      </ValidationProvider>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                      Save
+                    </button>
+                  </div>
+                  <div class="col-md-3">
+                    <b-form-input
+                      v-model="filter"
+                      type="search"
+                      id="filterInput"
+                      placeholder="Type to Search"
+                    ></b-form-input>
+                  </div>
+                </div>
+              </form>
+            </ValidationObserver>
+            <b-row>
+              <b-col>
+                <b-table
+                  class="table mb-2"
+                  :bordered="bordered"
+                  :hover="true"
+                  :items="categories"
+                  :fields="fields"
+                  :head-variant="headVariant"
+                  :filter="filter"
+                  :fixed="fixed"
+                  :per-page="perPage"
+                  :current-page="currentPage"
+                  :busy.sync="isBusy"
+                  primary-key="_id"
+                  responsive="sm"
+                  :sort-by.sync="sortBy"
+                  :sort-desc.sync="sortDesc"
+                >
+                  <template #cell(actions)="row">
+                    <!-- <b-button size="sm" @click="row.toggleDetails">
+                      {{ row.detailsShowing ? "Hide" : "Show" }} Details
+                    </b-button> -->
+                    <b-button
+                      size="sm"
+                      @click="edit(row.item, row.index, $event.target)"
+                      class="mr-1"
+                    >
+                      Edit
+                    </b-button>
+                  </template>
+                </b-table>
+              </b-col>
+            </b-row>
+            <b-row md="3">
+              <b-col cols="12">
+                <b-pagination
+                  v-model="currentPage"
+                  :total-rows="rows"
+                  :per-page="perPage"
+                >
+                </b-pagination>
+              </b-col>
+            </b-row>
+          </div>
+        </div>
+      </div>
+    </div>
+    <b-modal
+      hide-footer
+      :id="catInfoModal.id"
+      title="EDIT CATEGORIES"
+      @hide="resetInfoModal"
+      ref="modal-catNameEdit"
+    >
+      <validation-observer ref="observer" v-slot="{ handleSubmit }">
+        <form class="editCatForm" @submit.stop.prevent="handleSubmit(onSubmit)">
+          <validation-provider
+            name="Category Name"
+            :rules="{ required: true, min: 5 }"
+            v-slot="catnameValidation"
+          >
+            <b-form-group
+              label="Category Name"
+              label-for="name-input"
+              invalid-feedback="Name is required"
+            >
+              <b-form-input
+                id="categoryName"
+                v-model="categoryName"
+                :state="getValidationState(catnameValidation)"
+                required
+              ></b-form-input>
+              <b-form-invalid-feedback id="input-1-live-feedback">{{
+                catnameValidation.errors[0]
+              }}</b-form-invalid-feedback>
+            </b-form-group>
+          </validation-provider>
+          <button type="submit" class="btn btn-primary btn-lg">
+            Save
+          </button>
+        </form>
+      </validation-observer>
+    </b-modal>
+    <b-modal
+      hide-footer
+      @hide="onCancel()"
+      ref="modal-catNameEditConfirmation"
+      title="Add User"
+    >
+      <p class="my-4">
+        Are you sure you want to edit {{ this.categoryName }} profile?
+      </p>
+      <div class="alert alert-danger" v-if="errMsg">
+        {{ errMsg }}
+      </div>
+      <b-button
+        class="mt-3"
+        variant="outline-success"
+        block
+        @click="editCatNameFinal()"
+        >Yes</b-button
+      >
+      <b-button class="mt-3" variant="outline-danger" @click="onCancel()" block
+        >No</b-button
+      >
+    </b-modal>
+  </section>
+</template>
+
+<script>
+/* eslint-disable */
+import { mapActions, mapGetters, mapState } from "vuex";
+import store from "@/store";
+import { mask } from "vue-the-mask";
+import axios from "axios";
+import router from "../../../router";
+
+export default {
+  directives: { mask },
+  name: "CategoriesComp",
+  data() {
+    return {
+      filter: "",
+      headVariant: "dark",
+      perPage: 5,
+      currentPage: 1,
+      isBusy: false,
+      sortBy: "name",
+      sortDesc: false,
+      bordered: true,
+      fixed: false,
+      id: "",
+      categoryName: "",
+      categories: [],
+      fields: [
+        { key: "category_name", sortable: true, label: "Category" },
+        {
+          key: "isActive",
+          sortable: false,
+          label: "Is Active",
+          thStyle: { width: "18%" }
+        },
+        { key: "actions", label: "Actions", thStyle: { width: "20%" } }
+      ],
+      catInfoModal: {
+        id: "info-modal",
+        title: "",
+        content: {}
+      },
+      errMsg: ""
+    };
+  },
+  computed: {
+    rows() {
+      return this.categories.length;
+    }
+  },
+  mounted() {
+    this.getCatList();
+  },
+  methods: {
+    ...mapActions(["categoryList", "addCategory"]),
+
+    async getCatList() {
+      this.isBusy = true;
+      axios
+        .get("http://localhost:5000/api/admin/categoryList")
+        .then(({ data }) => {
+          this.isBusy = false;
+          if (data.categories.lenght === 0) {
+            alert("no data");
+          }
+          this.categories = data.categories;
+        })
+        .catch(err => {
+          console.log("may error");
+        });
+    },
+
+    async submitToAdd() {
+      const toAdd = this.categoryName;
+
+      this.addCategory(toAdd).then(result => {
+        if (result.data.success === true) {
+          this.getCatList();
+        }
+      });
+    },
+    checkIfValid(e) {
+      this.categoryName = e;
+      console.log(this.categoryName);
+    },
+
+    onSubmit() {
+      this.$refs.form.validate().then(success => {
+        if (!success) {
+          // document
+          //   .getElementById("categoryName")
+          //   .setAttribute(
+          //     "class",
+          //     " form-control border border-danger your-class"
+          //   );
+          // document
+          //   .getElementById("errorMsg")
+          //   .setAttribute("class", "text-danger");
+          return;
+        }
+        this.submitToAdd();
+        alert("Form has been submitted!");
+
+        // Resetting Values
+        this.categoryName = "";
+
+        // Wait until the models are updated in the UI
+        this.$nextTick(() => {
+          this.$refs.form.reset();
+        });
+      });
+    },
+
+    async edit(item, index, button) {
+      this.categoryName = item.category_name;
+      this.id = item._id;
+      this.$root.$emit("bv::show::modal", this.catInfoModal.id, button);
+    },
+
+    async editCatNameFinal() {
+      this.$refs["modal-catNameEditConfirmation"].show();
+      const id = this.id;
+    },
+
+    async resetInfoModal() {
+      this.catInfoModal.title = "";
+      this.catInfoModal.content = "";
+    },
+
+    async onCancel() {
+      this.errMsg = "";
+      this.$refs["modal-catNameEditConfirmation"].hide();
+      this.$refs["modal-catNameEdit"].hide();
+      this.$refs["modal-catNameEditConfirmation"].hide();
+    }
+  }
+};
+</script>
+
+<style scoped>
+.card-title {
+  font-size: 27px;
+}
+.btn-sm {
+  padding: 0.5rem 4.81rem;
+}
+</style>
