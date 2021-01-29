@@ -44,6 +44,7 @@
     "vue-the-mask": "^0.11.1",
     "vue2-ace-editor": "0.0.13",
     "vuejs-datepicker": "^1.5.4",
+    "vuelidate": "^0.7.6",
     "vuex": "^3.6.0"
   },
   "devDependencies": {

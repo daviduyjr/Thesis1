@@ -5,48 +5,46 @@
         <div class="card">
           <div class="card-body">
             <h2 class="card-title text-center">Categories</h2>
-            <ValidationObserver ref="form">
-              <form @submit.stop.prevent="onSubmit">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <ValidationProvider
-                        name="Category Name"
-                        rules="required|min:3"
-                        v-slot="{ errors }"
-                      >
-                        <div class="input-group">
-                          <b-form-input
-                            id="categoryName"
-                            name="categoryName"
-                            type="text"
-                            class="form-control"
-                            placeholder="Category"
-                            v-model="categoryName"
-                            autocomplete="off"
-                            v-on:change="checkIfValid($event)"
-                          ></b-form-input>
-                        </div>
-                        <span id="errorMsg">{{ errors[0] }}</span>
-                      </ValidationProvider>
+
+            <form @submit.stop.prevent="onSubmit">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <div class="input-group">
+                      <b-form-input
+                        id="categoryName"
+                        name="categoryName"
+                        type="text"
+                        class="form-control"
+                        placeholder="Category"
+                        v-model="$v.categoryName.$model"
+                        :state="validateState('categoryName')"
+                        aria-describedby="input-1-live-feedback"
+                        autocomplete="off"
+                      ></b-form-input>
+                      <b-form-invalid-feedback id="input-1-live-feedback">
+                        This is a required field and must be at least 3
+                        characters.
+                      </b-form-invalid-feedback>
                     </div>
                   </div>
-                  <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                      Save
-                    </button>
-                  </div>
-                  <div class="col-md-3">
-                    <b-form-input
-                      v-model="filter"
-                      type="search"
-                      id="filterInput"
-                      placeholder="Type to Search"
-                    ></b-form-input>
-                  </div>
                 </div>
-              </form>
-            </ValidationObserver>
+                <div class="col-md-3">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    Save
+                  </button>
+                </div>
+                <div class="col-md-3">
+                  <b-form-input
+                    v-model="filter"
+                    type="search"
+                    id="filterInput"
+                    placeholder="Type to Search"
+                  ></b-form-input>
+                </div>
+              </div>
+            </form>
+
             <b-row>
               <b-col>
                 <b-table
@@ -102,43 +100,27 @@
       @hide="resetInfoModal"
       ref="modal-catNameEdit"
     >
-      <validation-observer ref="observer" v-slot="{ handleSubmit }">
-        <form class="editCatForm" @submit.stop.prevent="handleSubmit(onSubmit)">
-          <validation-provider
-            name="Category Name"
-            :rules="{ required: true, min: 5 }"
-            v-slot="catnameValidation"
-          >
-            <b-form-group
-              label="Category Name"
-              label-for="name-input"
-              invalid-feedback="Name is required"
-            >
-              <b-form-input
-                id="categoryName"
-                v-model="categoryName"
-                :state="getValidationState(catnameValidation)"
-                required
-              ></b-form-input>
-              <b-form-invalid-feedback id="input-1-live-feedback">{{
-                catnameValidation.errors[0]
-              }}</b-form-invalid-feedback>
-            </b-form-group>
-          </validation-provider>
-          <button type="submit" class="btn btn-primary btn-lg">
-            Save
-          </button>
-        </form>
-      </validation-observer>
+      <form class="editCatForm" @submit.stop.prevent="onEditSubmit">
+        <b-form-group label="Category Name" label-for="name-input">
+          <b-form-input
+            id="categoryName"
+            v-model="categoryNameToEdit"
+          ></b-form-input>
+        </b-form-group>
+
+        <button type="submit" class="btn btn-primary btn-lg">
+          Save
+        </button>
+      </form>
     </b-modal>
     <b-modal
       hide-footer
       @hide="onCancel()"
-      ref="modal-catNameEditConfirmation"
-      title="Add User"
+      ref="confirmation"
+      :title="this.confirmationModal.title"
     >
       <p class="my-4">
-        Are you sure you want to edit {{ this.categoryName }} profile?
+        Are you sure you want to {{ this.method }} {{ this.categoryName }} ?
       </p>
       <div class="alert alert-danger" v-if="errMsg">
         {{ errMsg }}
@@ -147,7 +129,7 @@
         class="mt-3"
         variant="outline-success"
         block
-        @click="editCatNameFinal()"
+        @click="submitAddFinal()"
         >Yes</b-button
       >
       <b-button class="mt-3" variant="outline-danger" @click="onCancel()" block
@@ -164,10 +146,12 @@ import store from "@/store";
 import { mask } from "vue-the-mask";
 import axios from "axios";
 import router from "../../../router";
+import { validationMixin } from "vuelidate";
+import { required, minLength } from "vuelidate/lib/validators";
 
 export default {
-  directives: { mask },
   name: "CategoriesComp",
+  mixins: [validationMixin],
   data() {
     return {
       filter: "",
@@ -181,6 +165,7 @@ export default {
       fixed: false,
       id: "",
       categoryName: "",
+      categoryNameToEdit: "",
       categories: [],
       fields: [
         { key: "category_name", sortable: true, label: "Category" },
@@ -197,8 +182,15 @@ export default {
         title: "",
         content: {}
       },
+      confirmationModal: {
+        title: ""
+      },
+      method: "",
       errMsg: ""
     };
+  },
+  validations: {
+    categoryName: { required, minLength: minLength(3) }
   },
   computed: {
     rows() {
@@ -209,7 +201,12 @@ export default {
     this.getCatList();
   },
   methods: {
-    ...mapActions(["categoryList", "addCategory"]),
+    ...mapActions(["categoryList", "addCategory", "editCategory"]),
+
+    validateState(categoryName) {
+      const { $dirty, $error } = this.$v.categoryName;
+      return $dirty ? !$error : null;
+    },
 
     async getCatList() {
       this.isBusy = true;
@@ -226,57 +223,62 @@ export default {
           console.log("may error");
         });
     },
-
-    async submitToAdd() {
-      const toAdd = this.categoryName;
-
-      this.addCategory(toAdd).then(result => {
-        if (result.data.success === true) {
-          this.getCatList();
-        }
+    // start ng pang add
+    resetForm() {
+      this.categoryNameToEdit = null;
+      if (this.method === "Add") {
+        this.categoryName = null;
+        this.$refs["confirmation"].hide();
+      } else {
+        this.categoryNameToEdit = null;
+        this.$refs["confirmation"].hide();
+        this.$refs["modal-catNameEdit"].hide();
+      }
+      this.method = null;
+      this.$nextTick(() => {
+        this.$v.$reset();
       });
-    },
-    checkIfValid(e) {
-      this.categoryName = e;
-      console.log(this.categoryName);
     },
 
     onSubmit() {
-      this.$refs.form.validate().then(success => {
-        if (!success) {
-          // document
-          //   .getElementById("categoryName")
-          //   .setAttribute(
-          //     "class",
-          //     " form-control border border-danger your-class"
-          //   );
-          // document
-          //   .getElementById("errorMsg")
-          //   .setAttribute("class", "text-danger");
-          return;
-        }
-        this.submitToAdd();
-        alert("Form has been submitted!");
-
-        // Resetting Values
-        this.categoryName = "";
-
-        // Wait until the models are updated in the UI
-        this.$nextTick(() => {
-          this.$refs.form.reset();
-        });
-      });
+      this.$v.$touch();
+      if (this.$v.$anyError) {
+        return;
+      }
+      this.confirmationModal.title = "Add Category";
+      this.method = "Add";
+      this.$refs["confirmation"].show();
     },
 
+    async submitAddFinal() {
+      const toAdd = this.categoryName;
+      if (this.method === "Add") {
+        await this.addCategory(toAdd).then(result => {
+          if (result.data.success === true) {
+            this.resetForm();
+            this.getCatList();
+            this.$refs["confirmation"].hide();
+            alert("Form submitted!");
+          }
+        });
+      } else {
+        const toEdit = { id: this.id, catName: this.categoryNameToEdit };
+        await this.editCategory(toEdit);
+        alert("edit");
+      }
+    },
+
+    // end ng pang add
+
     async edit(item, index, button) {
-      this.categoryName = item.category_name;
+      this.categoryNameToEdit = item.category_name;
       this.id = item._id;
       this.$root.$emit("bv::show::modal", this.catInfoModal.id, button);
     },
-
-    async editCatNameFinal() {
-      this.$refs["modal-catNameEditConfirmation"].show();
-      const id = this.id;
+    async onEditSubmit() {
+      this.confirmationModal.title = "Edit Category";
+      this.method = "Edit";
+      this.$refs["confirmation"].show();
     },
 
     async resetInfoModal() {
@@ -286,9 +288,7 @@ export default {
 
     async onCancel() {
       this.errMsg = "";
-      this.$refs["modal-catNameEditConfirmation"].hide();
-      this.$refs["modal-catNameEdit"].hide();
-      this.$refs["modal-catNameEditConfirmation"].hide();
+      this.resetForm();
     }
   }
 };

@@ -34,13 +34,29 @@ const actions = {
       );
 
       if (res.data.success === true) {
-        commit("NEW_CATEGGORY_SUCCESS", res);
+        commit("NEW_CATEGORY_SUCCESS", res);
         return res;
       }
     } catch (err) {
       const error = { data: err.response.data };
       return error;
     }
+  },
+
+  async editCategory({ commit }, catData) {
+    try {
+      let res = await axios.put(
+        "http://localhost:5000/api/admin/updateCategoryName",
+        {
+          id: catData.id,
+          category_name: catData.catName
+        }
+      );
+      if (res.data.success === true) {
+        commit("EDIT_CATEGORY_SUCCESS", res);
+        return res;
+      }
+    } catch (err) {}
   }
 };
 
@@ -53,6 +69,9 @@ const mutations = {
     state.errorManageProduct = null;
   },
   NEW_CATEGGORY_SUCCESS(state, catData) {
+    this.catName = catData.data.categories;
+  },
+  EDIT_CATEGGORY_SUCCESS(state, catData) {
     this.catName = catData.data.categories;
   }
 };
