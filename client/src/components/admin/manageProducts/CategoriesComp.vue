@@ -16,7 +16,7 @@
                         name="categoryName"
                         type="text"
                         class="form-control"
-                        placeholder="Category"
+                        placeholder="Add Category"
                         v-model="$v.categoryName.$model"
                         :state="validateState('categoryName')"
                         aria-describedby="input-1-live-feedback"
@@ -39,7 +39,7 @@
                     v-model="filter"
                     type="search"
                     id="filterInput"
-                    placeholder="Type to Search"
+                    placeholder="Type to Search Category"
                   ></b-form-input>
                 </div>
               </div>
@@ -105,6 +105,7 @@
           <b-form-input
             id="categoryName"
             v-model="categoryNameToEdit"
+            autocomplete="off"
           ></b-form-input>
         </b-form-group>
 
@@ -263,8 +264,16 @@ export default {
         });
       } else {
         const toEdit = { id: this.id, catName: this.categoryNameToEdit };
-        await this.editCategory(toEdit);
-        alert("edit");
+        await this.editCategory(toEdit).then(res => {
+          if (res.data.success === true) {
+            this.resetForm();
+            this.getCatList();
+            this.$refs["confirmation"].hide();
+          }
+          if (res.data.success === false) {
+            this.errMsg = res.data.err;
+          }
+        });
       }
     },
 

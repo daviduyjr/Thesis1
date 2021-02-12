@@ -4,6 +4,7 @@ const passport = require("passport");
 
 const adminController = require("../../controller/admin/admin.controller");
 const adminProductsController = require("../../controller/admin/products/addCategory");
+const adminDistributorController = require("../../controller/admin/products/distributor");
 
 const passportSignIn = passport.authenticate("login", { session: false });
 
@@ -34,5 +35,8 @@ router.get("/categoryList", adminProductsController.categoryList);
 router.post("/addCategory", adminProductsController.addCategory);
 
 router.put("/updateCategoryName", adminProductsController.updateCategoryName);
+
+///para sa distributors
+router.post("/addDistributor", adminDistributorController.addDistributor);
 
 module.exports = router;

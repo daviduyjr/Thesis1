@@ -48,15 +48,20 @@ const actions = {
       let res = await axios.put(
         "http://localhost:5000/api/admin/updateCategoryName",
         {
-          id: catData.id,
+          _id: catData.id,
           category_name: catData.catName
         }
       );
+
       if (res.data.success === true) {
         commit("EDIT_CATEGORY_SUCCESS", res);
         return res;
       }
-    } catch (err) {}
+    } catch (err) {
+      const error = { data: err.response.data };
+      commit("EDIT_CATEGORY_ERROR", error);
+      return error;
+    }
   }
 };
 
@@ -71,8 +76,12 @@ const mutations = {
   NEW_CATEGGORY_SUCCESS(state, catData) {
     this.catName = catData.data.categories;
   },
-  EDIT_CATEGGORY_SUCCESS(state, catData) {
-    this.catName = catData.data.categories;
+  EDIT_CATEGORY_SUCCESS(state, catData) {
+    debugger;
+    state.catName = catData.data.categories.category_name;
+  },
+  EDIT_CATEGORY_ERROR(state, error) {
+    state.error = error.data.err;
   }
 };
 

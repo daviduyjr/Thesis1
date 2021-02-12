@@ -25,7 +25,12 @@ app.use(passport.initialize());
 require("./config/passport")(passport);
 
 mongoose
-  .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(db, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
   .then(() => {
     console.log(`connected to ${db}`);
   })

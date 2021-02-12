@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const Category = require("../../../models/products/Category");
+const Category = require("../../../models/inventory/Category");
 const { roles } = require("../../../config/roles");
 
 module.exports = {
@@ -37,30 +37,46 @@ module.exports = {
   },
 
   updateCategoryName: async (req, res, next) => {
-    const { category_name, _id } = req.body;
+    try {
+      const { category_name, _id } = req.body;
+      const cat = await Category.findById(_id);
 
-    let catToFind = await Category.findOne({ category_name });
+      if (cat) {
+        if (cat.category_name === category_name) {
+          return res.status(200).json({ categories: cat, success: true });
+        } else {
+          let catNameToFind = await Category.findOne({ category_name });
 
-    if (catToFind) {
-      if (catToFind.id === _id) {
-        return res.json("test");
+          if (catNameToFind) {
+            return res
+              .status(400)
+              .json({ err: "Category Name already exist", success: false });
+          } else {
+            updateCatName(category_name, _id).then((data) => {
+              return res.status(200).json({ categories: data, success: true });
+            });
+          }
+        }
       }
-      return res
-        .status(400)
-        .json({ err: "Category Name already exist", success: false });
-    }
-    let result = await Category.findByIdAndUpdate(
-      _id,
-      { category_name, date_updated: Date.now() },
-      {
-        new: true,
-        useFindAndModify: false,
-      }
-    );
-    if (!result) {
-      res.status(400).json({ err: "User doesn't exist", success: false });
-    } else {
-      res.status(200).json({ catName: result, success: true });
+    } catch (err) {
+      res.status(400).json({ err: "Category doesn't exist", success: false });
     }
   },
+};
+
+var updateCatName = async (category_name, _id) => {
+  let result = await Category.findByIdAndUpdate(
+    _id,
+    { category_name, date_updated: Date.now() },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  );
+  if (!result) {
+    const err = "may mali eh";
+    return err;
+  } else {
+    return result;
+  }
 };
