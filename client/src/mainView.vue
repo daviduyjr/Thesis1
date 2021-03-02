@@ -15,10 +15,12 @@
       </div>
       <!-- page-body-wrapper ends -->
     </div>
+    <Toasts></Toasts>
   </section>
 </template>
 
 <script lang="js">
+/* eslint-disable */
 import AppHeader from '../src/components/partials/AppHeader'
 import AppSidebar from '../src/components/partials/AppSidebar'
 import AppFooter from '../src/components/partials/AppFooter'
@@ -28,6 +30,10 @@ export default {
     AppHeader,
     AppSidebar,
     AppFooter
+  },
+  methods: {
+
+
   }
 }
 </script>

@@ -73,11 +73,10 @@ const mutations = {
     state.categories = catData.data.categories;
     state.errorManageProduct = null;
   },
-  NEW_CATEGGORY_SUCCESS(state, catData) {
+  NEW_CATEGORY_SUCCESS(state, catData) {
     this.catName = catData.data.categories;
   },
   EDIT_CATEGORY_SUCCESS(state, catData) {
-    debugger;
     state.catName = catData.data.categories.category_name;
   },
   EDIT_CATEGORY_ERROR(state, error) {

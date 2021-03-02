@@ -19,6 +19,7 @@
           </a>
         </li>
         <li class="nav-item nav-category">Main Menu</li>
+        <!-- Para sa admin to -->
         <li class="nav-item">
           <a class="nav-link" v-b-toggle="'dashboard-dropdown'">
             <i class="menu-icon typcn typcn-document-text"></i>
@@ -56,11 +57,6 @@
                   >Add User</router-link
                 >
               </li>
-              <!-- <li class="nav-item">
-                <router-link class="nav-link" to="/buttons"
-                  >Buttons</router-link
-                >
-              </li> -->
             </ul>
           </b-collapse>
         </li>
@@ -77,9 +73,15 @@
                   >Categories</router-link
                 >
               </li>
+              <li class="nav-item">
+                <router-link class="nav-link" to="/productsTab"
+                  >Tabs</router-link
+                >
+              </li>
             </ul>
           </b-collapse>
         </li>
+        <!-- Para sa Supervisor to -->
         <li class="nav-item" v-if="isSupervisor">
           <a class="nav-link" v-b-toggle="'SV'">
             <i class="menu-icon typcn typcn-document-add"></i>
@@ -93,15 +95,10 @@
                   >User Profile</router-link
                 >
               </li>
-              <!-- <li class="nav-item">
-                <router-link class="nav-link" to="/buttons"
-                  >Buttons</router-link
-                >
-              </li> -->
             </ul>
           </b-collapse>
         </li>
-
+        <!-- Para sa User to -->
         <li class="nav-item" v-if="isUser">
           <a class="nav-link" v-b-toggle="'user'">
             <i class="menu-icon typcn typcn-document-add"></i>

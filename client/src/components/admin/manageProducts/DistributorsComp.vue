@@ -1,5 +1,5 @@
 <template>
-  <section class="Categories">
+  <section class="register">
     <form @submit.stop.prevent="onSubmit">
       <div class="row">
         <div class="col-md-6">
@@ -122,7 +122,10 @@
           class="mt-3"
           variant="outline-success"
           block
-          @click="submitAddFinal()"
+          @click="
+            submitAddFinal();
+            makeToast('success');
+          "
           >Yes</b-button
         >
         <b-button
@@ -148,7 +151,7 @@ import { validationMixin } from "vuelidate";
 import { required, minLength } from "vuelidate/lib/validators";
 
 export default {
-  name: "CategoriesComp",
+  name: "DistributorsComp",
   mixins: [validationMixin],
   data() {
     return {
@@ -208,7 +211,6 @@ export default {
     },
 
     async getCatList() {
-      //pang kuha ng list ng category
       this.isBusy = true;
       axios
         .get("http://localhost:5000/api/admin/categoryList")
@@ -225,7 +227,6 @@ export default {
     },
     // start ng pang add
     resetForm() {
-      //pang reset ng form after mag add and edit
       this.categoryNameToEdit = null;
       if (this.method === "Add") {
         this.categoryName = null;
@@ -242,10 +243,10 @@ export default {
     },
 
     onSubmit() {
-      // this.$v.$touch();
-      // if (this.$v.$anyError) {
-      //   return;
-      // }
+      this.$v.$touch();
+      if (this.$v.$anyError) {
+        return;
+      }
       this.confirmationModal.title = "Add Category";
       this.method = "Add";
       this.$refs["confirmation"].show();
@@ -259,15 +260,6 @@ export default {
             this.resetForm();
             this.getCatList();
             this.$refs["confirmation"].hide();
-            this.$toast.success("Successfully Added.", {
-              rtl: false,
-              timeOut: 3000,
-              closeable: true
-            });
-          }
-
-          if (result.data.success === false) {
-            this.errMsg = result.data.msg;
           }
         });
       } else {
@@ -277,11 +269,6 @@ export default {
             this.resetForm();
             this.getCatList();
             this.$refs["confirmation"].hide();
-            this.$toast.success("Successfully Edited.", {
-              rtl: false,
-              timeOut: 3000,
-              closeable: true
-            });
           }
           if (res.data.success === false) {
             this.errMsg = res.data.err;
@@ -311,6 +298,26 @@ export default {
     async onCancel() {
       this.errMsg = "";
       this.resetForm();
+    },
+
+    // toast(toaster, append = false) {
+    //   debugger;
+    //   this.counter++;
+    //   this.$bvToast.toast(`Toast ${this.counter} body content`, {
+    //     title: `Toaster ${toaster}`,
+    //     toaster: toaster,
+    //     solid: true,
+    //     appendToast: append
+    //   });
+    // }
+
+    makeToast(variant = null) {
+      console.log("toast got called");
+      this.$bvToast.toast("Toast body content", {
+        title: `Variant ${variant || "default"}`,
+        variant: variant,
+        solid: true
+      });
     }
   }
 };

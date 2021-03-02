@@ -13,7 +13,11 @@ exports.roles = (function () {
     .readAny("profile")
     .createAny("profile")
     .updateAny("profile")
-    .deleteAny("profile");
+    .deleteAny("profile")
+    .readAny("category")
+    .createAny("category")
+    .updateAny("category")
+    .deleteAny("category");
 
   return ac;
 })();

@@ -30,13 +30,29 @@ router.get("/newUser/", passportSignIn, adminController.usersProfile);
 
 ///para sa products
 
-router.get("/categoryList", adminProductsController.categoryList);
+router.get(
+  "/categoryList",
+  passportSignIn,
+  adminProductsController.categoryList
+);
 
-router.post("/addCategory", adminProductsController.addCategory);
+router.post(
+  "/addCategory",
+  passportSignIn,
+  adminProductsController.addCategory
+);
 
-router.put("/updateCategoryName", adminProductsController.updateCategoryName);
+router.put(
+  "/updateCategoryName",
+  passportSignIn,
+  adminProductsController.updateCategoryName
+);
 
 ///para sa distributors
-router.post("/addDistributor", adminDistributorController.addDistributor);
+router.post(
+  "/addDistributor",
+  passportSignIn,
+  adminDistributorController.addDistributor
+);
 
 module.exports = router;
