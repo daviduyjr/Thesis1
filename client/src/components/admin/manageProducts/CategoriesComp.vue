@@ -1,6 +1,12 @@
 <template>
   <section class="Categories">
     <form @submit.stop.prevent="onSubmit">
+      <loading
+        :active="isLoading"
+        :is-full-page="fullPage"
+        :loader="loader"
+        :canCancel="canCancel"
+      />
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
@@ -141,11 +147,13 @@
 /* eslint-disable */
 import { mapActions, mapGetters, mapState } from "vuex";
 import store from "@/store";
-import { mask } from "vue-the-mask";
 import axios from "axios";
 import router from "../../../router";
 import { validationMixin } from "vuelidate";
 import { required, minLength } from "vuelidate/lib/validators";
+
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
 
 export default {
   name: "CategoriesComp",
@@ -158,7 +166,7 @@ export default {
       currentPage: 1,
       isBusy: false,
       sortBy: "name",
-      sortDesc: false,
+      sortDesc: true,
       bordered: true,
       fixed: false,
       id: "",
@@ -185,8 +193,15 @@ export default {
       },
       method: "",
       errMsg: "",
-      counter: 0
+      counter: 0,
+      isLoading: false,
+      fullPage: false,
+      loader: "spinner",
+      canCancel: false
     };
+  },
+  components: {
+    Loading
   },
   validations: {
     categoryName: { required, minLength: minLength(3) }
@@ -250,23 +265,30 @@ export default {
       this.method = "Add";
       this.$refs["confirmation"].show();
     },
-
+    onCancel() {
+      console.log("User cancelled the loader.");
+    },
     async submitAddFinal() {
       const toAdd = this.categoryName;
       if (this.method === "Add") {
         await this.addCategory(toAdd).then(result => {
           if (result.data.success === true) {
-            this.resetForm();
-            this.getCatList();
+            this.isLoading = true;
             this.$refs["confirmation"].hide();
-            this.$toast.success("Successfully Added.", {
-              rtl: false,
-              timeOut: 3000,
-              closeable: true
-            });
+            setTimeout(() => {
+              this.isLoading = false;
+              this.resetForm();
+              this.getCatList();
+              this.$toast.success("Successfully Added.", {
+                rtl: false,
+                timeOut: 3000,
+                closeable: true
+              });
+            }, 2000);
           }
 
           if (result.data.success === false) {
+            this.isLoading = false;
             this.errMsg = result.data.msg;
           }
         });
@@ -274,16 +296,21 @@ export default {
         const toEdit = { id: this.id, catName: this.categoryNameToEdit };
         await this.editCategory(toEdit).then(res => {
           if (res.data.success === true) {
-            this.resetForm();
-            this.getCatList();
+            this.isLoading = true;
             this.$refs["confirmation"].hide();
-            this.$toast.success("Successfully Edited.", {
-              rtl: false,
-              timeOut: 3000,
-              closeable: true
-            });
+            setTimeout(() => {
+              this.isLoading = false;
+              this.resetForm();
+              this.getCatList();
+              this.$toast.success("Successfully Edited.", {
+                rtl: false,
+                timeOut: 2000,
+                closeable: true
+              });
+            }, 2000);
           }
           if (res.data.success === false) {
+            this.isLoading = false;
             this.errMsg = res.data.err;
           }
         });

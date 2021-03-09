@@ -18,16 +18,17 @@ module.exports = {
     if (permission.granted) {
       console.log('granted');
       const { categoryName } = req.body;
-      const foundCat = await Category.findOne({ category_name: categoryName });
+
+      const foundCat = await Category.findOne({ category_name: categoryName.toUpperCase() });
       if (foundCat) {
         return res.status(400).json({
-          msg: `Category "${categoryName}" is already in use`,
+          msg: `Category "${categoryName.toUpperCase()}" is already in use`,
           success: false,
         });
       }
 
       const newCat = new Category({
-        category_name: categoryName,
+        category_name: categoryName.toUpperCase(),
         date_updated: Date.now(),
       });
 
@@ -47,17 +48,17 @@ module.exports = {
     try {
       const { category_name, _id } = req.body;
       const cat = await Category.findById(_id);
-
+      const catName = category_name.toUpperCase();
       if (cat) {
-        if (cat.category_name === category_name) {
+        if (cat.category_name === category_name.toUpperCase()) {
           return res.status(200).json({ categories: cat, success: true });
         } else {
-          let catNameToFind = await Category.findOne({ category_name });
+          let catNameToFind = await Category.findOne({ category_name: catName });
 
           if (catNameToFind) {
-            return res.status(400).json({ err: `Category ${category_name} already exist`, success: false });
+            return res.status(400).json({ err: `Category ${catName} already exist`, success: false });
           } else {
-            updateCatName(category_name, _id).then((data) => {
+            updateCatName(catName, _id).then((data) => {
               return res.status(200).json({ categories: data, success: true });
             });
           }
