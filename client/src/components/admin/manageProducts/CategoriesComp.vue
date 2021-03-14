@@ -1,48 +1,92 @@
 <template>
   <section class="Categories">
-    <form @submit.stop.prevent="onSubmit">
-      <loading
-        :active="isLoading"
-        :is-full-page="fullPage"
-        :loader="loader"
-        :canCancel="canCancel"
-      />
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <div class="input-group">
-              <b-form-input
-                id="categoryName"
-                name="categoryName"
-                type="text"
-                class="form-control"
-                placeholder="Add Category"
-                v-model="$v.categoryName.$model"
-                :state="validateState('categoryName')"
-                aria-describedby="input-1-live-feedback"
-                autocomplete="off"
-              ></b-form-input>
-              <b-form-invalid-feedback id="input-1-live-feedback">
-                This is a required field and must be at least 3 characters.
-              </b-form-invalid-feedback>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <button type="submit" class="btn btn-primary btn-lg">
-            Save
-          </button>
-        </div>
-        <div class="col-md-3">
+    <loading
+      :active="isLoading"
+      :is-full-page="fullPage"
+      :loader="loader"
+      :canCancel="canCancel"
+    />
+    <div class="row">
+      <div class="col-md-6">
+        <validation-observer ref="observer" v-slot="{ handleSubmit }">
+          <validation-provider
+            name="Category Name"
+            :rules="{ required: true, min: 5 }"
+            v-slot="catnameValidation"
+          >
+            <form @submit.stop.prevent="handleSubmit(onSubmit)">
+              <div class="form-group">
+                <div class="input-group">
+                  <b-form-input
+                    id="categoryName"
+                    name="categoryName"
+                    type="text"
+                    class="form-control"
+                    placeholder="Add Category"
+                    v-model="categoryName"
+                    :state="getValidationState(catnameValidation)"
+                    aria-describedby="input-1-live-feedback"
+                    autocomplete="off"
+                  ></b-form-input>
+
+                  <b-input-group-append>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                      Save
+                    </button>
+                  </b-input-group-append>
+                  <b-form-invalid-feedback id="input-1-live-feedback">{{
+                    catnameValidation.errors[0]
+                  }}</b-form-invalid-feedback>
+                </div>
+                <div></div>
+              </div>
+            </form>
+          </validation-provider>
+        </validation-observer>
+      </div>
+      <div class="col-md-2"></div>
+
+      <div class="col-md-4">
+        <b-input-group size="md">
           <b-form-input
             v-model="filter"
             type="search"
             id="filterInput"
             placeholder="Type to Search Category"
           ></b-form-input>
-        </div>
+
+          <b-input-group-append>
+            <button
+              :disabled="!filter"
+              @click="filter = ''"
+              class="btn btn-warning"
+            >
+              Clear
+            </button>
+          </b-input-group-append>
+        </b-input-group>
       </div>
-    </form>
+      <b-col sm="5" md="6" class="my-1">
+        <b-form-group
+          label="Per page"
+          label-for="per-page-select"
+          label-cols-sm="6"
+          label-cols-md="4"
+          label-cols-lg="3"
+          label-align-sm="left"
+          label-size="sm"
+          class="mb-0"
+        >
+          <b-form-select
+            id="per-page-select"
+            v-model="perPage"
+            :options="pageOptions"
+            size="md"
+            class="perPage"
+          ></b-form-select>
+        </b-form-group>
+      </b-col>
+    </div>
 
     <b-row>
       <b-col>
@@ -96,19 +140,35 @@
         @hide="resetInfoModal"
         ref="modal-catNameEdit"
       >
-        <form class="editCatForm" @submit.stop.prevent="onEditSubmit">
-          <b-form-group label="Category Name" label-for="name-input">
-            <b-form-input
-              id="categoryName"
-              v-model="categoryNameToEdit"
-              autocomplete="off"
-            ></b-form-input>
-          </b-form-group>
+        <validation-observer ref="observer" v-slot="{ handleSubmit }">
+          <validation-provider
+            name="Category Name"
+            :rules="{ required: true, min: 5 }"
+            v-slot="catToEditValidation"
+          >
+            <form
+              class="editCatForm"
+              @submit.stop.prevent="handleSubmit(onEditSubmit)"
+            >
+              <b-form-group label="Category Name" label-for="name-input">
+                <b-form-input
+                  id="categoryNameToEdit"
+                  v-model="categoryNameToEdit"
+                  :state="getValidationState(catToEditValidation)"
+                  aria-describedby="input-1-live-feedback"
+                  autocomplete="off"
+                ></b-form-input>
+                <b-form-invalid-feedback id="input-1-live-feedback">{{
+                  catToEditValidation.errors[0]
+                }}</b-form-invalid-feedback>
+              </b-form-group>
 
-          <button type="submit" class="btn btn-primary btn-lg">
-            Save
-          </button>
-        </form>
+              <button type="submit" class="btn btn-primary btn-lg">
+                Save
+              </button>
+            </form>
+          </validation-provider>
+        </validation-observer>
       </b-modal>
     </div>
     <div>
@@ -119,7 +179,16 @@
         :title="this.confirmationModal.title"
       >
         <p class="my-4">
-          Are you sure you want to {{ this.method }} {{ this.categoryName }} ?
+          <!-- Are you sure you want to {{ this.method }}
+          {{
+            this.method === "Edit" ? this.categoryNameToEdit : this.categoryName
+          }}
+          ? -->
+          {{
+            this.method === "Add"
+              ? `Are you sure you want to add ${this.categoryName}? `
+              : `Are you sure you want to save this?`
+          }}
         </p>
         <div class="alert alert-danger" v-if="errMsg">
           {{ errMsg }}
@@ -149,15 +218,15 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import store from "@/store";
 import axios from "axios";
 import router from "../../../router";
-import { validationMixin } from "vuelidate";
-import { required, minLength } from "vuelidate/lib/validators";
+// import { validationMixin } from "vuelidate";
+// import { required, minLength } from "vuelidate/lib/validators";
 
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 
 export default {
   name: "CategoriesComp",
-  mixins: [validationMixin],
+
   data() {
     return {
       filter: "",
@@ -171,6 +240,7 @@ export default {
       fixed: false,
       id: "",
       categoryName: "",
+      categoryname: "",
       categoryNameToEdit: "",
       categories: [],
       fields: [
@@ -197,15 +267,19 @@ export default {
       isLoading: false,
       fullPage: false,
       loader: "spinner",
-      canCancel: false
+      canCancel: false,
+      submitStatus: null,
+      perPage: 5,
+      pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }]
     };
   },
+  // mixins: [validationMixin],
   components: {
     Loading
   },
-  validations: {
-    categoryName: { required, minLength: minLength(3) }
-  },
+  // validations: {
+  //   categoryName: { required, minLength: minLength(3) }
+  // },
   computed: {
     rows() {
       return this.categories.length;
@@ -217,9 +291,8 @@ export default {
   methods: {
     ...mapActions(["categoryList", "addCategory", "editCategory"]),
 
-    validateState(categoryName) {
-      const { $dirty, $error } = this.$v.categoryName;
-      return $dirty ? !$error : null;
+    getValidationState({ dirty, validated, valid = null }) {
+      return dirty || validated ? valid : null;
     },
 
     async getCatList() {
@@ -251,14 +324,15 @@ export default {
         this.$refs["modal-catNameEdit"].hide();
       }
       this.method = null;
-      this.$nextTick(() => {
-        this.$v.$reset();
-      });
+      // this.$nextTick(() => {
+      //   this.$v.$reset();
+      // });
     },
 
     onSubmit() {
       // this.$v.$touch();
       // if (this.$v.$anyError) {
+      //   console.log(this.$v.$anyError);
       //   return;
       // }
       this.confirmationModal.title = "Add Category";
@@ -349,5 +423,9 @@ export default {
 }
 .btn-sm {
   padding: 0.5rem 4.81rem;
+}
+.perPage {
+  max-width: 37%;
+  margin-bottom: 5px;
 }
 </style>

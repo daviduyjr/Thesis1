@@ -1,58 +1,32 @@
-const express = require("express");
-const router = require("express-promise-router")();
-const passport = require("passport");
+const express = require('express');
+const router = require('express-promise-router')();
+const passport = require('passport');
 
-const adminController = require("../../controller/admin/admin.controller");
-const adminProductsController = require("../../controller/admin/products/addCategory");
-const adminDistributorController = require("../../controller/admin/products/distributor");
+const adminController = require('../../controller/admin/admin.controller');
+const adminProductsController = require('../../controller/admin/products/addCategory');
+const adminDistributorController = require('../../controller/admin/products/distributor');
 
-const passportSignIn = passport.authenticate("login", { session: false });
+const passportSignIn = passport.authenticate('login', { session: false });
 
-router.route("/profile").get(passportSignIn, adminController.profile);
+router.route('/profile').get(passportSignIn, adminController.profile);
 
-router.get("/usersList", passportSignIn, adminController.usersList);
+router.get('/usersList', passportSignIn, adminController.usersList);
 
-router.post(
-  "/register",
-  passportSignIn,
-  adminController.grantAccess("createAny", "profile"),
-  adminController.register
-);
+router.post('/register', passportSignIn, adminController.grantAccess('createAny', 'profile'), adminController.register);
 
-router.put(
-  "/updateUsersProfile",
-  passport.authenticate("login", { session: false }),
-  adminController.grantAccess("updateAny", "profile"),
-  adminController.updateUsersProfile
-);
+router.put('/updateUsersProfile', passport.authenticate('login', { session: false }), adminController.grantAccess('updateAny', 'profile'), adminController.updateUsersProfile);
 
-router.get("/newUser/", passportSignIn, adminController.usersProfile);
+router.get('/newUser/', passportSignIn, adminController.usersProfile);
 
 ///para sa products
 
-router.get(
-  "/categoryList",
-  passportSignIn,
-  adminProductsController.categoryList
-);
+router.get('/categoryList', passportSignIn, adminProductsController.categoryList);
 
-router.post(
-  "/addCategory",
-  passportSignIn,
-  adminProductsController.addCategory
-);
+router.post('/addCategory', passportSignIn, adminController.grantAccess('createAny', 'category'), adminProductsController.addCategory);
 
-router.put(
-  "/updateCategoryName",
-  passportSignIn,
-  adminProductsController.updateCategoryName
-);
+router.put('/updateCategoryName', passportSignIn, adminController.grantAccess('updateAny', 'category'), adminProductsController.updateCategoryName);
 
 ///para sa distributors
-router.post(
-  "/addDistributor",
-  passportSignIn,
-  adminDistributorController.addDistributor
-);
+router.post('/addDistributor', passportSignIn, adminDistributorController.addDistributor);
 
 module.exports = router;

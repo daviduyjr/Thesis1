@@ -8,6 +8,7 @@
             <!-- <p class="card-description">
               For displaying tabular data. <code>&lt;b-table&gt;</code> supports pagination, filtering, sorting, custom rendering, events, and asynchronous data.
               </p> -->
+            <!-- pang validate kung empty yung input -->
             <validation-observer ref="observer" v-slot="{ handleSubmit }">
               <form @submit.stop.prevent="handleSubmit(onSubmit)">
                 <validation-provider

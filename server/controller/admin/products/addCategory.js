@@ -3,6 +3,21 @@ const Category = require('../../../models/inventory/Category');
 const { roles } = require('../../../config/roles');
 
 module.exports = {
+  grantAccess: (action, resource) => {
+    return async (req, res, next) => {
+      try {
+        const permission = roles.can(req.user.role)[action](resource);
+        if (!permission.granted) {
+          return res.status(401).json({
+            error: "You don't have enough permission to perform this action",
+          });
+        }
+        next();
+      } catch (error) {
+        next(error);
+      }
+    };
+  },
   categoryList: async (req, res, next) => {
     const categories = await Category.find();
     if (categories.length === 0) {
