@@ -6,7 +6,14 @@
       :loader="loader"
       :canCancel="canCancel"
     /> -->
-    <b-overlay :show="show" rounded="sm" @shown="onShown" @hidden="onHidden">
+    <b-overlay
+      id="overlay-background"
+      :show="show"
+      :variant="variant"
+      :opacity="opacity"
+      :blur="blur"
+      rounded="sm"
+    >
       <div class="row" :aria-hidden="show ? 'true' : null">
         <div class="col-md-6">
           <validation-observer ref="observer" v-slot="{ handleSubmit }">
@@ -260,9 +267,8 @@
             class="mt-3"
             variant="outline-success"
             block
-            @click="submitAddFinal(), (show = true)"
-            ref="show"
             :disabled="show"
+            @click="submitAddFinal()"
             >Yes</b-button
           >
           <b-button
@@ -274,7 +280,7 @@
           >
         </b-modal>
       </div>
-      <template #overlay>
+      <!-- <template #overlay>
         <div class="text-center">
           <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
           <p id="cancel-label">Please wait...</p>
@@ -288,7 +294,7 @@
             Cancel
           </b-button>
         </div>
-      </template>
+      </template> -->
     </b-overlay>
   </section>
 </template>
@@ -311,6 +317,9 @@ export default {
   data() {
     return {
       show: false,
+      variant: "transparent",
+      opacity: 0.89,
+      blur: "2px",
       filter: "",
       headVariant: "dark",
       perPage: 5,
@@ -375,14 +384,14 @@ export default {
   },
   methods: {
     ...mapActions(["categoryList", "addCategory", "editCategory"]),
-    onShown() {
-      // Focus the cancel button when the overlay is showing
-      this.$refs.cancel.focus();
-    },
-    onHidden() {
-      // Focus the show button when the overlay is removed
-      this.$refs.show.focus();
-    },
+    // onShown() {
+    //   // Focus the cancel button when the overlay is showing
+    //   this.$refs.cancel.focus();
+    // },
+    // onHidden() {
+    //   // Focus the show button when the overlay is removed
+    //   this.$refs.show.focus();
+    // },
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
@@ -428,6 +437,7 @@ export default {
       console.log("User cancelled the loader.");
     },
     async submitAddFinal() {
+      this.show = true;
       const toAdd = this.categoryName;
       if (this.method === "Add") {
         //eto na yung pang add mismo ng category
@@ -439,7 +449,6 @@ export default {
               this.isLoading = false;
               this.resetForm();
               this.getCatList();
-              this.show = "false";
               this.$toast.success("Successfully Added.", {
                 rtl: false,
                 timeOut: 3000,
@@ -455,6 +464,7 @@ export default {
         });
       } else {
         //eto na yung pang edit mismo ng category
+
         const toEdit = {
           id: this.id,
           catName: this.categoryNameToEdit,
@@ -464,11 +474,12 @@ export default {
           if (res.data.success === true) {
             this.isLoading = true;
             this.$refs["confirmation"].hide();
+
             setTimeout(() => {
               this.isLoading = false;
               this.resetForm();
               this.getCatList();
-              this.show = "false";
+              this.show = false;
               this.$toast.success("Successfully Edited.", {
                 rtl: false,
                 timeOut: 2000,
