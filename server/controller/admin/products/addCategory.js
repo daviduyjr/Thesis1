@@ -61,19 +61,22 @@ module.exports = {
 
   updateCategoryName: async (req, res, next) => {
     try {
-      const { category_name, _id } = req.body;
+      const { category_name, catStatus, _id } = req.body;
       const cat = await Category.findById(_id);
       const catName = category_name.toUpperCase();
+
       if (cat) {
         if (cat.category_name === category_name.toUpperCase()) {
-          return res.status(200).json({ categories: cat, success: true });
+          updateCatName(catName, catStatus, _id).then((data) => {
+            return res.status(200).json({ categories: data, success: true });
+          });
         } else {
           let catNameToFind = await Category.findOne({ category_name: catName });
 
           if (catNameToFind) {
             return res.status(400).json({ err: `Category ${catName} already exist`, success: false });
           } else {
-            updateCatName(catName, _id).then((data) => {
+            updateCatName(catName, catStatus, _id).then((data) => {
               return res.status(200).json({ categories: data, success: true });
             });
           }
@@ -85,10 +88,10 @@ module.exports = {
   },
 };
 
-var updateCatName = async (category_name, _id) => {
+var updateCatName = async (category_name, catStatus, _id) => {
   let result = await Category.findByIdAndUpdate(
     _id,
-    { category_name, date_updated: Date.now() },
+    { category_name, isActive: catStatus, date_updated: Date.now() },
     {
       new: true,
       useFindAndModify: false,
