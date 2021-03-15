@@ -49,7 +49,8 @@ const actions = {
         "http://localhost:5000/api/admin/updateCategoryName",
         {
           _id: catData.id,
-          category_name: catData.catName
+          category_name: catData.catName,
+          catStatus: catData.catStatus
         }
       );
 

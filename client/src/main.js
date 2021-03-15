@@ -4,7 +4,7 @@
 import Vue from "vue";
 import App from "./App";
 import router from "./router";
-import BootstrapVue from "bootstrap-vue";
+import { BootstrapVue, OverlayPlugin, IconsPlugin } from "bootstrap-vue";
 import VueBootstrapToasts from "vue-bootstrap-toasts";
 import JQuery from "jquery";
 import VueSlideBar from "vue-slide-bar";
@@ -52,6 +52,8 @@ const options = {
 // Vue.component("ValidationObserver", ValidationObserver);
 
 Vue.use(BootstrapVue);
+Vue.use(OverlayPlugin);
+Vue.use(IconsPlugin);
 Vue.use(VueBootstrapToasts);
 Vue.use(VueSweetalert2, options);
 Vue.use(VueGoodWizard);

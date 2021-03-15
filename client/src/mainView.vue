@@ -16,6 +16,12 @@
       <!-- page-body-wrapper ends -->
     </div>
     <Toasts></Toasts>
+    <loading
+      :active="isLoading"
+      :is-full-page="fullPage"
+      :loader="loader"
+      :canCancel="canCancel"
+    />
   </section>
 </template>
 
@@ -24,15 +30,27 @@
 import AppHeader from '../src/components/partials/AppHeader'
 import AppSidebar from '../src/components/partials/AppSidebar'
 import AppFooter from '../src/components/partials/AppFooter'
+
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+
 export default {
   name: 'mainView',
   components: {
     AppHeader,
     AppSidebar,
-    AppFooter
+    AppFooter,
+    Loading
+  },
+  data() {
+    return {
+      isLoading: false,
+      fullPage: false,
+      loader: "spinner",
+      canCancel: false,
+    }
   },
   methods: {
-
 
   }
 }

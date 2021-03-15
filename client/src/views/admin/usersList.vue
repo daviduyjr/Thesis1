@@ -6,14 +6,87 @@
           <div class="card-body">
             <h2 class="card-title text-center">Users List</h2>
             <b-row md="3">
-              <b-col cols="4">
-                <b-form-input
-                  v-model="filter"
-                  type="search"
-                  placeholder="Search"
-                  debounce="0"
+              <b-col cols="6">
+                <b-form-group
+                  label="Filter"
+                  label-for="filter-input"
+                  label-cols-sm="1"
+                  label-cols-lg="2"
+                  label-align-lg="left"
+                  label-size="lg"
+                  class="mb-0"
+                  description="Search here"
                 >
-                </b-form-input>
+                  <b-input-group size="md">
+                    <b-form-input
+                      v-model="filter"
+                      type="search"
+                      placeholder="Search"
+                      debounce="0"
+                    >
+                    </b-form-input>
+                    <b-input-group-append>
+                      <button
+                        :disabled="!filter"
+                        @click="filter = ''"
+                        class="btn btn-dark"
+                      >
+                        Clear
+                      </button>
+                    </b-input-group-append>
+                  </b-input-group>
+                </b-form-group>
+              </b-col>
+
+              <b-col cols="6">
+                <b-form-group
+                  v-model="sortDirection"
+                  label="Filter On"
+                  description="Leave all unchecked to filter on all data"
+                  label-cols-sm="3"
+                  label-align-md="right"
+                  label-size="md"
+                  class="mb-0"
+                  v-slot="{ ariaDescribedby }"
+                >
+                  <b-form-checkbox-group
+                    v-model="filterOn"
+                    :options="options"
+                    :aria-describedby="ariaDescribedby"
+                    class="mt-1 listOfFilter"
+                  >
+                    <!-- <b-form-checkbox size="lg" value="username"
+                      >Name</b-form-checkbox
+                    >
+                    <b-form-checkbox value="name">Username</b-form-checkbox>
+                    <b-form-checkbox value="role">Role</b-form-checkbox>
+                    <b-form-checkbox value="isActive">Active</b-form-checkbox> -->
+                  </b-form-checkbox-group>
+                </b-form-group>
+              </b-col>
+            </b-row>
+
+            <b-row>
+              <b-col sm="5" md="6" class="my-1">
+                <b-form-group
+                  label="Per page"
+                  label-for="per-page-select"
+                  label-cols-sm="1"
+                  label-cols-md="2"
+                  label-cols-lg="2"
+                  label-align-sm="left"
+                  label-size="md"
+                  class="mb-0 perPageLabel"
+                >
+                  <!-- <label class="perPageLabel">Per page:</label> -->
+                  <b-form-select
+                    id="per-page-select"
+                    v-model="perPage"
+                    :options="pageOptions"
+                    size="md"
+                    class="perPage"
+                  ></b-form-select>
+                </b-form-group>
               </b-col>
             </b-row>
             <b-row md="3">
@@ -28,6 +101,7 @@
                     :head-variant="headVariant"
                     :filter="filter"
                     :fixed="fixed"
+                    :filter-included-fields="filterOn"
                     :per-page="perPage"
                     :current-page="currentPage"
                     :busy.sync="isBusy"
@@ -116,7 +190,7 @@ export default {
     return {
       filter: "",
       headVariant: "dark",
-      perPage: 3,
+      perPage: 5,
       currentPage: 1,
       isBusy: false,
       sortBy: "name",
@@ -134,12 +208,21 @@ export default {
         },
         { key: "actions", label: "Actions", thStyle: { width: "18%" } }
       ],
+      options: [
+        { text: "Username", value: "username" },
+        { text: "Name", value: "name" },
+        { text: "Role", value: "role" },
+        { text: "isActive", value: "isActive" }
+      ],
       users: [],
       infoModal: {
         id: "info-modal",
         title: "",
         content: {}
-      }
+      },
+      pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
+      filterOn: [],
+      sortDirection: "asc"
     };
   },
   computed: {

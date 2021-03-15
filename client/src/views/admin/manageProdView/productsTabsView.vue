@@ -11,7 +11,7 @@
                   <CategoriesComp />
                 </b-tab>
                 <b-tab title="Second">
-                  <p>second tab</p>
+                  <DistributorsComponent />
                 </b-tab>
                 <b-tab title="Disabled" disabled>
                   <p>Bisabled tab</p>
@@ -28,10 +28,12 @@
 <script>
 /* eslint-disable */
 import CategoriesComp from "@/components/admin/manageProducts/CategoriesComp";
+import DistributorsComponent from "@/components/admin/manageProducts/DistributorsComp";
 export default {
   name: "productsTabsView",
   components: {
-    CategoriesComp
+    CategoriesComp,
+    DistributorsComponent
   }
 };
 </script>
