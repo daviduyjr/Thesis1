@@ -27,6 +27,8 @@ router.post('/addCategory', passportSignIn, adminController.grantAccess('createA
 router.put('/updateCategoryName', passportSignIn, adminController.grantAccess('updateAny', 'category'), adminProductsController.updateCategoryName);
 
 ///para sa distributors
+router.get('/distributorList', passportSignIn, adminDistributorController.distributorList);
+
 router.post('/addDistributor', passportSignIn, adminDistributorController.addDistributor);
 
 module.exports = router;

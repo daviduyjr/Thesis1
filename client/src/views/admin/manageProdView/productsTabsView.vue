@@ -10,7 +10,7 @@
                 <b-tab title="CATEGORIES" active>
                   <CategoriesComp />
                 </b-tab>
-                <b-tab title="Second">
+                <b-tab title="DISTRIBUTORS">
                   <DistributorsComponent />
                 </b-tab>
                 <b-tab title="Disabled" disabled>

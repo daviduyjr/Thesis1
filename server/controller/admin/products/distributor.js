@@ -1,8 +1,8 @@
-const bcrypt = require("bcryptjs");
-const Distributor = require("../../../models/inventory/Distributor");
-const { roles } = require("../../../config/roles");
+const bcrypt = require('bcryptjs');
+const Distributor = require('../../../models/inventory/Distributor');
+const { roles } = require('../../../config/roles');
 
-const Counter = require("../../../models/inventory/counter");
+const Counter = require('../../../models/inventory/counter');
 
 module.exports = {
   addDistributor: async (req, res, next) => {
@@ -17,18 +17,14 @@ module.exports = {
       });
     }
 
-    const id = "distributorID";
-    const dist = await Counter.findOneAndUpdate(
-      { id },
-      { $inc: { seq: 1 } },
-      { new: true, useFindAndModify: false }
-    );
+    const id = 'distributorID';
+    const dist = await Counter.findOneAndUpdate({ id }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false });
 
     if (!dist) {
-      c = await new Counter({ id: "distributorID", seq: 1 });
+      c = await new Counter({ id: 'distributorID', seq: 1 });
       await c.save();
     }
-    const DistID = await Counter.findOne({ id: "distributorID" });
+    const DistID = await Counter.findOne({ id: 'distributorID' });
 
     const newDistID = `Dist-0${DistID.seq}`;
 
@@ -43,9 +39,18 @@ module.exports = {
     await newDistributor.save().then((distributor) => {
       res.status(200).json({
         success: true,
-        message: "Succesfully Saved",
+        message: 'Succesfully Saved',
         distributor: distributor,
       });
     });
+  },
+
+  distributorList: async (req, res, next) => {
+    const distributors = await Distributor.find();
+    if (distributors.length === 0) {
+      res.status(200).json({ distributors: 'No Data Available', success: true });
+    } else {
+      res.status(200).json({ distributors: distributors, success: true });
+    }
   },
 };

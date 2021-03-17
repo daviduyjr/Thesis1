@@ -1,17 +1,10 @@
 <template>
   <section class="Categories">
-    <!-- <loading
-      :active="isLoading"
-      :is-full-page="fullPage"
-      :loader="loader"
-      :canCancel="canCancel"
-    /> -->
     <b-overlay
-      id="overlay-background"
-      :show="show"
       :variant="variant"
       :opacity="opacity"
       :blur="blur"
+      :show="show"
       rounded="sm"
     >
       <div class="row" :aria-hidden="show ? 'true' : null">
@@ -128,27 +121,6 @@
             </b-form-checkbox-group>
           </b-form-group>
         </div>
-        <!-- <b-col lg="6" class="my-1">
-        <b-form-group
-          v-model="sortDirection"
-          label="Filter On"
-          description="Leave all unchecked to filter on all data"
-          label-cols-sm="3"
-          label-align-sm="right"
-          label-size="md"
-          class="mb-0"
-          v-slot="{ ariaDescribedby }"
-        >
-          <b-form-checkbox-group
-            v-model="filterOn"
-            :aria-describedby="ariaDescribedby"
-            class="mt-1"
-          >
-            <b-form-checkbox value="category_name">Name</b-form-checkbox>
-            <b-form-checkbox value="isActive">Active</b-form-checkbox>
-          </b-form-checkbox-group>
-        </b-form-group>
-      </b-col> -->
       </div>
 
       <b-row>
@@ -280,21 +252,12 @@
           >
         </b-modal>
       </div>
-      <!-- <template #overlay>
+      <template #overlay>
         <div class="text-center">
           <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
           <p id="cancel-label">Please wait...</p>
-          <b-button
-            ref="cancel"
-            variant="outline-danger"
-            size="sm"
-            aria-describedby="cancel-label"
-            @click="show = false"
-          >
-            Cancel
-          </b-button>
         </div>
-      </template> -->
+      </template>
     </b-overlay>
   </section>
 </template>
@@ -305,8 +268,6 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import store from "@/store";
 import axios from "axios";
 import router from "../../../router";
-// import { validationMixin } from "vuelidate";
-// import { required, minLength } from "vuelidate/lib/validators";
 
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
@@ -359,7 +320,6 @@ export default {
       loader: "spinner",
       canCancel: false,
       submitStatus: null,
-      perPage: 5,
       pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
       filterOn: [],
       sortDirection: "asc",
@@ -367,13 +327,7 @@ export default {
       isActive: ""
     };
   },
-  // mixins: [validationMixin],
-  components: {
-    Loading
-  },
-  // validations: {
-  //   categoryName: { required, minLength: minLength(3) }
-  // },
+
   computed: {
     rows() {
       return this.categories.length;
@@ -384,14 +338,7 @@ export default {
   },
   methods: {
     ...mapActions(["categoryList", "addCategory", "editCategory"]),
-    // onShown() {
-    //   // Focus the cancel button when the overlay is showing
-    //   this.$refs.cancel.focus();
-    // },
-    // onHidden() {
-    //   // Focus the show button when the overlay is removed
-    //   this.$refs.show.focus();
-    // },
+
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
@@ -449,6 +396,8 @@ export default {
               this.isLoading = false;
               this.resetForm();
               this.getCatList();
+              this.show = false;
+              this.$refs.observer.reset();
               this.$toast.success("Successfully Added.", {
                 rtl: false,
                 timeOut: 3000,

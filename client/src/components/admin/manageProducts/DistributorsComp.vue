@@ -1,40 +1,138 @@
 <template>
-  <div>
-    <b-overlay :show="show" rounded="sm" @shown="onShown" @hidden="onHidden">
-      <b-card
-        title="Card with custom overlay content"
-        :aria-hidden="show ? 'true' : null"
-      >
-        <b-card-text
-          >Lorem ipsum dolor sit amet, consectetur adipiscing elit.</b-card-text
-        >
-        <b-card-text>Click the button to toggle the overlay:</b-card-text>
-        <b-button
-          ref="show"
-          :disabled="show"
-          variant="primary"
-          @click="show = true"
-        >
-          Show overlay
-        </b-button>
-      </b-card>
-      <template #overlay>
-        <div class="text-center">
-          <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
-          <p id="cancel-label">Please wait...</p>
-          <b-button
-            ref="cancel"
-            variant="outline-danger"
-            size="sm"
-            aria-describedby="cancel-label"
-            @click="show = false"
-          >
-            Cancel
-          </b-button>
+  <section class="Distributor">
+    <div class="row">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-md-3 mb-2">
+            <button class="btn btn-lg btn-success">ADD DISTRIBUTOR</button>
+          </div>
+          <div class="col-md-6">
+            <b-form-group
+              label="Filter"
+              label-for="filter-input"
+              label-cols-sm="3"
+              label-align-lg="right"
+              label-size="lg"
+              class="mb-0"
+            >
+              <b-input-group size="md">
+                <b-form-input
+                  v-model="table.filter"
+                  type="search"
+                  id="filterInput"
+                  placeholder="Type to Search Distributor"
+                ></b-form-input>
+
+                <b-input-group-append>
+                  <button
+                    :disabled="!table.filter"
+                    @click="table.filter = ''"
+                    class="btn btn-dark"
+                  >
+                    Clear
+                  </button>
+                </b-input-group-append>
+              </b-input-group>
+            </b-form-group>
+          </div>
+          <b-col sm="5" md="3" class="my-1">
+            <b-form-group
+              label="Per page"
+              label-for="per-page-select"
+              label-cols-sm="6"
+              label-cols-md="4"
+              label-cols-lg="3"
+              label-align-sm="left"
+              label-size="md"
+              class="mb-0 perPageLabel"
+              style="font-size: 18px;"
+            >
+              <!-- <label class="perPageLabel">Per page:</label> -->
+              <b-form-select
+                id="per-page-select"
+                v-model="table.perPage"
+                :options="table.pageOptions"
+                size="md"
+                class="perPage"
+              ></b-form-select>
+            </b-form-group>
+          </b-col>
         </div>
-      </template>
-    </b-overlay>
-  </div>
+      </div>
+      <div class="col-md-12">
+        <b-table
+          class="table mb-2"
+          :bordered="table.bordered"
+          :hover="true"
+          :items="table.distributors"
+          :fields="table.fields"
+          :head-variant="table.headVariant"
+          :filter="table.filter"
+          :filter-included-fields="filterOn"
+          :fixed="table.fixed"
+          :per-page="table.perPage"
+          :current-page="table.currentPage"
+          :busy.sync="table.isBusy"
+          primary-key="_id"
+          responsive="sm"
+          sort-direction="desc"
+          :sort-by.sync="table.sortBy"
+          :sort-desc.sync="table.sortDesc"
+          sort-icon-left
+        >
+          <template #cell(actions)="row">
+            <b-button size="sm" @click="row.toggleDetails">
+              {{ row.detailsShowing ? "Hide" : "Show" }} Details
+            </b-button>
+            <b-button
+              size="sm"
+              @click="edit(row.item, row.index, $event.target)"
+              class="mr-1"
+            >
+              Edit
+            </b-button>
+          </template>
+          <template #row-details="row">
+            <b-card>
+              <ul>
+                <li>
+                  Distributor : <strong>{{ row.item.distributor_name }}</strong>
+                </li>
+                <li>
+                  Address : <strong>{{ row.item.address }}</strong>
+                </li>
+                <li>
+                  Contact Number :
+                  <strong>{{ row.item.contact_number }}</strong>
+                </li>
+              </ul>
+            </b-card>
+          </template>
+        </b-table>
+      </div>
+      <b-col cols="5">
+        <b-row md="3">
+          <b-col cols="12">
+            <b-pagination
+              v-model="table.currentPage"
+              :total-rows="rows"
+              :per-page="table.perPage"
+            >
+            </b-pagination>
+          </b-col>
+        </b-row>
+      </b-col>
+    </div>
+
+    <b-modal
+      hide-footer
+      :id="editDistModal.id"
+      title="EDIT USERS INFO"
+      @hide="reseteditDistModal"
+    >
+      <editDistributorComp :distInfoProps="editDistModal.content" />
+    </b-modal>
+  </section>
 </template>
 
 <script>
@@ -44,27 +142,111 @@ import store from "@/store";
 import { mask } from "vue-the-mask";
 import axios from "axios";
 import router from "../../../router";
-import { validationMixin } from "vuelidate";
-import { required, minLength } from "vuelidate/lib/validators";
+
+import editDistributorComp from "@/components/admin/manageProducts/EditDistributorComp";
 
 export default {
   name: "DistributorsComponent",
-  mixins: [validationMixin],
+  components: { editDistributorComp },
   data() {
     return {
-      show: false
+      overlay: {
+        show: false,
+        variant: "transparent",
+        opacity: 0.89,
+        blur: "2px"
+      },
+      table: {
+        filter: "",
+        headVariant: "dark",
+        sortDesc: true,
+        bordered: true,
+        fixed: false,
+        perPage: 5,
+        currentPage: 1,
+        isBusy: false,
+        sortBy: "dist_no",
+        fields: [
+          { key: "dist_no", sortable: true, label: "ID" },
+          {
+            key: "distributor_name",
+            sortable: true,
+            label: "Distributors Name"
+          },
+          // { key: "address", sortable: true, label: "Address" },
+          // { key: "contact_number", sortable: true, label: "Contact No." },
+          { key: "actions", label: "Actions", thStyle: { width: "20%" } }
+        ],
+        pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
+        distributors: []
+      },
+
+      id: "",
+      categoryName: "",
+      categoryNameToEdit: "",
+
+      editDistModal: {
+        id: "info-modal",
+        title: "",
+        content: {}
+      },
+      confirmationModal: {
+        title: ""
+      },
+      method: "",
+      errMsg: "",
+      counter: 0,
+      isLoading: false,
+      fullPage: false,
+      loader: "spinner",
+      canCancel: false,
+      submitStatus: null,
+
+      pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
+      filterOn: [],
+      sortDirection: "asc",
+      checkIfActive: false,
+      isActive: ""
     };
   },
 
-  mounted() {},
+  computed: {
+    rows() {
+      return this.table.distributors.length;
+    }
+  },
+  mounted() {
+    this.getDistributorsList();
+  },
   methods: {
-    onShown() {
-      // Focus the cancel button when the overlay is showing
-      this.$refs.cancel.focus();
+    async getDistributorsList() {
+      //pang kuha ng list ng distributors
+      this.isBusy = true;
+
+      axios
+        .get("http://localhost:5000/api/admin/distributorList")
+        .then(({ data }) => {
+          this.isBusy = false;
+          if (data.distributors.lenght === 0) {
+            alert("no data");
+          }
+          this.table.distributors = data.distributors;
+        })
+        .catch(err => {
+          console.log("may error");
+        });
     },
-    onHidden() {
-      // Focus the show button when the overlay is removed
-      this.$refs.show.focus();
+
+    edit(item, index, button) {
+      //lalabas ang modal para maedit ang distributor
+
+      this.editDistModal.title = "INFO";
+      this.editDistModal.content = item;
+      this.$root.$emit("bv::show::modal", this.editDistModal.id, button);
+    },
+    reseteditDistModal() {
+      this.editDistModal.title = "";
+      this.editDistModal.content = "";
     }
   }
 };
@@ -76,5 +258,8 @@ export default {
 }
 .btn-sm {
   padding: 0.5rem 4.81rem;
+}
+.perPage {
+  max-width: 100%;
 }
 </style>
