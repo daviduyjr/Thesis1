@@ -127,7 +127,7 @@
     <b-modal
       hide-footer
       :id="editDistModal.id"
-      title="EDIT USERS INFO"
+      title="EDIT DISTRIBUTOR INFO"
       @hide="reseteditDistModal"
     >
       <editDistributorComp :distInfoProps="editDistModal.content" />
@@ -193,11 +193,9 @@ export default {
       confirmationModal: {
         title: ""
       },
-      method: "",
       errMsg: "",
       counter: 0,
       isLoading: false,
-      fullPage: false,
       loader: "spinner",
       canCancel: false,
       submitStatus: null,

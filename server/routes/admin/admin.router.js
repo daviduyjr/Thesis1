@@ -31,4 +31,6 @@ router.get('/distributorList', passportSignIn, adminDistributorController.distri
 
 router.post('/addDistributor', passportSignIn, adminDistributorController.addDistributor);
 
+router.put('/updateDistributor', adminDistributorController.updateDistributor);
+
 module.exports = router;

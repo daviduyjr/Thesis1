@@ -45,19 +45,20 @@ const actions = {
     }
   },
 
-  async editCategory({ commit }, distributor) {
+  async editDistributor({ commit }, distributor) {
     try {
       let res = await axios.put(
-        "http://localhost:5000/api/admin/updateCategoryName",
+        "http://localhost:5000/api/admin/updateDistributor",
         {
-          _id: distributor.id,
-          category_name: distributor.catName,
-          catStatus: distributor.catStatus
+          dist_no: distributor.dist_no,
+          distributor_name: distributor.distributor_name,
+          address: distributor.address,
+          contact_number: distributor.contact_number
         }
       );
 
       if (res.data.success === true) {
-        commit("EDIT_CATEGORY_SUCCESS", res);
+        commit("EDIT_DISTRIBUTOR_SUCCESS", res);
         return res;
       }
     } catch (err) {
@@ -69,9 +70,6 @@ const actions = {
 };
 
 const mutations = {
-  CATEGORY_LIST_REQUEST() {
-    state.errorManageProduct = null;
-  },
   DISTRIBUTOR_LIST_RESULT(state, distributor) {
     state.categories = distributor.data.categories;
     state.errorManageProduct = null;
@@ -79,7 +77,7 @@ const mutations = {
   NEW_CATEGORY_SUCCESS(state, distributor) {
     this.catName = distributor.data.categories;
   },
-  EDIT_CATEGORY_SUCCESS(state, distributor) {
+  EDIT_DISTRIBUTOR_SUCCESS(state, distributor) {
     state.catName = distributor.data.categories.category_name;
   },
   EDIT_CATEGORY_ERROR(state, error) {
