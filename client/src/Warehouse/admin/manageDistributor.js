@@ -78,7 +78,7 @@ const mutations = {
     this.catName = distributor.data.categories;
   },
   EDIT_DISTRIBUTOR_SUCCESS(state, distributor) {
-    state.catName = distributor.data.categories.category_name;
+    // state.catName = distributor.data.categories.category_name;
   },
   EDIT_CATEGORY_ERROR(state, error) {
     state.error = error.data.err;

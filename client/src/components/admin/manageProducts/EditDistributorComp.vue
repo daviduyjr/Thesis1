@@ -204,18 +204,21 @@ export default {
         contact_number: this.contact_number
         // isActive: this.isActive ? "Yes" : "No"
       };
-      this.editDistributor(distributor)
-        .then(res => {
-          if (res.data.success === true) {
-            this.$refs["my-modal"].hide();
-          }
-          if (res.data.success === false) {
-            this.errMsg = res.data.msg;
-          }
-        })
-        .catch(err => {
-          console.log(err);
-        });
+      const test = await this.editDistributor(distributor);
+      debugger;
+      console.log(test);
+      // .then(res => {
+      //   debugger;
+      //   if (res.data.success === true) {
+      //     this.$refs["my-modal"].hide();
+      //   }
+      //   if (res.data.success === false) {
+      //     this.errMsg = res.data.msg;
+      //   }
+      // })
+      // .catch(err => {
+      //   console.log("error", err);
+      // });
     },
     onSubmit() {
       this.$refs["editDistModal"].show();

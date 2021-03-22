@@ -56,23 +56,36 @@ module.exports = {
 
   updateDistributor: async (req, res, next) => {
     try {
-      const { dist_no, distributor_name, address, contact_number } = req.body;
-      const dist = await Distributor.findOne({ dist_no });
-      console.log(dist);
+      // const { dist_no, distributor_name, address, contact_number } = req.body;
+
+      const newDistributor = {
+        new_dist_no: req.body.dist_no,
+        new_distributor_name: req.body.distributor_name,
+        new_address: req.body.address,
+        new_contact_number: req.body.contact_number,
+      };
+
+      const dist = await Distributor.findOne({ dist_no: newDistributor.new_dist_no });
+
       if (dist) {
-        if (dist.distributor_name === distributor_name.toUpperCase()) {
+        if (dist.distributor_name === newDistributor.new_distributor_name.toUpperCase()) {
           console.log('existing na yung name');
-          // updateCatName(catName, catStatus, _id).then((data) => {
+          // updateDistributor(catName, catStatus, dist_no).then((data) => {
           //   return res.status(200).json({ categories: data, success: true });
           // });
         } else {
-          let catNameToFind = await Category.findOne({ category_name: catName });
+          let updateDistName = await Distributor.findOne({
+            distributor_name: newDistributor.new_distributor_name.toUpperCase(),
+          });
 
-          if (catNameToFind) {
-            return res.status(400).json({ err: `Category ${catName} already exist`, success: false });
+          if (updateDistName) {
+            return res.status(400).json({
+              err: `Distributor ${newDistributor.new_distributor_name.toUpperCase()} already exist`,
+              success: false,
+            });
           } else {
-            updateCatName(catName, catStatus, _id).then((data) => {
-              return res.status(200).json({ categories: data, success: true });
+            updateDistributor(newDistributor).then((data) => {
+              return res.status(200).json({ distributor: data, success: true });
             });
           }
         }
@@ -81,4 +94,27 @@ module.exports = {
       res.status(400).json({ err: "Category doesn't exist", success: false });
     }
   },
+};
+
+var updateDistributor = async (newDistributor) => {
+  let result = await Distributor.findOneAndUpdate(
+    { dist_no: newDistributor.new_dist_no },
+    {
+      dist_no: newDistributor.new_dist_no,
+      distributor_name: newDistributor.new_distributor_name,
+      address: newDistributor.new_address,
+      contact_number: newDistributor.new_contact_number,
+      date_updated: Date.now(),
+    },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  );
+  if (!result) {
+    const err = 'may mali eh';
+    return err;
+  } else {
+    return result;
+  }
 };
