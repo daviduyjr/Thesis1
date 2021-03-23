@@ -389,7 +389,8 @@ export default {
       if (this.method === "Add") {
         //eto na yung pang add mismo ng category
         await this.addCategory(toAdd).then(result => {
-          if (result.data.success === true) {
+          debugger;
+          if (result[0].data.success === true) {
             this.isLoading = true;
             this.$refs["confirmation"].hide();
             setTimeout(() => {
@@ -406,9 +407,9 @@ export default {
             }, 2000);
           }
 
-          if (result.data.success === false) {
+          if (result[0].data.success === false) {
             this.isLoading = false;
-            this.errMsg = result.data.msg;
+            this.errMsg = result[0].data.msg;
           }
         });
       } else {

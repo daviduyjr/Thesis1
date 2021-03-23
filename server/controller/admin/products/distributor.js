@@ -56,8 +56,6 @@ module.exports = {
 
   updateDistributor: async (req, res, next) => {
     try {
-      // const { dist_no, distributor_name, address, contact_number } = req.body;
-
       const newDistributor = {
         new_dist_no: req.body.dist_no,
         new_distributor_name: req.body.distributor_name,
@@ -69,10 +67,9 @@ module.exports = {
 
       if (dist) {
         if (dist.distributor_name === newDistributor.new_distributor_name.toUpperCase()) {
-          console.log('existing na yung name');
-          // updateDistributor(catName, catStatus, dist_no).then((data) => {
-          //   return res.status(200).json({ categories: data, success: true });
-          // });
+          updateDistributor(newDistributor).then((data) => {
+            return res.status(200).json({ distributor: data, success: true });
+          });
         } else {
           let updateDistName = await Distributor.findOne({
             distributor_name: newDistributor.new_distributor_name.toUpperCase(),
@@ -101,7 +98,7 @@ var updateDistributor = async (newDistributor) => {
     { dist_no: newDistributor.new_dist_no },
     {
       dist_no: newDistributor.new_dist_no,
-      distributor_name: newDistributor.new_distributor_name,
+      distributor_name: newDistributor.new_distributor_name.toUpperCase(),
       address: newDistributor.new_address,
       contact_number: newDistributor.new_contact_number,
       date_updated: Date.now(),

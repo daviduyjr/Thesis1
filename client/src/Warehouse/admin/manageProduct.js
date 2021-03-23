@@ -35,6 +35,7 @@ const actions = {
 
       if (res.data.success === true) {
         commit("NEW_CATEGORY_SUCCESS", res);
+
         return res;
       }
     } catch (err) {
@@ -56,6 +57,7 @@ const actions = {
 
       if (res.data.success === true) {
         commit("EDIT_CATEGORY_SUCCESS", res);
+
         return res;
       }
     } catch (err) {

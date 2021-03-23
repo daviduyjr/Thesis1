@@ -26,13 +26,14 @@
                 aria-describedby="input-1-live-feedback"
                 :disabled="true"
               ></b-form-input>
+
               <b-form-invalid-feedback id="input-1-live-feedback">{{
                 distNoValidation.errors[0]
               }}</b-form-invalid-feedback>
             </b-form-group>
           </validation-provider>
           <validation-provider
-            name="distName"
+            name="Distributor's Name"
             :rules="{ required: true, min: 5 }"
             v-slot="distNameValidation"
           >
@@ -53,6 +54,7 @@
                 :state="getValidationState(distNameValidation)"
                 aria-describedby="input-2-live-feedback"
                 data-vv-as="distName"
+                autocomplete="off"
               ></b-form-input>
               <b-form-invalid-feedback id="input-2-live-feedback">{{
                 distNameValidation.errors[0]
@@ -81,6 +83,7 @@
                 :state="getValidationState(addressValidation)"
                 aria-describedby="input-3-live-feedback"
                 data-vv-as="address"
+                autocomplete="off"
               ></b-form-input>
 
               <b-form-invalid-feedback id="input-3-live-feedback">{{
@@ -111,6 +114,7 @@
                 aria-describedby="input-4-live-feedback"
                 data-vv-as="contactNumber"
                 v-mask="['(+63) ###-####-###', '(+63) ###-####-###']"
+                autocomplete="off"
               ></b-form-input>
               <b-form-invalid-feedback id="input-3-live-feedback"
                 >The Contact Number field is required</b-form-invalid-feedback
@@ -143,7 +147,7 @@
       <b-modal
         hide-footer
         @hide="onCancel()"
-        ref="editDistModal"
+        ref="editDistModalConfirmation"
         title="EDIT INFO"
       >
         <p class="my-4">
@@ -205,8 +209,14 @@ export default {
         // isActive: this.isActive ? "Yes" : "No"
       };
       const test = await this.editDistributor(distributor);
-      debugger;
-      console.log(test);
+
+      if (test.data.success == true) {
+        this.$refs["editDistModalConfirmation"].hide();
+        this.$emit("clicked", test);
+      }
+      if (test.data.success == false) {
+        this.errMsg = test.data.err;
+      }
       // .then(res => {
       //   debugger;
       //   if (res.data.success === true) {
@@ -221,12 +231,12 @@ export default {
       // });
     },
     onSubmit() {
-      this.$refs["editDistModal"].show();
+      this.$refs["editDistModalConfirmation"].show();
       // console.log(this.username);
     },
     onCancel() {
       this.errMsg = "";
-      this.$refs["editDistModal"].hide();
+      this.$refs["editDistModalConfirmation"].hide();
     },
     switchChange(e) {
       this.$nextTick(() => {
