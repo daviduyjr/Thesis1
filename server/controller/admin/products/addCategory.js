@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const Category = require('../../../models/inventory/Category');
 const { roles } = require('../../../config/roles');
 
+const Counter = require('../../../models/inventory/counter');
+
 module.exports = {
   grantAccess: (action, resource) => {
     return async (req, res, next) => {
@@ -28,35 +30,48 @@ module.exports = {
   },
 
   addCategory: async (req, res, next) => {
-    const role = req.user.role;
-    const permission = roles.can(role).createAny('category');
-    if (permission.granted) {
-      console.log('granted');
-      const { categoryName } = req.body;
+    // const role = req.user.role;
+    // const permission = roles.can(role).createAny('category');
+    // if (permission.granted) {
+    console.log('granted');
+    const { categoryName, category_abbreviation } = req.body;
 
-      const foundCat = await Category.findOne({ category_name: categoryName.toUpperCase() });
-      if (foundCat) {
-        return res.status(400).json({
-          msg: `Category "${categoryName.toUpperCase()}" is already in use`,
-          success: false,
-        });
-      }
+    const findAbbv = await Counter.findOne({ id: category_abbreviation.toUpperCase() });
 
-      const newCat = new Category({
-        category_name: categoryName.toUpperCase(),
-        date_updated: Date.now(),
+    if (findAbbv) {
+      return res.status(400).json({
+        msg: `Abbreviation "${category_abbreviation.toUpperCase()}" is already in use`,
+        success: false,
       });
-
-      await newCat.save().then((cat) => {
-        res.status(200).json({
-          success: true,
-          message: 'Succesfully Saved',
-          category: cat,
-        });
-      });
-    } else {
-      res.status(403).end();
     }
+
+    c = await new Counter({ id: category_abbreviation.toUpperCase(), seq: 1 });
+    await c.save();
+
+    const foundCat = await Category.findOne({ category_name: categoryName.toUpperCase() });
+    if (foundCat) {
+      return res.status(400).json({
+        msg: `Category "${categoryName.toUpperCase()}" is already in use`,
+        success: false,
+      });
+    }
+
+    const newCat = new Category({
+      category_name: categoryName.toUpperCase(),
+      category_abbreviation: category_abbreviation.toUpperCase(),
+      date_updated: Date.now(),
+    });
+
+    await newCat.save().then((cat) => {
+      res.status(200).json({
+        success: true,
+        message: 'Succesfully Saved',
+        category: cat,
+      });
+    });
+    // } else {
+    //   res.status(403).end();
+    // }
   },
 
   updateCategoryName: async (req, res, next) => {

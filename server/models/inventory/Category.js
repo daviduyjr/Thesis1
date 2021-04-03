@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const Schema = mongoose.Schema;
 
 const categorySchema = new Schema({
@@ -7,10 +7,14 @@ const categorySchema = new Schema({
     type: String,
     required: true,
   },
+  category_abbreviation: {
+    type: String,
+    required: true,
+  },
   isActive: {
     type: String,
-    default: "Yes",
-    enum: ["Yes", "No"],
+    default: 'Yes',
+    enum: ['Yes', 'No'],
     required: true,
   },
   date_created: {
@@ -23,6 +27,6 @@ const categorySchema = new Schema({
   },
 });
 
-const Category = mongoose.model("category", categorySchema);
+const Category = mongoose.model('category', categorySchema);
 
 module.exports = Category;

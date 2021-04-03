@@ -3,7 +3,8 @@ import axios from "axios";
 import router from "../../router";
 
 const state = {
-  distributors: {},
+  distributors: [],
+  newDistributor: {},
   distributorName: "",
   errorManageDistributors: ""
 };
@@ -28,15 +29,21 @@ const actions = {
     }
   },
 
-  async addCategory({ commit }, distributor) {
+  async addDistributor({ commit }, distributor) {
     try {
+      const newDistributor = {
+        name: distributor.distributor_name,
+        address: distributor.address,
+        contact_number: distributor.contact_number
+      };
+
       let res = await axios.post(
         "http://localhost:5000/api/admin/addDistributor",
-        { categoryName: distributor }
+        { distributor: newDistributor }
       );
 
       if (res.data.success === true) {
-        commit("NEW_CATEGORY_SUCCESS", res);
+        commit("NEW_DISTRIBUTOR_SUCCESS", res);
         return res;
       }
     } catch (err) {
@@ -63,7 +70,7 @@ const actions = {
       }
     } catch (err) {
       const error = { data: err.response.data };
-      commit("EDIT_CATEGORY_ERROR", error);
+      commit("EDIT_DISTRIBUTOR_ERROR", error);
       return error;
     }
   }
@@ -74,13 +81,13 @@ const mutations = {
     state.categories = distributor.data.categories;
     state.errorManageProduct = null;
   },
-  NEW_CATEGORY_SUCCESS(state, distributor) {
-    this.catName = distributor.data.categories;
+  NEW_DISTRIBUTOR_SUCCESS(state, distributor) {
+    state.newDistributor = distributor.data.distributor;
   },
   EDIT_DISTRIBUTOR_SUCCESS(state, distributor) {
-    // state.catName = distributor.data.categories.category_name;
+    //  state.catName = distributor.data.categories.category_name;
   },
-  EDIT_CATEGORY_ERROR(state, error) {
+  EDIT_DISTRIBUTOR_ERROR(state, error) {
     state.error = error.data.err;
   }
 };

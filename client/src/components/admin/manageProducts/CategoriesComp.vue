@@ -297,6 +297,11 @@ export default {
       fields: [
         { key: "category_name", sortable: true, label: "Category" },
         {
+          key: "category_abbreviation",
+          sortable: true,
+          label: "Category Abbrv"
+        },
+        {
           key: "isActive",
           sortable: false,
           label: "Is Active",

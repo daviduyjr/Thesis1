@@ -5,6 +5,7 @@ const passport = require('passport');
 const adminController = require('../../controller/admin/admin.controller');
 const adminProductsController = require('../../controller/admin/products/addCategory');
 const adminDistributorController = require('../../controller/admin/products/distributor');
+const adminProductController = require('../../controller/admin/products/product');
 
 const passportSignIn = passport.authenticate('login', { session: false });
 
@@ -18,11 +19,12 @@ router.put('/updateUsersProfile', passport.authenticate('login', { session: fals
 
 router.get('/newUser/', passportSignIn, adminController.usersProfile);
 
-///para sa products
+///para sa category
 
 router.get('/categoryList', passportSignIn, adminProductsController.categoryList);
 
-router.post('/addCategory', passportSignIn, adminController.grantAccess('createAny', 'category'), adminProductsController.addCategory);
+// router.post('/addCategory', passportSignIn, adminController.grantAccess('createAny', 'category'), adminProductsController.addCategory);
+router.post('/addCategory', adminProductsController.addCategory);
 
 router.put('/updateCategoryName', passportSignIn, adminController.grantAccess('updateAny', 'category'), adminProductsController.updateCategoryName);
 
@@ -32,5 +34,8 @@ router.get('/distributorList', passportSignIn, adminDistributorController.distri
 router.post('/addDistributor', passportSignIn, adminDistributorController.addDistributor);
 
 router.put('/updateDistributor', adminDistributorController.updateDistributor);
+
+/// para sa productDetails
+router.post('/addProduct', adminProductController.addProduct);
 
 module.exports = router;

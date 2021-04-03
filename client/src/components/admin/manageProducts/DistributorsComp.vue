@@ -142,8 +142,20 @@
       ref="editDistModal"
     >
       <editDistributorComp
-        @clicked="onClickChild"
+        @clicked="editDistSave"
         :distInfoProps="editDistModal.content"
+      />
+    </b-modal>
+    <b-modal
+      hide-footer
+      :id="addDistModal.id"
+      title="ADD DISTRIBUTOR"
+      @hide="reseteditDistModal"
+      ref="addDistModal"
+    >
+      <addDistributorComp
+        @clicked="addDistSave"
+        :distInfoProps="addDistModal.content"
       />
     </b-modal>
   </section>
@@ -157,11 +169,12 @@ import { mask } from "vue-the-mask";
 import axios from "axios";
 import router from "../../../router";
 
+import addDistributorComp from "@/components/admin/manageProducts/AddDistributorComp";
 import editDistributorComp from "@/components/admin/manageProducts/EditDistributorComp";
 
 export default {
   name: "DistributorsComponent",
-  components: { editDistributorComp },
+  components: { editDistributorComp, addDistributorComp },
   data() {
     return {
       overlay: {
@@ -197,6 +210,11 @@ export default {
       },
       id: "",
       editDistModal: {
+        id: "info-modal",
+        title: "",
+        content: {}
+      },
+      addDistModal: {
         id: "info-modal",
         title: "",
         content: {}
@@ -237,8 +255,23 @@ export default {
         });
     },
 
-    addDistributor() {},
-
+    addDistributor() {
+      // this.$root.$emit("bv::show::modal", this.addDistModal.id);
+      this.$refs["addDistModal"].show();
+    },
+    addDistSave() {
+      this.$refs["addDistModal"].hide();
+      this.overlay.show = true;
+      setTimeout(() => {
+        this.overlay.show = false;
+        this.$toast.success("Successfully Added.", {
+          rtl: false,
+          timeOut: 2000,
+          closeable: true
+        });
+        this.getDistributorsList();
+      }, 2000);
+    },
     edit(item, index, button) {
       //lalabas ang modal para maedit ang distributor
 
@@ -250,7 +283,7 @@ export default {
       this.editDistModal.title = "";
       this.editDistModal.content = "";
     },
-    onClickChild(test) {
+    editDistSave(test) {
       this.$refs["editDistModal"].hide();
       this.overlay.show = true;
       setTimeout(() => {
