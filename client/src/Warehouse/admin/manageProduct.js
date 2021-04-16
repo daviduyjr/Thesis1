@@ -30,7 +30,10 @@ const actions = {
     try {
       let res = await axios.post(
         "http://localhost:5000/api/admin/addCategory",
-        { categoryName: catData }
+        {
+          categoryName: catData.categoryName,
+          category_abbreviation: catData.catAbbv
+        }
       );
 
       if (res.data.success === true) {

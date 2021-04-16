@@ -24,8 +24,6 @@ module.exports = {
 
   addProduct: async (req, res, next) => {
     try {
-      //const role = req.user.role;
-
       const test = {
         product_code: req.body.product_code,
         product_name: req.body.product_name,
@@ -46,13 +44,13 @@ module.exports = {
 
       const newProduct = new ProductDetails({
         product_code: ProductCodeTeset,
-        product_name: req.body.product_name.toUpperCase(),
-        orig_price: req.body.orig_price,
-        SRP: req.body.SRP,
-        reseller_price: req.body.reseller_price,
-        description: req.body.description,
-        cat_id: req.body.cat_id,
-        weight: req.body.weight,
+        product_name: test.product_name.toUpperCase(),
+        orig_price: test.orig_price,
+        SRP: test.SRP,
+        reseller_price: test.reseller_price,
+        description: test.description,
+        cat_id: test.cat_id,
+        weight: test.weight,
         date_updated: Date.now(),
       });
 
@@ -90,19 +88,27 @@ module.exports = {
 };
 
 var prodCode = async (catid) => {
+  //Pang generate ng product code, depende sa category
   try {
     const cat = await Category.findById({ _id: catid });
 
     const catAbbv = cat.category_abbreviation;
 
-    const dist = await Counter.findOneAndUpdate({ id: catAbbv }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false });
+    const test = await new Promise((resolve, reject) => {
+      Counter.findOneAndUpdate({ id: catAbbv }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false }, (error, result) => {
+        if (error) {
+          console.error(JSON.stringify(error));
+          return reject(error);
+        }
 
-    const productCode = await Counter.findOne({ id: catAbbv });
+        const prodId = result.id;
 
-    const prodId = productCode.id;
+        const newproductCode = `${prodId}-0${result.seq}`;
+        resolve(newproductCode);
+      });
+    });
 
-    const newproductCode = `${prodId}-0${productCode.seq}`;
-    return newproductCode;
+    return test;
   } catch (err) {
     return err;
   }

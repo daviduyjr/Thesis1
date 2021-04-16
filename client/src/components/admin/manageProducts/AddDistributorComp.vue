@@ -111,8 +111,8 @@
             class="mt-2 float-right "
             variant="outline-success"
             size="lg"
-            >Save</b-button
-          >
+            >Save
+          </b-button>
         </form>
       </validation-observer>
     </div>

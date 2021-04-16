@@ -141,6 +141,7 @@ const mutations = {
     state.status = "loading";
   },
   user_profile(state, user) {
+    console.log("user", user);
     state.user = user;
     state.currentUserRole = user.role;
   }

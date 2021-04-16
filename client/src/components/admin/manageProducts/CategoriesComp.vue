@@ -1,50 +1,17 @@
 <template>
   <section class="Categories">
     <b-overlay
-      :variant="variant"
-      :opacity="opacity"
-      :blur="blur"
-      :show="show"
+      :variant="overlay.variant"
+      :opacity="overlay.opacity"
+      :blur="overlay.blur"
+      :show="overlay.show"
       rounded="sm"
     >
-      <div class="row" :aria-hidden="show ? 'true' : null">
-        <div class="col-md-6">
-          <validation-observer ref="observer" v-slot="{ handleSubmit }">
-            <validation-provider
-              name="Category Name"
-              :rules="{ required: true, min: 5 }"
-              v-slot="catnameValidation"
-            >
-              <form @submit.stop.prevent="handleSubmit(onSubmit)">
-                <div class="form-group">
-                  <div class="input-group">
-                    <b-form-input
-                      id="categoryName"
-                      name="categoryName"
-                      type="text"
-                      class="form-control"
-                      placeholder="Add Category"
-                      v-model="categoryName"
-                      @focus="onFocus($event)"
-                      @blur.native="onBlur($event)"
-                      :state="getValidationState(catnameValidation)"
-                      aria-describedby="input-1-live-feedback"
-                      autocomplete="off"
-                    ></b-form-input>
-
-                    <b-input-group-append>
-                      <button type="submit" class="btn btn-primary btn-lg">
-                        Save
-                      </button>
-                    </b-input-group-append>
-                    <b-form-invalid-feedback id="input-1-live-feedback">{{
-                      catnameValidation.errors[0]
-                    }}</b-form-invalid-feedback>
-                  </div>
-                </div>
-              </form>
-            </validation-provider>
-          </validation-observer>
+      <div class="row" :aria-hidden="overlay.show ? 'true' : null">
+        <div class="col-md-6 btnAdd">
+          <button class="btn btn-lg btn-success" @click="addCategory()">
+            ADD CATEGORY
+          </button>
         </div>
         <div class="col-md-2"></div>
 
@@ -175,6 +142,8 @@
           title="EDIT CATEGORIES"
           @hide="resetInfoModal"
           ref="modal-catNameEdit"
+          :header-bg-variant="modal.headerBgVariant"
+          :header-text-variant="modal.headerTextVariant"
         >
           <validation-observer ref="observer" v-slot="{ handleSubmit }">
             <form
@@ -186,7 +155,11 @@
                 :rules="{ required: true, min: 5 }"
                 v-slot="catToEditValidation"
               >
-                <b-form-group label="Category Name" label-for="name-input">
+                <b-form-group
+                  class="mb-1"
+                  label="Category Name"
+                  label-for="name-input"
+                >
                   <b-form-input
                     id="categoryNameToEdit"
                     v-model="categoryNameToEdit"
@@ -202,7 +175,6 @@
               <div class="input-group switch">
                 <b-form-checkbox
                   id="isActiveSwitch"
-                  class="editFormInput mb-2"
                   v-model="isActive"
                   name="check-button"
                   switch
@@ -211,9 +183,14 @@
                   Is Active : <b>{{ isActive ? "Yes" : "No" }}</b>
                 </b-form-checkbox>
               </div>
-              <button type="submit" class="btn btn-primary btn-lg">
+              <b-button
+                type="submit"
+                class="mt-0 float-right"
+                variant="outline-success"
+                size="lg"
+              >
                 Save
-              </button>
+              </b-button>
             </form>
           </validation-observer>
         </b-modal>
@@ -224,6 +201,8 @@
           @hide="onCancel()"
           ref="confirmation"
           :title="this.confirmationModal.title"
+          :header-bg-variant="confirmationModal.headerBgVariant"
+          :header-text-variant="confirmationModal.headerTextVariant"
         >
           <p class="my-4">
             {{
@@ -239,7 +218,6 @@
             class="mt-3"
             variant="outline-success"
             block
-            :disabled="show"
             @click="submitAddFinal()"
             >Yes</b-button
           >
@@ -252,12 +230,19 @@
           >
         </b-modal>
       </div>
-      <template #overlay>
-        <div class="text-center">
-          <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
-          <p id="cancel-label">Please wait...</p>
-        </div>
-      </template>
+
+      <div>
+        <b-modal
+          hide-footer
+          :id="catInfoModal.id"
+          title="ADD CATEGORY"
+          ref="addCategoryModal"
+          :header-bg-variant="modal.headerBgVariant"
+          :header-text-variant="modal.headerTextVariant"
+        >
+          <addCategoryComp @clicked="addCatSaveSuccess" />
+        </b-modal>
+      </div>
     </b-overlay>
   </section>
 </template>
@@ -265,18 +250,27 @@
 <script>
 /* eslint-disable */
 import { mapActions, mapGetters, mapState } from "vuex";
-import store from "@/store";
 import axios from "axios";
 import router from "../../../router";
 
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 
+import addCategoryComp from "@/components/admin/manageProducts/AddCategoryComp";
+
 export default {
   name: "CategoriesComp",
 
   data() {
     return {
+      modal: {
+        headerBgVariant: "dark",
+        headerTextVariant: "light"
+      },
+      confirmationModal: {
+        headerBgVariant: "dark",
+        headerTextVariant: "light"
+      },
       show: false,
       variant: "transparent",
       opacity: 0.89,
@@ -329,10 +323,16 @@ export default {
       filterOn: [],
       sortDirection: "asc",
       checkIfActive: false,
-      isActive: ""
+      isActive: "",
+      overlay: {
+        show: false,
+        variant: "transparent",
+        opacity: 0.89,
+        blur: "2px"
+      }
     };
   },
-
+  components: { addCategoryComp },
   computed: {
     rows() {
       return this.categories.length;
@@ -365,89 +365,66 @@ export default {
         });
     },
     // start ng pang add and edit
-    resetForm() {
-      //pang reset ng form after mag add and edit
-      this.categoryNameToEdit = null;
-      if (this.method === "Add") {
-        this.categoryName = null;
-        this.$refs["confirmation"].hide();
-      } else {
-        this.categoryNameToEdit = null;
-        this.$refs["confirmation"].hide();
-        this.$refs["modal-catNameEdit"].hide();
-      }
-      this.method = null;
-    },
 
-    onSubmit() {
-      // para mapalabas lang yung modal for confirmation pag nag add
-      this.confirmationModal.title = "Add Category";
-      this.method = "Add";
-      this.$refs["confirmation"].show();
-    },
+    // onSubmit() {
+    //   // para mapalabas lang yung modal for confirmation pag nag add
+    //   this.confirmationModal.title = "Add Category";
+    //   this.method = "Add";
+    //   this.$refs["confirmation"].show();
+    // },
     onCancel() {
       console.log("User cancelled the loader.");
     },
+
+    addCategory() {
+      this.$refs["addCategoryModal"].show();
+    },
+    addCatSaveSuccess() {
+      this.$refs["addCategoryModal"].hide();
+      this.overlay.show = true;
+      setTimeout(() => {
+        this.getCatList();
+        this.overlay.show = false;
+        this.$toast.success("Successfully Edited.", {
+          rtl: false,
+          timeOut: 2000,
+          closeable: true
+        });
+      }, 2000);
+    },
+    reseteditDistModal() {
+      this.editDistModal.title = "";
+      this.editDistModal.content = "";
+    },
     async submitAddFinal() {
-      this.show = true;
-      const toAdd = this.categoryName;
-      if (this.method === "Add") {
-        //eto na yung pang add mismo ng category
-        await this.addCategory(toAdd).then(result => {
-          debugger;
-          if (result[0].data.success === true) {
-            this.isLoading = true;
-            this.$refs["confirmation"].hide();
-            setTimeout(() => {
-              this.isLoading = false;
-              this.resetForm();
-              this.getCatList();
-              this.show = false;
-              this.$refs.observer.reset();
-              this.$toast.success("Successfully Added.", {
-                rtl: false,
-                timeOut: 3000,
-                closeable: true
-              });
-            }, 2000);
-          }
+      //eto na yung pang edit mismo ng category
 
-          if (result[0].data.success === false) {
-            this.isLoading = false;
-            this.errMsg = result[0].data.msg;
-          }
-        });
-      } else {
-        //eto na yung pang edit mismo ng category
-
-        const toEdit = {
-          id: this.id,
-          catName: this.categoryNameToEdit,
-          catStatus: this.isActive ? "Yes" : "No"
-        };
-        await this.editCategory(toEdit).then(res => {
-          if (res.data.success === true) {
-            this.isLoading = true;
-            this.$refs["confirmation"].hide();
-
-            setTimeout(() => {
-              this.isLoading = false;
-              this.resetForm();
-              this.getCatList();
-              this.show = false;
-              this.$toast.success("Successfully Edited.", {
-                rtl: false,
-                timeOut: 2000,
-                closeable: true
-              });
-            }, 2000);
-          }
-          if (res.data.success === false) {
-            this.isLoading = false;
-            this.errMsg = res.data.err;
-          }
-        });
-      }
+      const toEdit = {
+        id: this.id,
+        catName: this.categoryNameToEdit,
+        catStatus: this.isActive ? "Yes" : "No"
+      };
+      await this.editCategory(toEdit).then(res => {
+        if (res.data.success === true) {
+          this.$refs["confirmation"].hide();
+          this.$refs["modal-catNameEdit"].hide();
+          this.overlay.show = true;
+          setTimeout(() => {
+            this.getCatList();
+            this.overlay.show = false;
+            this.$toast.success("Successfully Edited.", {
+              rtl: false,
+              timeOut: 2000,
+              closeable: true
+            });
+          }, 2000);
+        }
+        if (res.data.success === false) {
+          this.isLoading = false;
+          this.errMsg = res.data.err;
+          this.confirmationModal.headerBgVariant = "danger";
+        }
+      });
     },
 
     // end ng pang add and edit
@@ -476,12 +453,15 @@ export default {
         this.checkIfActive = true;
       }
       // END -lalabas yung modal para makapag edit ng category
-      this.$root.$emit("bv::show::modal", this.catInfoModal.id, button);
+      // this.$root.$emit("bv::show::modal", this.catInfoModal.id, button);
+      this.$refs["modal-catNameEdit"].show();
     },
     async onEditSubmit() {
       // para mapalabas lang yung modal for confirmation pag nag edit
       this.confirmationModal.title = "Edit Category";
       this.method = "Edit";
+      this.confirmationModal.headerBgVariant = "dark";
+      this.confirmationModal.headerTextVariant = "light";
       this.$refs["confirmation"].show();
     },
 
@@ -492,7 +472,9 @@ export default {
 
     async onCancel() {
       this.errMsg = "";
-      this.resetForm();
+      this.$refs["confirmation"].hide();
+      this.confirmationModal.headerBgVariant = "dark";
+      this.confirmationModal.headerTextVariant = "light";
     },
 
     onBlur(event) {
@@ -522,5 +504,9 @@ export default {
   line-height: 1;
   vertical-align: middle;
   margin-right: 14px;
+}
+
+.btnAdd {
+  margin-bottom: 9px !important;
 }
 </style>

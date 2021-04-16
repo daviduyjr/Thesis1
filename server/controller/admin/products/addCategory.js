@@ -36,6 +36,14 @@ module.exports = {
     console.log('granted');
     const { categoryName, category_abbreviation } = req.body;
 
+    const foundCat = await Category.findOne({ category_name: categoryName.toUpperCase() });
+    if (foundCat) {
+      return res.status(400).json({
+        msg: `Category "${categoryName.toUpperCase()}" is already in use`,
+        success: false,
+      });
+    }
+
     const findAbbv = await Counter.findOne({ id: category_abbreviation.toUpperCase() });
 
     if (findAbbv) {
@@ -47,15 +55,6 @@ module.exports = {
 
     c = await new Counter({ id: category_abbreviation.toUpperCase(), seq: 1 });
     await c.save();
-
-    const foundCat = await Category.findOne({ category_name: categoryName.toUpperCase() });
-    if (foundCat) {
-      return res.status(400).json({
-        msg: `Category "${categoryName.toUpperCase()}" is already in use`,
-        success: false,
-      });
-    }
-
     const newCat = new Category({
       category_name: categoryName.toUpperCase(),
       category_abbreviation: category_abbreviation.toUpperCase(),

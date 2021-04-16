@@ -149,6 +149,8 @@
         @hide="onCancel()"
         ref="editDistModalConfirmation"
         title="EDIT INFO"
+        :header-bg-variant="modal.headerBgVariant"
+        :header-text-variant="modal.headerTextVariant"
       >
         <p class="my-4">
           Are you sure you want to edit {{ this.distributor_name }}?
@@ -186,6 +188,10 @@ export default {
   name: "editDistributorComp",
   data() {
     return {
+      modal: {
+        headerBgVariant: "info",
+        headerTextVariant: "light"
+      },
       dist_no: "",
       distributor_name: null,
       address: "",
@@ -216,6 +222,7 @@ export default {
       }
       if (test.data.success == false) {
         this.errMsg = test.data.err;
+        this.modal.headerBgVariant = "danger";
       }
       // .then(res => {
       //   debugger;
@@ -237,6 +244,7 @@ export default {
     onCancel() {
       this.errMsg = "";
       this.$refs["editDistModalConfirmation"].hide();
+      this.modal.headerBgVariant = "info";
     },
     switchChange(e) {
       this.$nextTick(() => {

@@ -25,8 +25,6 @@ const actions = {
       );
       if (res.data.success === true) {
         commit("register_success", res.data.user);
-        const newUserId = res.data.user._id;
-        router.push({ name: "newUserInfo", params: { id: newUserId } });
         return res;
       }
       if (res.data.success === false) {
@@ -67,8 +65,6 @@ const actions = {
 
       if (res.data.success === true) {
         commit("register_success", res.data.user);
-        const newUserId = res.data.user._id;
-        router.push({ name: "newUserInfo", params: { id: newUserId } });
         return res;
       }
       if (res.data.success === false) {

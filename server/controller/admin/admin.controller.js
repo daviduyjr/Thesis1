@@ -1,6 +1,7 @@
-const bcrypt = require("bcryptjs");
-const User = require("../.././models/User");
-const { roles } = require("../../config/roles");
+const bcrypt = require('bcryptjs');
+
+const User = require('../.././models/User');
+const { roles } = require('../../config/roles');
 
 module.exports = {
   grantAccess: (action, resource) => {
@@ -24,7 +25,7 @@ module.exports = {
 
   usersList: async (req, res, next) => {
     const role = req.user.role;
-    const permission = roles.can(role).readAny("profile");
+    const permission = roles.can(role).readAny('profile');
     if (permission.granted) {
       const users = await User.find();
 
@@ -39,34 +40,29 @@ module.exports = {
       // });
 
       if (users.length === 0) {
-        res.status(200).json({ users: "No Data Available", success: true });
+        res.status(200).json({ users: 'No Data Available', success: true });
       } else {
         res.status(200).json({ users: users, success: true });
       }
     } else {
-      res
-        .status(403)
-        .json({ msg: "You dont have access in this files", success: false })
-        .end();
+      res.status(403).json({ msg: 'You dont have access in this files', success: false }).end();
     }
   },
 
   register: async (req, res, next) => {
-    let { name, contact_number, address, username, password, role } = req.body;
+    let { name, contact_number, address, email, password, role } = req.body;
 
-    const foundUser = await User.findOne({ username: username });
+    const foundUser = await User.findOne({ email: email });
     if (foundUser) {
       return res.status(400).json({
-        msg: `Username "${username}" is already in use`,
+        msg: `Email "${email}" is already in use`,
         success: false,
       });
     }
 
     const foundName = await User.findOne({ name: name });
     if (foundName) {
-      return res
-        .status(400)
-        .json({ msg: `${name} has already a role.`, success: false });
+      return res.status(400).json({ msg: `${name} has already a role.`, success: false });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -76,69 +72,107 @@ module.exports = {
       name,
       contact_number,
       address,
-      username,
+      email,
       password: passwordHash,
       role,
       date_updated: Date.now(),
     });
 
-    await newUser.save().then((user) => {
+    await newUser.save().then((newUser) => {
       res.status(200).json({
         success: true,
-        message: "Succesfully Saved",
-        user: user,
+        message: 'Succesfully Saved',
+        newUser: newUser,
       });
     });
   },
 
   updateUsersProfile: async (req, res, next) => {
-    const { id } = req.body;
-    const {
-      name,
-      contact_number,
-      address,
-      username,
-      password,
-      role,
-      isActive,
-    } = req.body;
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
-    const user = await User.findByIdAndUpdate(
-      id,
-      {
-        name,
-        contact_number,
-        address,
-        username,
-        password: passwordHash,
-        role,
-        isActive,
-        date_updated: Date.now(),
-      },
-      { new: true, useFindAndModify: false }
-    );
-    if (!user) {
-      res.status(400).json({ err: "User doesn't exist", success: false });
-    } else {
-      res.status(200).json({ user: user, success: true });
+    try {
+      const newUserData = {
+        id: req.body.id,
+        name: req.body.name,
+        contact_number: req.body.contact_number,
+        address: req.body.address,
+        email: req.body.email,
+        role: req.body.role,
+        isActive: req.body.isActive,
+      };
+
+      const user = await User.findById({ _id: newUserData.id });
+
+      if (user) {
+        if (user.email === newUserData.email) {
+          updateUsers(newUserData).then((data) => {
+            // console.log(data);
+            // if (data.msg != null) {
+            //   return res.status(400).json({ msg: msg, success: false });
+            // } else {
+            // }
+            return res.status(200).json({ user: data.user, success: true });
+          });
+        } else {
+          const checkIfEmailExist = await User.findOne({ email: newUserData.email });
+          if (checkIfEmailExist) {
+            return res.status(400).json({ msg: 'Email already exist', success: false });
+          } else {
+            updateUsers(newUserData).then((data) => {
+              if (data.msg != null) {
+                return res.status(400).json({ msg: msg, success: false });
+              } else {
+                return res.status(200).json({ user: data.user, success: true });
+              }
+            });
+          }
+        }
+      }
+    } catch (err) {
+      return res.status(400).json({
+        msg: `Error ${err}`,
+        success: false,
+      });
     }
   },
   usersProfile: async (req, res, next) => {
-    const role = req.user.role;
-    const permission = roles.can(role).readAny("profile");
+    const role = req.newUser.role;
+    const permission = roles.can(role).readAny('profile');
     if (permission.granted) {
-      console.log("newUser got called");
+      console.log('newUser got called');
       const { id } = req.query;
 
       const result = await User.findById({ _id: id }, function (error, data) {
         if (error) {
-          res.status(400).json({ msg: "Users not found.", success: false });
+          res.status(400).json({ msg: 'Users not found.', success: false });
         }
       });
-      res.status(200).json({ user: result, success: true });
+      res.status(200).json({ newUser: result, success: true });
     } else {
       res.status(403).end();
     }
   },
+};
+
+const updateUsers = async (newUserData) => {
+  const user = await User.findById({ _id: newUserData.id });
+
+  const newUser = await User.findByIdAndUpdate(
+    { _id: newUserData.id },
+    {
+      name: newUserData.name,
+      contact_number: newUserData.contact_number,
+      address: newUserData.address,
+      email: newUserData.email,
+      password: user.password,
+      role: newUserData.role,
+      isActive: newUserData.isActive,
+      date_updated: Date.now(),
+    },
+    { new: true, useFindAndModify: false }
+  );
+  if (!newUser) {
+    const msg = 'Something Went Wrong!';
+    return msg;
+  } else {
+    return newUser;
+  }
 };

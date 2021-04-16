@@ -127,7 +127,7 @@ export default {
     ...mapActions(['login']),
     loginUser(){
       let user = {
-        username: this.username,
+        email: this.username,
         password: this.password
       }
       this.login(user)

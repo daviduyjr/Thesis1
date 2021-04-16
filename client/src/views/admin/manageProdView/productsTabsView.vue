@@ -7,14 +7,14 @@
             <h2 class="card-title text-center">Manage Products</h2>
             <div>
               <b-tabs content-class="mt-3" justified lazy>
+                <b-tab title="Products">
+                  <p>Bisabled tab</p>
+                </b-tab>
                 <b-tab title="CATEGORIES" active>
                   <CategoriesComp />
                 </b-tab>
                 <b-tab title="DISTRIBUTORS">
                   <DistributorsComponent />
-                </b-tab>
-                <b-tab title="Disabled" disabled>
-                  <p>Bisabled tab</p>
                 </b-tab>
               </b-tabs>
             </div>

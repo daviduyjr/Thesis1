@@ -4,85 +4,44 @@
       <validation-observer ref="observer" v-slot="{ handleSubmit }">
         <form class="editForm" @submit.stop.prevent="handleSubmit(onSubmit)">
           <validation-provider
-            name="UserName"
-            :rules="{ required: true, min: 5 }"
-            v-slot="usernameValidation"
+            name="Email"
+            :rules="{ email: true, required: true, min: 5 }"
+            v-slot="emailValidation"
           >
-            <div class="form-group">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i
-                      class="mdi mdi-account-outline"
-                      style="font-size: 1.4rem;"
-                    ></i>
-                  </span>
-                </div>
+            <b-row class="my-1">
+              <b-col sm="3" class="label">
+                <label for="email" class="text-medium">Email:</label>
+              </b-col>
+              <b-col sm="9">
                 <b-form-input
-                  id="username"
-                  name="username"
+                  id="email"
+                  name="email"
                   type="text"
                   class="form-control editFormInput"
-                  placeholder="Username"
-                  v-model="username"
-                  :state="getValidationState(usernameValidation)"
+                  v-model="email"
+                  :state="getValidationState(emailValidation)"
                   aria-describedby="input-1-live-feedback"
                   :disabled="checkIfActive"
+                  autocomplete="off"
                 ></b-form-input>
                 <b-form-invalid-feedback id="input-1-live-feedback">{{
-                  usernameValidation.errors[0]
+                  emailValidation.errors[0]
                 }}</b-form-invalid-feedback>
-              </div>
-            </div>
+                <!-- </div> -->
+              </b-col>
+            </b-row>
           </validation-provider>
-          <validation-provider
-            name="Password"
-            :rules="{ required: true, min: 5 }"
-            v-slot="passwordValidation"
-          >
-            <div class="form-group">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i
-                      class="mdi mdi-lock-outline"
-                      style="font-size: 1.4rem;"
-                    ></i>
-                  </span>
-                </div>
-                <b-form-input
-                  id="password"
-                  name="password"
-                  type="password"
-                  class="form-control editFormInput"
-                  placeholder="Password"
-                  v-model="password"
-                  :state="getValidationState(passwordValidation)"
-                  aria-describedby="input-2-live-feedback"
-                  data-vv-as="Username"
-                  :disabled="checkIfActive"
-                ></b-form-input>
-                <b-form-invalid-feedback id="input-2-live-feedback">{{
-                  passwordValidation.errors[0]
-                }}</b-form-invalid-feedback>
-              </div>
-            </div>
-          </validation-provider>
+
           <validation-provider
             name="Name"
             :rules="{ required: true, min: 5 }"
             v-slot="nameValidation"
           >
-            <div class="form-group">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i
-                      class="mdi mdi-account-box"
-                      style="font-size: 1.4rem;"
-                    ></i>
-                  </span>
-                </div>
+            <b-row class="my-1">
+              <b-col sm="3" class="label">
+                <label for="name" class="text-medium">Full Name:</label>
+              </b-col>
+              <b-col sm="9">
                 <b-form-input
                   id="name"
                   name="name"
@@ -94,29 +53,25 @@
                   aria-describedby="input-3-live-feedback"
                   data-vv-as="Name"
                   :disabled="checkIfActive"
+                  autocomplete="off"
                 ></b-form-input>
 
                 <b-form-invalid-feedback id="input-3-live-feedback">{{
                   nameValidation.errors[0]
                 }}</b-form-invalid-feedback>
-              </div>
-            </div>
+              </b-col>
+            </b-row>
           </validation-provider>
           <validation-provider
             name="Contact Number"
             :rules="{ required: true, min: 18 }"
             v-slot="contactNumberValidation"
           >
-            <div class="form-group">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i
-                      class="mdi mdi-cellphone-android"
-                      style="font-size: 1.4rem;"
-                    ></i>
-                  </span>
-                </div>
+            <b-row class="my-1">
+              <b-col sm="3" class="label">
+                <label for="name" class="text-medium">Contact #:</label>
+              </b-col>
+              <b-col sm="9">
                 <b-form-input
                   id="contactNumber"
                   name="contactNumber"
@@ -129,25 +84,24 @@
                   data-vv-as="contactNumber"
                   v-mask="['(+63) ###-####-###', '(+63) ###-####-###']"
                   :disabled="checkIfActive"
+                  autocomplete="off"
                 ></b-form-input>
                 <b-form-invalid-feedback id="input-3-live-feedback"
                   >The Contact Number field is required</b-form-invalid-feedback
                 >
-              </div>
-            </div>
+              </b-col>
+            </b-row>
           </validation-provider>
           <validation-provider
             name="Address"
             :rules="{ required: true, min: 5 }"
             v-slot="addressValidation"
           >
-            <div class="form-group">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i class="mdi mdi-home" style="font-size: 1.4rem;"></i>
-                  </span>
-                </div>
+            <b-row class="my-1">
+              <b-col sm="3" class="label">
+                <label for="name" class="text-medium">Address:</label>
+              </b-col>
+              <b-col sm="9">
                 <b-form-input
                   id="address"
                   name="address"
@@ -159,44 +113,46 @@
                   aria-describedby="input-5-live-feedback"
                   data-vv-as="Name"
                   :disabled="checkIfActive"
+                  autocomplete="off"
                 ></b-form-input>
 
                 <b-form-invalid-feedback id="input-5-live-feedback">{{
                   addressValidation.errors[0]
                 }}</b-form-invalid-feedback>
-              </div>
-            </div>
+              </b-col>
+            </b-row>
           </validation-provider>
           <validation-provider
             name="Role"
             :rules="{ required: true }"
             v-slot="roleValidation"
           >
-            <div class="form-group row">
-              <div class="input-group">
-                <div class="col-md-7">
-                  <b-form-select
-                    id="roleSelect"
-                    name="role"
-                    class="editFormInput"
-                    v-model="selected"
-                    :options="options"
-                    :state="getValidationState(roleValidation)"
-                    aria-describedby="input-6-live-feedback"
-                    data-vv-as="Role"
-                    :disabled="checkIfActive"
-                  ></b-form-select>
-                </div>
-              </div>
-              <b-form-invalid-feedback id="input-6-live-feedback">{{
-                roleValidation.errors[0]
-              }}</b-form-invalid-feedback>
-            </div>
+            <b-row class="my-1">
+              <b-col sm="3" class="label">
+                <label for="name" class="text-medium">Role:</label>
+              </b-col>
+              <b-col sm="9">
+                <b-form-select
+                  id="roleSelect"
+                  name="role"
+                  class="editFormInput"
+                  v-model="selected"
+                  :options="options"
+                  :state="getValidationState(roleValidation)"
+                  aria-describedby="input-6-live-feedback"
+                  data-vv-as="Role"
+                  :disabled="checkIfActive"
+                ></b-form-select>
+                <b-form-invalid-feedback id="input-6-live-feedback">{{
+                  roleValidation.errors[0]
+                }}</b-form-invalid-feedback>
+              </b-col>
+            </b-row>
           </validation-provider>
           <div class="input-group switch">
             <b-form-checkbox
               id="isActiveSwitch"
-              class="editFormInput"
+              class="editFormInput switchBtn"
               v-model="isActive"
               name="check-button"
               switch
@@ -205,14 +161,25 @@
               Is Active : <b>{{ isActive ? "Yes" : "No" }}</b>
             </b-form-checkbox>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg">
+          <b-button
+            type="submit"
+            variant="outline-success"
+            class="btn btn-lg float-right"
+          >
             Save
-          </button>
+          </b-button>
         </form>
       </validation-observer>
-      <b-modal hide-footer @hide="onCancel()" ref="my-modal" title="Add User">
+      <b-modal
+        hide-footer
+        @hide="onCancel()"
+        ref="my-modal"
+        title="Add User"
+        :header-bg-variant="confirmationModal.headerBgVariant"
+        :header-text-variant="confirmationModal.headerTextVariant"
+      >
         <p class="my-4">
-          Are you sure you want to edit {{ this.username }} profile?
+          Are you sure you want to edit {{ this.email }} profile?
         </p>
         <div class="alert alert-danger" v-if="errMsg">
           {{ errMsg }}
@@ -248,7 +215,7 @@ export default {
   data() {
     return {
       id: "",
-      username: null,
+      email: null,
       password: "",
       name: "",
       contactNumber: "",
@@ -262,7 +229,11 @@ export default {
       ],
       errMsg: "",
       isActive: "",
-      checkIfActive: false
+      checkIfActive: false,
+      confirmationModal: {
+        headerBgVariant: "info",
+        headerTextVariant: "light"
+      }
     };
   },
   props: { userProps: {} },
@@ -274,8 +245,7 @@ export default {
     async editUserFinal() {
       let user = {
         id: this.id,
-        username: this.username,
-        password: this.password,
+        email: this.email,
         name: this.name,
         contact_number: this.contactNumber,
         address: this.address,
@@ -283,14 +253,16 @@ export default {
         currentUserRole: store.state.Auth.currentUserRole,
         isActive: this.isActive ? "Yes" : "No"
       };
-      console.log(user);
+
       this.editUserInfo(user)
         .then(res => {
           if (res.data.success === true) {
             this.$refs["my-modal"].hide();
+            this.$emit("clicked");
           }
           if (res.data.success === false) {
             this.errMsg = res.data.msg;
+            this.confirmationModal.headerBgVariant = "danger";
           }
         })
         .catch(err => {
@@ -299,11 +271,11 @@ export default {
     },
     onSubmit() {
       this.$refs["my-modal"].show();
-      console.log(this.username);
     },
     onCancel() {
       this.errMsg = "";
       this.$refs["my-modal"].hide();
+      this.confirmationModal.headerBgVariant = "info";
     },
     switchChange(e) {
       this.$nextTick(() => {
@@ -319,16 +291,15 @@ export default {
     ...mapGetters(["user", "errorManageUser"])
   },
   mounted() {
-    const inputEl = document.querySelectorAll(".editFormInput");
     this.id = this.userProps._id;
-    this.username = this.userProps.username;
+    this.email = this.userProps.email;
     this.password = "";
     this.selected = this.userProps.role;
     this.address = this.userProps.address;
     this.contactNumber = this.userProps.contact_number;
     this.name = this.userProps.name;
     this.isActive = this.userProps.isActive;
-    console.log(this.isActive);
+
     if (this.isActive === "Yes") {
       this.isActive = true;
       this.checkIfActive = false;
@@ -343,5 +314,10 @@ export default {
 <style scoped>
 .switch {
   margin-bottom: 13px;
+}
+
+.label {
+  padding-right: 0px !important;
+  margin-top: 9px !important;
 }
 </style>

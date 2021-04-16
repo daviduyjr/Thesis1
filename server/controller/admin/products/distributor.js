@@ -99,7 +99,7 @@ module.exports = {
         }
       }
     } catch (err) {
-      res.status(400).json({ err: "Category doesn't exist", success: false });
+      res.status(400).json({ err: "Distributor doesn't exist", success: false });
     }
   },
 };

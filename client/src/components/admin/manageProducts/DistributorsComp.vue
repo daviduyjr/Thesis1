@@ -140,6 +140,8 @@
       title="EDIT DISTRIBUTOR INFO"
       @hide="reseteditDistModal"
       ref="editDistModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
     >
       <editDistributorComp
         @clicked="editDistSave"
@@ -152,6 +154,8 @@
       title="ADD DISTRIBUTOR"
       @hide="reseteditDistModal"
       ref="addDistModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
     >
       <addDistributorComp
         @clicked="addDistSave"
@@ -177,6 +181,10 @@ export default {
   components: { editDistributorComp, addDistributorComp },
   data() {
     return {
+      modal: {
+        headerBgVariant: "dark",
+        headerTextVariant: "light"
+      },
       overlay: {
         show: false,
         variant: "transparent",
@@ -277,7 +285,8 @@ export default {
 
       this.editDistModal.title = "INFO";
       this.editDistModal.content = item;
-      this.$root.$emit("bv::show::modal", this.editDistModal.id, button);
+      // this.$root.$emit("bv::show::modal", this.editDistModal.id, button);
+      this.$refs["editDistModal"].show();
     },
     reseteditDistModal() {
       this.editDistModal.title = "";
