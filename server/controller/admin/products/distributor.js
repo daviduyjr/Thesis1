@@ -8,7 +8,7 @@ module.exports = {
   distributorList: async (req, res, next) => {
     const distributors = await Distributor.find();
     if (distributors.length === 0) {
-      res.status(200).json({ distributors: 'No Data Available', success: true });
+      res.status(400).json({ distributors: 'No Data Available', success: true });
     } else {
       res.status(200).json({ distributors: distributors, success: true });
     }

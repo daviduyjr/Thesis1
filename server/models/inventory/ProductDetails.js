@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const Schema = mongoose.Schema;
 
 const productDetailsSchema = new Schema({
-  product_code: {
+  _id: {
     type: String,
     required: true,
   },
@@ -27,7 +27,7 @@ const productDetailsSchema = new Schema({
     type: String,
     required: true,
   },
-  cat_id: {
+  category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
   },

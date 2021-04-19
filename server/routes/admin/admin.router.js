@@ -3,7 +3,7 @@ const router = require('express-promise-router')();
 const passport = require('passport');
 
 const adminController = require('../../controller/admin/admin.controller');
-const adminProductsController = require('../../controller/admin/products/addCategory');
+const adminCategoryController = require('../../controller/admin/products/addCategory');
 const adminDistributorController = require('../../controller/admin/products/distributor');
 const adminProductController = require('../../controller/admin/products/product');
 
@@ -22,12 +22,12 @@ router.get('/newUser/', passportSignIn, adminController.usersProfile);
 
 ///para sa category
 
-router.get('/categoryList', passportSignIn, adminProductsController.categoryList);
+router.get('/categoryList', passportSignIn, adminCategoryController.categoryList);
 
-// router.post('/addCategory', passportSignIn, adminController.grantAccess('createAny', 'category'), adminProductsController.addCategory);
-router.post('/addCategory', adminProductsController.addCategory);
+// router.post('/addCategory', passportSignIn, adminController.grantAccess('createAny', 'category'), adminCategoryController.addCategory);
+router.post('/addCategory', adminCategoryController.addCategory);
 
-router.put('/updateCategoryName', passportSignIn, adminController.grantAccess('updateAny', 'category'), adminProductsController.updateCategoryName);
+router.put('/updateCategoryName', passportSignIn, adminController.grantAccess('updateAny', 'category'), adminCategoryController.updateCategoryName);
 
 ///para sa distributors
 router.get('/distributorList', passportSignIn, adminDistributorController.distributorList);
@@ -38,5 +38,7 @@ router.put('/updateDistributor', adminDistributorController.updateDistributor);
 
 /// para sa productDetails
 router.post('/addProduct', adminProductController.addProduct);
+
+router.get('/productList', adminProductController.productLList);
 
 module.exports = router;

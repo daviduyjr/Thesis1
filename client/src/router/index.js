@@ -106,7 +106,7 @@ const router = new Router({
           }
         },
         {
-          path: "/productsTab",
+          path: "/ManageRecords",
           name: "productTabsView",
           component: productTabsView,
           meta: {

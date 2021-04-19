@@ -22,35 +22,49 @@ module.exports = {
     };
   },
 
+  productLList: async (req, res, next) => {
+    try {
+      const products = await ProductDetails.find().populate({ path: 'category', model: Category });
+      if (products.length === 0) {
+        res.status(400).json({ msg: 'No data available', success: false });
+      } else {
+        res.status(200).json({ products: products, success: true });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ msg: err, success: false });
+    }
+  },
+
   addProduct: async (req, res, next) => {
     try {
-      const test = {
-        product_code: req.body.product_code,
+      const prod = {
+        _id: req.body.id,
         product_name: req.body.product_name,
         orig_price: req.body.orig_price,
         SRP: req.body.SRP,
         reseller_price: req.body.reseller_price,
         description: req.body.description,
-        cat_id: req.body.cat_id,
+        category: req.body.category,
         weight: req.body.weight,
       };
 
-      const findProduct = await ProductDetails.findOne({ product_name: test.product_name.toUpperCase() });
+      const findProduct = await ProductDetails.findOne({ product_name: prod.product_name.toUpperCase() });
 
       if (findProduct) {
         return res.status(400).json({ msg: `Product Name ${findProduct.product_name} already exist`, success: false });
       }
-      const ProductCodeTeset = await prodCode(test.cat_id);
+      const ProductCodeTeset = await prodCode(prod.category);
 
       const newProduct = new ProductDetails({
-        product_code: ProductCodeTeset,
-        product_name: test.product_name.toUpperCase(),
-        orig_price: test.orig_price,
-        SRP: test.SRP,
-        reseller_price: test.reseller_price,
-        description: test.description,
-        cat_id: test.cat_id,
-        weight: test.weight,
+        _id: ProductCodeTeset,
+        product_name: prod.product_name.toUpperCase(),
+        orig_price: prod.orig_price,
+        SRP: prod.SRP,
+        reseller_price: prod.reseller_price,
+        description: prod.description,
+        category: prod.category,
+        weight: prod.weight,
         date_updated: Date.now(),
       });
 
@@ -94,7 +108,7 @@ var prodCode = async (catid) => {
 
     const catAbbv = cat.category_abbreviation;
 
-    const test = await new Promise((resolve, reject) => {
+    const prod = await new Promise((resolve, reject) => {
       Counter.findOneAndUpdate({ id: catAbbv }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false }, (error, result) => {
         if (error) {
           console.error(JSON.stringify(error));
@@ -108,7 +122,7 @@ var prodCode = async (catid) => {
       });
     });
 
-    return test;
+    return prod;
   } catch (err) {
     return err;
   }

@@ -4,11 +4,11 @@
       <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
           <div class="card-body">
-            <h2 class="card-title text-center">Manage Products</h2>
+            <h2 class="card-title text-center">Manage Records</h2>
             <div>
               <b-tabs content-class="mt-3" justified lazy>
                 <b-tab title="Products">
-                  <p>Bisabled tab</p>
+                  <ProductsTab />
                 </b-tab>
                 <b-tab title="CATEGORIES" active>
                   <CategoriesComp />
@@ -29,11 +29,14 @@
 /* eslint-disable */
 import CategoriesComp from "@/components/admin/manageProducts/CategoriesComp";
 import DistributorsComponent from "@/components/admin/manageProducts/DistributorsComp";
+import ProductsTab from "@/components/admin/manageProducts/ProductsTab";
+
 export default {
   name: "productsTabsView",
   components: {
     CategoriesComp,
-    DistributorsComponent
+    DistributorsComponent,
+    ProductsTab
   }
 };
 </script>

@@ -3,7 +3,8 @@
     <nav class="sidebar sidebar-offcanvas" id="sidebar">
       <ul class="nav" v-if="user">
         <li class="nav-item nav-profile">
-          <a href="#" class="nav-link">
+          <!-- <a href="/profile" class="nav-link"> -->
+          <router-link class="nav-link" to="/profile">
             <div class="profile-image">
               <img
                 class="img-xs rounded-circle"
@@ -16,7 +17,8 @@
               <p class="profile-name">{{ user.name }}</p>
               <p class="designation">{{ user.role }}</p>
             </div>
-          </a>
+          </router-link>
+          <!-- </a> -->
         </li>
         <li class="nav-item nav-category">Main Menu</li>
         <!-- Para sa admin to -->
@@ -43,18 +45,8 @@
           <b-collapse id="admin" v-if="user">
             <ul class="nav flex-column sub-menu">
               <li class="nav-item">
-                <router-link class="nav-link" to="/profile"
-                  >Profile</router-link
-                >
-              </li>
-              <li class="nav-item">
                 <router-link class="nav-link" to="/usersList"
                   >Users List</router-link
-                >
-              </li>
-              <li class="nav-item">
-                <router-link class="nav-link" to="/addUser/"
-                  >Add User</router-link
                 >
               </li>
             </ul>
@@ -69,13 +61,8 @@
           <b-collapse id="product" v-if="user">
             <ul class="nav flex-column sub-menu">
               <li class="nav-item">
-                <router-link class="nav-link" to="/categories"
-                  >Categories</router-link
-                >
-              </li>
-              <li class="nav-item">
-                <router-link class="nav-link" to="/productsTab"
-                  >Tabs</router-link
+                <router-link class="nav-link" to="/ManageRecords"
+                  >Manage Products</router-link
                 >
               </li>
             </ul>

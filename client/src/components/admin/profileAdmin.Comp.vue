@@ -7,7 +7,7 @@
             <h2 class="card-title text-center">Profile</h2>
             <ul class="list group">
               <li class="list-group-item">
-                Username :<strong> {{ user.username }}</strong>
+                Email :<strong> {{ user.email }}</strong>
               </li>
               <li class="list-group-item">
                 Role :<strong> {{ user.role }}</strong>
