@@ -15,7 +15,11 @@ const actions = {
       let res = await axios.get("http://localhost:5000/api/admin/productList");
 
       return res;
-    } catch (err) {}
+    } catch (err) {
+      let json = '{"msg": "No records available!", "success": false }';
+      let msg = JSON.parse(json);
+      return msg;
+    }
   }
 };
 

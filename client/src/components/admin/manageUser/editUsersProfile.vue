@@ -174,7 +174,7 @@
         hide-footer
         @hide="onCancel()"
         ref="my-modal"
-        title="Add User"
+        title="Edit User Confirmation"
         :header-bg-variant="confirmationModal.headerBgVariant"
         :header-text-variant="confirmationModal.headerTextVariant"
       >

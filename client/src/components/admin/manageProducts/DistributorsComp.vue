@@ -53,7 +53,7 @@
                 label-cols-lg="3"
                 label-align-sm="left"
                 label-size="md"
-                class="mb-0 perPageLabel"
+                class="mb-0"
                 style="font-size: 18px;"
               >
                 <!-- <label class="perPageLabel">Per page:</label> -->

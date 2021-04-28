@@ -18,6 +18,27 @@
             <div class="col-md-6"></div>
           </div>
         </div>
+        <div class="col-3">
+          <b-form-group
+            label="Per page:"
+            label-for="per-page-select"
+            label-cols-sm="6"
+            label-cols-md="4"
+            label-cols-lg="3"
+            label-align-sm="left"
+            label-size="md"
+            class="mb-2"
+            style="font-size: 18px;"
+          >
+            <b-form-select
+              id="per-page-select"
+              v-model="table.perPage"
+              :options="table.pageOptions"
+              size="md"
+              class="perPage"
+            ></b-form-select>
+          </b-form-group>
+        </div>
         <div class="col-12">
           <b-table
             class="table mb-2"
@@ -55,15 +76,15 @@
               <b-card>
                 <ul>
                   <li>
-                    Products ID :
+                    Product ID :
                     <strong>{{ row.item._id }}</strong>
                   </li>
                   <li>
-                    Products Name :
+                    Product Name :
                     <strong>{{ row.item.product_name }}</strong>
                   </li>
                   <li>
-                    Products Description :
+                    Product Description :
                     <strong>{{ row.item.description }}</strong>
                   </li>
                   <li>
@@ -90,6 +111,9 @@
               </b-card>
             </template>
           </b-table>
+          <div class="col-12 errorTable" v-if="this.errorInList">
+            <h3 class="mb-0">{{ this.errorInList }}</h3>
+          </div>
         </div>
       </div>
     </b-overlay>
@@ -120,6 +144,7 @@ export default {
         currentPage: 1,
         isBusy: false,
         sortBy: "_id",
+        pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
         fields: [
           { key: "product_name", label: "Products Name", sortable: true },
           {
@@ -143,14 +168,43 @@ export default {
     async getProductList() {
       const result = await this.productList();
 
-      if (result.data.products.length === 0) {
-        this.errorInList = "No Data Available";
+      if (result.success === false) {
+        this.errorInList = result.msg;
       } else {
         this.table.products = result.data.products;
       }
+      console.log(this.errorInList);
     }
   }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.errorTable {
+  text-align: center;
+  border: 1px solid;
+  border-radius: 5px;
+  background-color: snow;
+}
+.errorTable {
+  /* width: 50px;
+  height: 50px; */
+  -webkit-animation: NAME-YOUR-ANIMATION 1s infinite; /* Safari 4+ */
+  -moz-animation: NAME-YOUR-ANIMATION 1s infinite; /* Fx 5+ */
+  -o-animation: NAME-YOUR-ANIMATION 1s infinite; /* Opera 12+ */
+  animation: NAME-YOUR-ANIMATION 1s infinite; /* IE 10+, Fx 29+ */
+}
+
+@-webkit-keyframes NAME-YOUR-ANIMATION {
+  0%,
+  49% {
+    background-color: rgb(255, 255, 255);
+    border: 3px solid #e50000;
+  }
+  50%,
+  100% {
+    background-color: #e50000;
+    border: 3px solid rgb(117, 209, 63);
+  }
+}
+</style>

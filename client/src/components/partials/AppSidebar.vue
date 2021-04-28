@@ -62,7 +62,7 @@
             <ul class="nav flex-column sub-menu">
               <li class="nav-item">
                 <router-link class="nav-link" to="/ManageRecords"
-                  >Manage Products</router-link
+                  >Manage Records</router-link
                 >
               </li>
             </ul>

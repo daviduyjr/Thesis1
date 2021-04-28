@@ -16,12 +16,6 @@
       <!-- page-body-wrapper ends -->
     </div>
     <Toasts></Toasts>
-    <loading
-      :active="isLoading"
-      :is-full-page="fullPage"
-      :loader="loader"
-      :canCancel="canCancel"
-    />
   </section>
 </template>
 
@@ -47,7 +41,7 @@ export default {
       isLoading: false,
       fullPage: false,
       loader: "spinner",
-      canCancel: false,
+      canCancel: true,
     }
   },
   methods: {
@@ -56,7 +50,4 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-.main-view {
-}
-</style>
+<style scoped lang="scss"></style>

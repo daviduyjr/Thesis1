@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 
 const User = require('../.././models/User');
+const Counter = require('../../models/inventory/counter');
 const { roles } = require('../../config/roles');
 
 module.exports = {
@@ -10,7 +11,7 @@ module.exports = {
         const permission = roles.can(req.user.role)[action](resource);
         if (!permission.granted) {
           return res.status(401).json({
-            error: "You don't have enough permission to perform this action",
+            error: "You don't have enough permission to perform this action.",
           });
         }
         next();
@@ -40,12 +41,12 @@ module.exports = {
       // });
 
       if (users.length === 0) {
-        res.status(200).json({ users: 'No Data Available', success: true });
+        res.status(200).json({ users: 'No Data Available.', success: true });
       } else {
         res.status(200).json({ users: users, success: true });
       }
     } else {
-      res.status(403).json({ msg: 'You dont have access in this files', success: false }).end();
+      res.status(403).json({ msg: 'You dont have access in this files.', success: false }).end();
     }
   },
 
@@ -64,11 +65,12 @@ module.exports = {
     if (foundName) {
       return res.status(400).json({ msg: `${name} has already a role.`, success: false });
     }
-
+    const userID = await genUserCode(role);
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
     const newUser = new User({
+      user_id: userID,
       name,
       contact_number,
       address,
@@ -109,12 +111,12 @@ module.exports = {
             //   return res.status(400).json({ msg: msg, success: false });
             // } else {
             // }
-            return res.status(200).json({ user: data.user, success: true });
+            return res.status(200).json({ user: data, success: true });
           });
         } else {
           const checkIfEmailExist = await User.findOne({ email: newUserData.email });
           if (checkIfEmailExist) {
-            return res.status(400).json({ msg: 'Email already exist', success: false });
+            return res.status(400).json({ msg: 'Email already exist!', success: false });
           } else {
             updateUsers(newUserData).then((data) => {
               if (data.msg != null) {
@@ -134,11 +136,10 @@ module.exports = {
     }
   },
   usersProfile: async (req, res, next) => {
-    const role = req.newUser.role;
+    const role = req.user.role;
     const permission = roles.can(role).readAny('profile');
     if (permission.granted) {
-      console.log('newUser got called');
-      const { id } = req.query;
+      const { id } = req.user._id;
 
       const result = await User.findById({ _id: id }, function (error, data) {
         if (error) {
@@ -174,5 +175,30 @@ const updateUsers = async (newUserData) => {
     return msg;
   } else {
     return newUser;
+  }
+};
+
+const genUserCode = async (role) => {
+  try {
+    const date = new Date();
+    const currentYear = date.getFullYear();
+
+    const result = await Counter.findOneAndUpdate({ id: 'user' }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false });
+
+    if (!result) {
+      userCounter = await new Counter({ id: 'user', seq: 1 });
+      await userCounter.save();
+
+      const newCounter = await Counter.findOne({ id: 'user' });
+
+      if (role === 'admin') return `ADMIN-${currentYear}-0${newCounter.seq}`;
+      if (role === 'suprevisor') return `SUPV-${currentYear}-0${newCounter.seq}`;
+      if (role === 'user') return `USER-${currentYear}-0${newCounter.seq}`;
+    }
+    if (role === 'admin') return `ADMIN-${currentYear}-0${result.seq}`;
+    if (role === 'supervisor') return `SUPV-${currentYear}-0${result.seq}`;
+    if (role === 'user') return `USER-${currentYear}-0${result.seq}`;
+  } catch (err) {
+    return err;
   }
 };

@@ -103,6 +103,7 @@
                 <b-col cols="12">
                   <div class="mt-2 mb-2">
                     <b-table
+                      id="usersTable"
                       class="table"
                       :bordered="bordered"
                       :hover="true"
@@ -119,6 +120,7 @@
                       responsive="sm"
                       :sort-by.sync="sortBy"
                       :sort-desc.sync="sortDesc"
+                      empty-text="There is no messages to show"
                     >
                       <template #cell(actions)="row">
                         <b-button size="sm" @click="row.toggleDetails">
@@ -136,7 +138,11 @@
                         <b-card>
                           <ul>
                             <li>
-                              email :
+                              User ID:
+                              <strong>{{ row.item.user_id }}</strong>
+                            </li>
+                            <li>
+                              Email :
                               <strong>{{ row.item.email }}</strong>
                             </li>
                             <li>
@@ -199,6 +205,16 @@
             >
               <addUser @clicked="addUserSuccess" />
             </b-modal>
+            <b-modal
+              size="md"
+              hide-footer
+              title="USERS PROFILE"
+              :header-bg-variant="modal.headerBgVariant"
+              :header-text-variant="modal.headerTextVariant"
+              ref="usersProfileModal"
+            >
+              <userProfile />
+            </b-modal>
           </div>
         </div>
       </div>
@@ -213,10 +229,10 @@ import "vue-loading-overlay/dist/vue-loading.css";
 
 import editUsersProfile from "@/components/admin/manageUser/editUsersProfile";
 import addUser from "@/components/admin/manageUser/AddUser";
-
+import userProfile from "@/components/admin/manageUser/user.profile";
 export default {
   name: "usersList",
-  components: { editUsersProfile, addUser },
+  components: { editUsersProfile, addUser, userProfile },
   data() {
     return {
       modal: {
@@ -228,7 +244,7 @@ export default {
       perPage: 5,
       currentPage: 1,
       isBusy: false,
-      sortBy: "name",
+      sortBy: "user_id",
       sortDesc: false,
       bordered: true,
       fixed: false,
@@ -244,7 +260,7 @@ export default {
         { key: "actions", label: "Actions", thStyle: { width: "18%" } }
       ],
       options: [
-        { text: "email", value: "email" },
+        { text: "Email", value: "email" },
         { text: "Name", value: "name" },
         { text: "Role", value: "role" },
         { text: "isActive", value: "isActive" }
@@ -295,6 +311,13 @@ export default {
         });
     },
     info(item, index, button) {
+      const trIndex = index + 1;
+      localStorage.setItem("index", trIndex);
+      // const trIndexs = localStorage.getItem("index");
+      // var x = document.getElementById("usersTable").rows[trIndexs].cells[4]
+      //   .children[0];
+      // x.click();
+      // console.log(x);
       this.infoModal.title = "INFO";
       this.infoModal.content = item;
       this.$root.$emit("bv::show::modal", this.infoModal.id, button);
@@ -312,6 +335,7 @@ export default {
       setTimeout(() => {
         this.getUsersList();
         this.overlay.show = false;
+        this.$refs["usersProfileModal"].show();
         this.$toast.success("Successfully Added.", {
           rtl: false,
           timeOut: 2000,
@@ -322,9 +346,11 @@ export default {
     editSuccess() {
       this.$refs["editUsersModal"].hide();
       this.overlay.show = true;
+
       setTimeout(() => {
         this.getUsersList();
         this.overlay.show = false;
+        this.$refs["usersProfileModal"].show();
         this.$toast.success("Successfully Saved", {
           rtl: false,
           timeOut: 2000,
@@ -332,6 +358,13 @@ export default {
         });
       }, 2000);
     }
+    // tryLang() {
+    //wag burahin pang acccess ko sa DOM to
+    //   const trIndex = localStorage.getItem("index");
+    //   var x = document.getElementById("usersTable").rows[trIndex].cells[4]
+    //     .children[0];
+    //   x.click();
+    // }
   }
 };
 </script>

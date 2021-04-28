@@ -7,12 +7,15 @@ const register_request = "register_request";
 const state = {
   newUser: {},
   errorManageUser: "",
-  newUserId: ""
+  newUserId: "",
+  userUpdated: {},
+  method: ""
 };
 
 const getters = {
   newUser: state => state.newUser,
-  errorManageUser: state => state.errorManageUser
+  errorManageUser: state => state.errorManageUser,
+  userUpdated: state => state.userUpdated
 };
 
 const actions = {
@@ -24,7 +27,7 @@ const actions = {
         userData
       );
       if (res.data.success === true) {
-        commit("register_success", res.data.user);
+        commit("register_success", res.data.newUser);
         return res;
       }
       if (res.data.success === false) {
@@ -48,7 +51,7 @@ const actions = {
         }
       });
       if (res.data.success) {
-        commit("new_user_profile_success", res);
+        commit("new_user_profile_success", res.data);
         return res;
       }
     } catch (err) {
@@ -64,7 +67,7 @@ const actions = {
       );
 
       if (res.data.success === true) {
-        commit("register_success", res.data.user);
+        commit("update_user_success", res.data);
         return res;
       }
       if (res.data.success === false) {
@@ -83,8 +86,10 @@ const mutations = {
     state.errorManageUser = null;
   },
   register_success(state, userData) {
+    console.log(userData);
     state.status = "success";
     state.errorManageUser = null;
+    state.method = "addUser";
     state.newUser = userData;
   },
   register_error(state, err) {
@@ -98,7 +103,12 @@ const mutations = {
     state.newUser = res.data.user;
   },
   new_user_profile_error(state, err) {
+    console.log(err);
     state.errorManageUser = err.response.data.msg;
+  },
+  update_user_success(state, data) {
+    state.method = "updateUser";
+    state.userUpdated = data.user;
   }
 };
 
