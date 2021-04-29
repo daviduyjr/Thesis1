@@ -29,12 +29,13 @@ const productDetailsSchema = new Schema({
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
+    ref: 'category',
   },
   weight: {
     type: String,
     required: true,
   },
+
   isActive: {
     type: String,
     default: 'Yes',

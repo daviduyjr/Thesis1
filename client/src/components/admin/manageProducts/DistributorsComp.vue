@@ -28,7 +28,7 @@
                   <b-form-input
                     v-model="table.filter"
                     type="search"
-                    id="filterInput"
+                    id="filter-input"
                     placeholder="Type to Search Distributor"
                   ></b-form-input>
 
@@ -67,71 +67,72 @@
               </b-form-group>
             </b-col>
           </div>
+
+          <div class="col-md-12">
+            <b-table
+              class="table mb-2"
+              :bordered="table.bordered"
+              :hover="true"
+              :items="table.distributors"
+              :fields="table.fields"
+              :head-variant="table.headVariant"
+              :filter="table.filter"
+              :filter-included-fields="table.filterOn"
+              :fixed="table.fixed"
+              :per-page="table.perPage"
+              :current-page="table.currentPage"
+              :busy.sync="table.isBusy"
+              primary-key="_id"
+              responsive="sm"
+              sort-direction="desc"
+              :sort-by.sync="table.sortBy"
+              :sort-desc.sync="table.sortDesc"
+              sort-icon-left
+            >
+              <template #cell(actions)="row">
+                <b-button size="sm" @click="row.toggleDetails">
+                  {{ row.detailsShowing ? "Hide" : "Show" }} Details
+                </b-button>
+                <b-button
+                  size="sm"
+                  @click="edit(row.item, row.index, $event.target)"
+                  class="mr-1"
+                >
+                  Edit
+                </b-button>
+              </template>
+              <template #row-details="row">
+                <b-card>
+                  <ul>
+                    <li>
+                      Distributor :
+                      <strong>{{ row.item.distributor_name }}</strong>
+                    </li>
+                    <li>
+                      Address : <strong>{{ row.item.address }}</strong>
+                    </li>
+                    <li>
+                      Contact Number :
+                      <strong>{{ row.item.contact_number }}</strong>
+                    </li>
+                  </ul>
+                </b-card>
+              </template>
+            </b-table>
+          </div>
+          <b-col cols="5">
+            <b-row md="3">
+              <b-col cols="12">
+                <b-pagination
+                  v-model="table.currentPage"
+                  :total-rows="rows"
+                  :per-page="table.perPage"
+                >
+                </b-pagination>
+              </b-col>
+            </b-row>
+          </b-col>
         </div>
-        <div class="col-md-12">
-          <b-table
-            class="table mb-2"
-            :bordered="table.bordered"
-            :hover="true"
-            :items="table.distributors"
-            :fields="table.fields"
-            :head-variant="table.headVariant"
-            :filter="table.filter"
-            :filter-included-fields="table.filterOn"
-            :fixed="table.fixed"
-            :per-page="table.perPage"
-            :current-page="table.currentPage"
-            :busy.sync="table.isBusy"
-            primary-key="_id"
-            responsive="sm"
-            sort-direction="desc"
-            :sort-by.sync="table.sortBy"
-            :sort-desc.sync="table.sortDesc"
-            sort-icon-left
-          >
-            <template #cell(actions)="row">
-              <b-button size="sm" @click="row.toggleDetails">
-                {{ row.detailsShowing ? "Hide" : "Show" }} Details
-              </b-button>
-              <b-button
-                size="sm"
-                @click="edit(row.item, row.index, $event.target)"
-                class="mr-1"
-              >
-                Edit
-              </b-button>
-            </template>
-            <template #row-details="row">
-              <b-card>
-                <ul>
-                  <li>
-                    Distributor :
-                    <strong>{{ row.item.distributor_name }}</strong>
-                  </li>
-                  <li>
-                    Address : <strong>{{ row.item.address }}</strong>
-                  </li>
-                  <li>
-                    Contact Number :
-                    <strong>{{ row.item.contact_number }}</strong>
-                  </li>
-                </ul>
-              </b-card>
-            </template>
-          </b-table>
-        </div>
-        <b-col cols="5">
-          <b-row md="3">
-            <b-col cols="12">
-              <b-pagination
-                v-model="table.currentPage"
-                :total-rows="rows"
-                :per-page="table.perPage"
-              >
-              </b-pagination>
-            </b-col>
-          </b-row>
-        </b-col>
       </div>
     </b-overlay>
     <b-modal

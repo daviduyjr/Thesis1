@@ -41,4 +41,8 @@ router.post('/addProduct', adminProductController.addProduct);
 
 router.get('/productList', adminProductController.productLList);
 
+// para sa product inventory
+
+router.get('/productInventory', adminProductController.productInventory);
+
 module.exports = router;

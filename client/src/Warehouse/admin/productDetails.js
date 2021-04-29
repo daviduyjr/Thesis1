@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const state = {
-  productList: {},
+  productList: [],
   product: "",
   newProducts: ""
 };
@@ -14,6 +14,7 @@ const actions = {
     try {
       let res = await axios.get("http://localhost:5000/api/admin/productList");
 
+      commit("product_list_result", res.data.products);
       return res;
     } catch (err) {
       let json = '{"msg": "No records available!", "success": false }';
@@ -23,7 +24,11 @@ const actions = {
   }
 };
 
-const mutations = {};
+const mutations = {
+  product_list_result(state, products) {
+    state.productList = products;
+  }
+};
 
 export default {
   state,

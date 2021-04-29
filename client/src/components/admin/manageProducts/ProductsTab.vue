@@ -10,15 +10,43 @@
       <div class="row" :aria-hidden="overlay.show ? 'true' : null">
         <div class="col-12">
           <div class="row">
-            <div class="col-md-3 mb-2">
+            <div class="col-md-8 mb-2">
               <button class="btn btn-lg btn-success">
                 ADD PRODUCT
               </button>
             </div>
-            <div class="col-md-6"></div>
+            <div class="col-md-4">
+              <b-form-group
+                label="Filter"
+                label-for="filter-input"
+                label-cols-sm="3"
+                label-align-lg="right"
+                label-size="lg"
+                class="mb-0"
+              >
+                <b-input-group size="md">
+                  <b-form-input
+                    v-model="table.filter"
+                    type="search"
+                    id="filter-input"
+                    placeholder="Type to search products."
+                  >
+                  </b-form-input>
+                  <b-input-group-append>
+                    <button
+                      :disabled="!table.filter"
+                      @click="table.filter = ''"
+                      class="btn btn-dark"
+                    >
+                      Clear
+                    </button>
+                  </b-input-group-append>
+                </b-input-group>
+              </b-form-group>
+            </div>
           </div>
         </div>
-        <div class="col-3">
+        <div class="col-4">
           <b-form-group
             label="Per page:"
             label-for="per-page-select"
@@ -39,6 +67,30 @@
             ></b-form-select>
           </b-form-group>
         </div>
+        <div class="col-md-4"></div>
+        <div class="col-md-4 my-1">
+          <b-form-group
+            v-model="sortDirection"
+            label="Filter On"
+            description="Leave all unchecked to filter on all data"
+            label-cols-sm="3"
+            label-align-md="center"
+            label-size="md"
+            class="mb-0"
+            v-slot="{ ariaDescribedby }"
+          >
+            <b-form-checkbox-group
+              class="mt-1"
+              v-model="filterOn"
+              :aria-describedby="ariaDescribedby"
+            >
+              <b-form-checkbox value="product_name"
+                >Product Name</b-form-checkbox
+              >
+              <b-form-checkbox value="description">Description</b-form-checkbox>
+            </b-form-checkbox-group>
+          </b-form-group>
+        </div>
         <div class="col-12">
           <b-table
             class="table mb-2"
@@ -48,7 +100,7 @@
             :fields="table.fields"
             :head-variant="table.headVariant"
             :filter="table.filter"
-            :filter-included-fields="table.filterOn"
+            :filter-included-fields="filterOn"
             :fixed="table.fixed"
             :per-page="table.perPage"
             :current-page="table.currentPage"
@@ -107,6 +159,7 @@
                     Net Weight :
                     <strong>{{ row.item.weight }}</strong>
                   </li>
+                  <li>Quantity :</li>
                 </ul>
               </b-card>
             </template>
@@ -156,7 +209,9 @@ export default {
         ],
         products: []
       },
-      errorInList: ""
+      errorInList: "",
+      sortDirection: "asc",
+      filterOn: []
     };
   },
   mounted() {
@@ -167,7 +222,6 @@ export default {
 
     async getProductList() {
       const result = await this.productList();
-
       if (result.success === false) {
         this.errorInList = result.msg;
       } else {

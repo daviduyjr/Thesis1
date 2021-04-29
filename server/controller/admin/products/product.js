@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const { roles } = require('../../../config/roles');
 
 const ProductDetails = require('../../../models/inventory/ProductDetails');
+const ProductInventory = require('../../../models/inventory/ProductInventory');
 const Category = require('../../../models/inventory/Category');
 const Counter = require('../../../models/inventory/counter');
 
@@ -24,7 +25,8 @@ module.exports = {
 
   productLList: async (req, res, next) => {
     try {
-      const products = await ProductDetails.find().populate({ path: 'category', model: Category });
+      // const products = await ProductDetails.find().populate({ path: 'category', model: Category });
+      const products = await ProductDetails.find().populate('category');
       if (products.length === 0) {
         res.status(400).json({ msg: 'No data available', success: false });
       } else {
@@ -47,6 +49,7 @@ module.exports = {
         description: req.body.description,
         category: req.body.category,
         weight: req.body.weight,
+        quantity: req.body.quantity,
       };
 
       const findProduct = await ProductDetails.findOne({ product_name: prod.product_name.toUpperCase() });
@@ -68,36 +71,34 @@ module.exports = {
         date_updated: Date.now(),
       });
 
-      await newProduct.save().then((prod) => {
-        res.status(200).json({
-          success: true,
-          message: 'Succesfully Saved',
-          product: prod,
-        });
+      const newProductInventory = new ProductInventory({
+        prodId: newProduct._id,
+        quantity: prod.quantity,
+      });
+
+      await newProductInventory.save(async (err, data) => {
+        if (err) {
+          res.status(400).json({ msg: 'Something Went Wrong In Product Inventory', success: false });
+        } else {
+          await newProduct.save().then((prod) => {
+            res.status(200).json({
+              success: true,
+              message: 'Succesfully Saved',
+              product: prod,
+            });
+          });
+        }
       });
     } catch (err) {
       res.status(400).json({ msg: err, success: false });
     }
-    // const foundCat = await ProductDetails.findOne({ category_name: categoryName.toUpperCase() });
-    // if (foundCat) {
-    //   return res.status(400).json({
-    //     msg: `Category "${categoryName.toUpperCase()}" is already in use`,
-    //     success: false,
-    //   });
-    // }
+  },
 
-    // const newCat = new ProductDetails({
-    //   category_name: categoryName.toUpperCase(),
-    //   date_updated: Date.now(),
-    // });
-
-    // await newCat.save().then((cat) => {
-    //   res.status(200).json({
-    //     success: true,
-    //     message: 'Succesfully Saved',
-    //     category: cat,
-    //   });
-    // });
+  productInventory: async (req, res, next) => {
+    const test = await ProductInventory.find().populate({ path: 'prodId', model: ProductDetails, populate: { path: 'category', model: Category } });
+    //const test = await ProductInventory.find().populate({ path: 'prodId', populate: { path: 'category' } });
+    console.log(test[0].prodId.category.category_name);
+    res.json({ test: test });
   },
 };
 

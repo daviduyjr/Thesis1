@@ -74,7 +74,6 @@ export default {
   methods: {
     userProfile2() {
       if (this.typeOfMethod === "updateUser") {
-        console.log("updatedUser", this.updatedUser);
         this.user.user_id = this.updatedUser.user_id;
         this.user.email = this.updatedUser.email;
         this.user.role = this.updatedUser.role;
@@ -86,7 +85,6 @@ export default {
       }
 
       if (this.typeOfMethod === "addUser") {
-        console.log("newUser", this.newUser);
         this.user.user_id = this.newUser.user_id;
         this.user.email = this.newUser.email;
         this.user.role = this.newUser.role;
