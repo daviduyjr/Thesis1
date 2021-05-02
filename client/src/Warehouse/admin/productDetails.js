@@ -7,13 +7,15 @@ const state = {
   newProducts: ""
 };
 
-const getters = {};
+const getters = {
+  productListGetter: state => state.productList
+};
 
 const actions = {
   async productList({ commit }) {
     try {
       let res = await axios.get("http://localhost:5000/api/admin/productList");
-
+      // console.log(res.data.products);
       commit("product_list_result", res.data.products);
       return res;
     } catch (err) {

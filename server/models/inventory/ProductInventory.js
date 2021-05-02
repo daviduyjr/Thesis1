@@ -8,10 +8,11 @@ const productInventorySchema = new Schema({
     // ref: 'productDetails',
     required: true,
   },
-  quantity: {
-    type: Number,
+  stock_onhand: {
+    type: String,
     required: true,
   },
+  //   unit: { type: String, required: true },
   date_created: {
     type: Date,
     default: Date.now,

@@ -15,6 +15,7 @@
                 ADD PRODUCT
               </button>
             </div>
+
             <div class="col-md-4">
               <b-form-group
                 label="Filter"
@@ -70,7 +71,7 @@
         <div class="col-md-4"></div>
         <div class="col-md-4 my-1">
           <b-form-group
-            v-model="sortDirection"
+            v-model="table.sortDirection"
             label="Filter On"
             description="Leave all unchecked to filter on all data"
             label-cols-sm="3"
@@ -80,14 +81,14 @@
             v-slot="{ ariaDescribedby }"
           >
             <b-form-checkbox-group
-              class="mt-1"
-              v-model="filterOn"
+              v-model="table.filterOn"
               :aria-describedby="ariaDescribedby"
+              class="mt-1"
             >
-              <b-form-checkbox value="product_name"
-                >Product Name</b-form-checkbox
-              >
-              <b-form-checkbox value="description">Description</b-form-checkbox>
+              <b-form-checkbox value="id">Product Code</b-form-checkbox>
+              <b-form-checkbox value="product_name">
+                Product Name
+              </b-form-checkbox>
             </b-form-checkbox-group>
           </b-form-group>
         </div>
@@ -96,16 +97,15 @@
             class="table mb-2"
             :bordered="table.bordered"
             :hover="true"
-            :items="table.products"
+            :items="products"
             :fields="table.fields"
             :head-variant="table.headVariant"
             :filter="table.filter"
-            :filter-included-fields="filterOn"
+            :filter-included-fields="table.filterOn"
             :fixed="table.fixed"
             :per-page="table.perPage"
             :current-page="table.currentPage"
             :busy.sync="table.isBusy"
-            primary-key="_id"
             responsive="sm"
             sort-direction="desc"
             :sort-by.sync="table.sortBy"
@@ -129,7 +129,7 @@
                 <ul>
                   <li>
                     Product ID :
-                    <strong>{{ row.item._id }}</strong>
+                    <strong>{{ row.item.id }}</strong>
                   </li>
                   <li>
                     Product Name :
@@ -153,13 +153,16 @@
                   </li>
                   <li>
                     Category :
-                    <strong>{{ row.item.category.category_name }}</strong>
+                    <strong>{{ row.item.category_name }}</strong>
                   </li>
                   <li>
                     Net Weight :
                     <strong>{{ row.item.weight }}</strong>
                   </li>
-                  <li>Quantity :</li>
+                  <li>
+                    Stock Onhand :
+                    <strong>{{ row.item.stock_onhand }}</strong>
+                  </li>
                 </ul>
               </b-card>
             </template>
@@ -175,7 +178,7 @@
 
 <script>
 /* eslint-disable */
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   name: "ProductsTab",
@@ -196,38 +199,70 @@ export default {
         perPage: 5,
         currentPage: 1,
         isBusy: false,
-        sortBy: "_id",
+        sortBy: "prodId._id",
         pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
         fields: [
-          { key: "product_name", label: "Products Name", sortable: true },
           {
-            key: "description",
-            label: "Products Description",
-            sortable: false
+            key: "id",
+            label: "Item Code",
+            sortable: true
           },
+          {
+            key: "product_name",
+            label: "Products Name",
+            sortable: true
+          },
+          // {
+          //   key: "prodId.description",
+          //   label: "Products Description",
+          //   sortable: false
+          // },
           { key: "actions", label: "Actions", thStyle: { width: "20%" } }
         ],
-        products: []
+        products: [],
+        filterOn: [],
+        sortDirection: "asc"
       },
       errorInList: "",
-      sortDirection: "asc",
-      filterOn: []
+      products: []
     };
   },
   mounted() {
+    // this.table.products = ;
     this.getProductList();
+  },
+  computed: {
+    listOfProducts() {
+      return this.$store.state.productDetails.productList;
+    }
   },
   methods: {
     ...mapActions(["productList"]),
-
+    ...mapGetters(["productListGetter"]),
     async getProductList() {
       const result = await this.productList();
       if (result.success === false) {
         this.errorInList = result.msg;
       } else {
-        this.table.products = result.data.products;
+        this.table.products = this.listOfProducts;
+        this.listOfProducts.forEach(prod => {
+          this.products.push({
+            id: prod.prodId._id,
+            product_name: prod.prodId.product_name,
+            description: prod.prodId.description,
+            orig_price: prod.prodId.orig_price,
+            SRP: prod.prodId.SRP,
+            reseller_price: prod.prodId.reseller_price,
+            category_name: prod.prodId.category.category_name,
+            weight: prod.prodId.weight,
+            stock_onhand: prod.stock_onhand
+          });
+        });
       }
-      console.log(this.errorInList);
+    },
+    edit(item, index) {
+      console.log("item", item.id);
+      console.log("index", index);
     }
   }
 };

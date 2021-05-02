@@ -25,8 +25,8 @@ module.exports = {
 
   productLList: async (req, res, next) => {
     try {
-      // const products = await ProductDetails.find().populate({ path: 'category', model: Category });
-      const products = await ProductDetails.find().populate('category');
+      const products = await ProductInventory.find().populate({ path: 'prodId', model: ProductDetails, populate: { path: 'category', model: Category } });
+      //const products = await ProductDetails.find().populate('category');
       if (products.length === 0) {
         res.status(400).json({ msg: 'No data available', success: false });
       } else {
@@ -73,7 +73,7 @@ module.exports = {
 
       const newProductInventory = new ProductInventory({
         prodId: newProduct._id,
-        quantity: prod.quantity,
+        stock_onhand: prod.quantity,
       });
 
       await newProductInventory.save(async (err, data) => {
@@ -96,8 +96,7 @@ module.exports = {
 
   productInventory: async (req, res, next) => {
     const test = await ProductInventory.find().populate({ path: 'prodId', model: ProductDetails, populate: { path: 'category', model: Category } });
-    //const test = await ProductInventory.find().populate({ path: 'prodId', populate: { path: 'category' } });
-    console.log(test[0].prodId.category.category_name);
+
     res.json({ test: test });
   },
 };
