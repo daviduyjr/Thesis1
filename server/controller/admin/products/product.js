@@ -23,10 +23,15 @@ module.exports = {
     };
   },
 
-  productLList: async (req, res, next) => {
+  productList: async (req, res, next) => {
     try {
-      const products = await ProductInventory.find().populate({ path: 'prodId', model: ProductDetails, populate: { path: 'category', model: Category } });
+      const products = await ProductInventory.find().populate({
+        path: 'prodId',
+        model: ProductDetails,
+        populate: { path: 'category', select: 'category_name', model: Category },
+      });
       //const products = await ProductDetails.find().populate('category');
+
       if (products.length === 0) {
         res.status(400).json({ msg: 'No data available', success: false });
       } else {
@@ -52,10 +57,14 @@ module.exports = {
         quantity: req.body.quantity,
       };
 
-      const findProduct = await ProductDetails.findOne({ product_name: prod.product_name.toUpperCase() });
+      const findProduct = await ProductDetails.findOne({
+        product_name: prod.product_name.toUpperCase(),
+      });
 
       if (findProduct) {
-        return res.status(400).json({ msg: `Product Name ${findProduct.product_name} already exist`, success: false });
+        return res
+          .status(400)
+          .json({ msg: `Product Name ${findProduct.product_name} already exist`, success: false });
       }
       const ProductCodeTeset = await prodCode(prod.category);
 
@@ -78,7 +87,9 @@ module.exports = {
 
       await newProductInventory.save(async (err, data) => {
         if (err) {
-          res.status(400).json({ msg: 'Something Went Wrong In Product Inventory', success: false });
+          res
+            .status(400)
+            .json({ msg: 'Something Went Wrong In Product Inventory', success: false });
         } else {
           await newProduct.save().then((prod) => {
             res.status(200).json({
@@ -95,7 +106,11 @@ module.exports = {
   },
 
   productInventory: async (req, res, next) => {
-    const test = await ProductInventory.find().populate({ path: 'prodId', model: ProductDetails, populate: { path: 'category', model: Category } });
+    const test = await ProductInventory.find().populate({
+      path: 'prodId',
+      model: ProductDetails,
+      populate: { path: 'category', model: Category },
+    });
 
     res.json({ test: test });
   },
@@ -109,17 +124,22 @@ var prodCode = async (catid) => {
     const catAbbv = cat.category_abbreviation;
 
     const prod = await new Promise((resolve, reject) => {
-      Counter.findOneAndUpdate({ id: catAbbv }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false }, (error, result) => {
-        if (error) {
-          console.error(JSON.stringify(error));
-          return reject(error);
+      Counter.findOneAndUpdate(
+        { id: catAbbv },
+        { $inc: { seq: 1 } },
+        { new: true, useFindAndModify: false },
+        (error, result) => {
+          if (error) {
+            console.error(JSON.stringify(error));
+            return reject(error);
+          }
+
+          const prodId = result.id;
+
+          const newproductCode = `${prodId}-0${result.seq}`;
+          resolve(newproductCode);
         }
-
-        const prodId = result.id;
-
-        const newproductCode = `${prodId}-0${result.seq}`;
-        resolve(newproductCode);
-      });
+      );
     });
 
     return prod;
