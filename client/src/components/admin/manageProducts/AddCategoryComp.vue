@@ -5,7 +5,7 @@
         <form class="editForm" @submit.stop.prevent="handleSubmit(onSubmit)">
           <validation-provider
             name="Category Name"
-            :rules="{ required: true, min: 5 }"
+            :rules="{ required: true, min: 3 }"
             v-slot="catNameValidation"
           >
             <b-form-group
@@ -84,7 +84,7 @@
       :header-bg-variant="confirmationModal.headerBgVariant"
       :header-text-variant="confirmationModal.headerTextVariant"
     >
-      <p class="my-4">Are you sure you want to edit {{ this.categoryName }}?</p>
+      <p class="my-4">Are you sure you want to add {{ this.categoryName }}?</p>
       <div class="alert alert-danger" v-if="errMsg">
         {{ errMsg }}
       </div>

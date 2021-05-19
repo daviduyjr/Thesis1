@@ -1,3 +1,4 @@
+/* eslint-disable */
 <template>
   <section class="Products">
     <b-overlay
@@ -11,7 +12,7 @@
         <div class="col-12">
           <div class="row">
             <div class="col-md-8 mb-2">
-              <button class="btn btn-lg btn-success">
+              <button class="btn btn-lg btn-success" @click="addProduct()">
                 ADD PRODUCT
               </button>
             </div>
@@ -47,7 +48,7 @@
             </div>
           </div>
         </div>
-        <div class="col-4">
+        <div class="col-3">
           <b-form-group
             label="Per page:"
             label-for="per-page-select"
@@ -68,32 +69,34 @@
             ></b-form-select>
           </b-form-group>
         </div>
-        <div class="col-md-4"></div>
-        <div class="col-md-4 my-1">
+        <!-- <div class="col-md-"></div> -->
+        <div class="col-md-5 my-1"></div>
+        <div class="col-4">
           <b-form-group
-            v-model="table.sortDirection"
-            label="Filter On"
-            description="Leave all unchecked to filter on all data"
-            label-cols-sm="3"
-            label-align-md="center"
-            label-size="md"
-            class="mb-0"
-            v-slot="{ ariaDescribedby }"
+            label-for="category"
+            label="Filter By Category"
+            label-size="lg"
+            label-cols-lg="4"
+            label-align="center"
           >
-            <b-form-checkbox-group
-              v-model="table.filterOn"
-              :aria-describedby="ariaDescribedby"
-              class="mt-1"
+            <b-form-select
+              id="category"
+              v-model="filters.selectCatName"
+              :options="options"
+              @change="selectCat"
             >
-              <b-form-checkbox value="id">Product Code</b-form-checkbox>
-              <b-form-checkbox value="product_name">
-                Product Name
-              </b-form-checkbox>
-            </b-form-checkbox-group>
+              <template #first>
+                <b-form-select-option :value="null">
+                  -- Select a category --</b-form-select-option
+                >
+              </template>
+            </b-form-select>
           </b-form-group>
         </div>
+
         <div class="col-12">
           <b-table
+            ref="table"
             class="table mb-2"
             :bordered="table.bordered"
             :hover="true"
@@ -111,6 +114,8 @@
             :sort-by.sync="table.sortBy"
             :sort-desc.sync="table.sortDesc"
             sort-icon-left
+            empty-text="No data to available."
+            show-empty
           >
             <template #cell(actions)="row">
               <b-button size="sm" @click="row.toggleDetails">
@@ -123,6 +128,9 @@
               >
                 Edit
               </b-button>
+            </template>
+            <template v-slot:empty="scope">
+              <h3 class="text-center">{{ scope.emptyText }}</h3>
             </template>
             <template #row-details="row">
               <b-card>
@@ -140,48 +148,96 @@
                     <strong>{{ row.item.description }}</strong>
                   </li>
                   <li>
-                    Original Price :
-                    <strong>{{ row.item.orig_price }}</strong>
+                    Unit Price :
+                    <strong>{{ row.item.unit_price }}</strong>
+                  </li>
+                  <li>
+                    Markup Price :
+                    <strong>{{ row.item.markup_price }}</strong>
                   </li>
                   <li>
                     SRP :
                     <strong>{{ row.item.SRP }}</strong>
                   </li>
-                  <li>
-                    RSP :
-                    <strong>{{ row.item.reseller_price }}</strong>
-                  </li>
+
                   <li>
                     Category :
                     <strong>{{ row.item.category_name }}</strong>
                   </li>
-                  <li>
-                    Net Weight :
-                    <strong>{{ row.item.weight }}</strong>
-                  </li>
+
                   <li>
                     Stock Onhand :
                     <strong>{{ row.item.stock_onhand }}</strong>
+                  </li>
+                  <li>
+                    Is Active :
+                    <strong>{{ row.item.isActive }}</strong>
                   </li>
                 </ul>
               </b-card>
             </template>
           </b-table>
-          <div class="col-12 errorTable" v-if="this.errorInList">
+          <!-- <div class="col-12 errorTable" v-if="this.errorInList">
             <h3 class="mb-0">{{ this.errorInList }}</h3>
-          </div>
+          </div> -->
+        </div>
+        <div class="col-12">
+          <b-row md="3">
+            <b-col cols="12">
+              <b-pagination
+                v-model="table.currentPage"
+                :total-rows="rows"
+                :per-page="table.perPage"
+              >
+              </b-pagination>
+            </b-col>
+          </b-row>
         </div>
       </div>
     </b-overlay>
+    <b-modal
+      hide-footer
+      :id="addProductModal.id"
+      title="ADD PRODUCT"
+      @hide="reseteditDistModal"
+      ref="addProductModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="md"
+    >
+      <AddProduct :categories="this.categories" @clicked="addProdSuccess" />
+    </b-modal>
+    <b-modal
+      hide-footer
+      :id="addProductModal.id"
+      title="PRODUCT DETAILS"
+      @hide="reseteditDistModal"
+      ref="productDetailsModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="md"
+    >
+      <ProductDetails
+        :product="this.productDetails"
+        @clicked="addProdSuccess"
+      />
+    </b-modal>
   </section>
 </template>
 
 <script>
 /* eslint-disable */
 import { mapActions, mapGetters } from "vuex";
+import axios from "axios";
+import AddProduct from "../manageProducts/ProductModal/AddProduct";
+import ProductDetails from "../manageProducts/ProductModal/ProductDetails";
 
 export default {
   name: "ProductsTab",
+  components: {
+    AddProduct,
+    ProductDetails
+  },
   data() {
     return {
       overlay: {
@@ -190,8 +246,17 @@ export default {
         opacity: 0.89,
         blur: "2px"
       },
+      modal: {
+        headerBgVariant: "dark",
+        headerTextVariant: "light"
+      },
+      filters: {
+        search: "",
+        selectCatName: ""
+      },
       table: {
         filter: "",
+        secondFilter: "",
         headVariant: "dark",
         sortDesc: true,
         bordered: true,
@@ -199,7 +264,7 @@ export default {
         perPage: 5,
         currentPage: 1,
         isBusy: false,
-        sortBy: "prodId._id",
+        sortBy: "product_name",
         pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
         fields: [
           {
@@ -212,57 +277,149 @@ export default {
             label: "Products Name",
             sortable: true
           },
-          // {
-          //   key: "prodId.description",
-          //   label: "Products Description",
-          //   sortable: false
-          // },
+          {
+            key: "category_name",
+            label: "Category",
+            sortable: false
+          },
           { key: "actions", label: "Actions", thStyle: { width: "20%" } }
         ],
-        products: [],
         filterOn: [],
-        sortDirection: "asc"
+        sortDirection: "desc"
       },
       errorInList: "",
-      products: []
+      productDetails: [],
+      products: [],
+      categories: [],
+      options: [],
+      categorySelect: "",
+      addProductModal: {
+        id: "info-modal",
+        title: "",
+        content: {}
+      }
     };
   },
   mounted() {
-    // this.table.products = ;
     this.getProductList();
+    this.getCategoryList();
   },
   computed: {
+    rows() {
+      return this.products.length;
+    },
     listOfProducts() {
       return this.$store.state.productDetails.productList;
     }
   },
   methods: {
-    ...mapActions(["productList"]),
+    ...mapActions(["productList", "categoryList"]),
     ...mapGetters(["productListGetter"]),
-    async getProductList() {
-      const result = await this.productList();
-      if (result.success === false) {
-        this.errorInList = result.msg;
-      } else {
-        this.table.products = this.listOfProducts;
-        this.listOfProducts.forEach(prod => {
-          this.products.push({
-            id: prod.prodId._id,
-            product_name: prod.prodId.product_name,
-            description: prod.prodId.description,
-            orig_price: prod.prodId.orig_price,
-            SRP: prod.prodId.SRP,
-            reseller_price: prod.prodId.reseller_price,
-            category_name: prod.prodId.category.category_name,
-            weight: prod.prodId.weight,
-            stock_onhand: prod.stock_onhand
+    async getCategoryList() {
+      const res = await this.categoryList();
+      if (res.data.success == true) {
+        this.categories = res.data.categories;
+        res.data.categories.forEach(data => {
+          this.options.push({
+            value: data._id,
+            text: data.category_name
           });
         });
       }
     },
+
+    async getProductList() {
+      const result = await this.productList();
+      if (result.success === false) {
+        //this.errorInList = result.msg;
+      } else {
+        this.products = await this.prodList();
+        return;
+      }
+    },
+    addProduct() {
+      this.$refs["addProductModal"].show();
+    },
+    addProdSuccess() {
+      this.$refs["addProductModal"].hide();
+      this.overlay.show = true;
+      setTimeout(() => {
+        this.getProductList();
+        this.getProdDetails();
+        this.$refs.table.refresh();
+        this.$refs["productDetailsModal"].show();
+        this.overlay.show = false;
+        this.$toast.success("Successfully Saved.", {
+          rtl: false,
+          timeOut: 2000,
+          closeable: true
+        });
+      }, 2000);
+    },
+    getProdDetails() {
+      const newP = this.$store.state.productDetails.newProduct;
+      const prod = {
+        productId: newP.prodId._id,
+        productName: newP.prodId.product_name,
+        description: newP.prodId.description,
+        category: newP.prodId.category.category_name,
+        unit_price: newP.prodId.unit_price,
+        markup_price: newP.prodId.markup_price,
+        srp: newP.prodId.SRP,
+        stock_onhand: newP.stock_onhand,
+        isActive: newP.prodId.isActive
+      };
+      this.productDetails = prod;
+    },
     edit(item, index) {
       console.log("item", item.id);
       console.log("index", index);
+    },
+    reseteditDistModal() {
+      this.addProductModal.title = "";
+      this.addProductModal.content = "";
+    },
+
+    async selectCat(e) {
+      try {
+        const id = this.filters.selectCatName;
+        const arr = [];
+
+        if (id === null) {
+          this.products = await this.prodList();
+          return;
+        }
+
+        let filteredItems = await this.prodList();
+        filteredItems = filteredItems.filter(product =>
+          product.category_id.match(id)
+        );
+        this.products = filteredItems;
+      } catch (err) {
+        let json = '{"msg": "No records available!", "success": false }';
+        let msg = JSON.parse(json);
+        return msg;
+      }
+    },
+
+    async prodList(product) {
+      const arr = [];
+      this.listOfProducts.forEach(async prod => {
+        await arr.push({
+          id: prod.prodId._id,
+          product_name: prod.prodId.product_name,
+          description: prod.prodId.description,
+          unit_price: prod.prodId.unit_price,
+          SRP: prod.prodId.SRP,
+          markup_price: prod.prodId.markup_price,
+          category_name: prod.prodId.category.category_name,
+          category_id: prod.prodId.category._id,
+          stock_onhand: prod.stock_onhand,
+          isActive: prod.prodId.isActive
+        });
+      });
+
+      return arr;
     }
   }
 };

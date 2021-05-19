@@ -20,6 +20,7 @@ import {
 } from "vee-validate";
 import * as rules from "vee-validate/dist/rules";
 import en from "vee-validate/dist/locale/en.json";
+import * as VeeValidate from "vee-validate";
 
 // install rules and localization
 Object.keys(rules).forEach(rule => {
@@ -31,8 +32,21 @@ localize("en", en);
 Vue.component("ValidationObserver", ValidationObserver);
 Vue.component("ValidationProvider", ValidationProvider);
 
+Vue.use(VeeValidate, {
+  validity: true,
+  classes: true,
+  classNames: {
+    valid: "is-valid",
+    invalid: "is-invalid"
+  }
+});
+
+//para sa pera hehe
+import money from "v-money";
+Vue.use(money, { precision: 4 });
+
 import store from "./store/index";
-import vueSlideBarMin from "vue-slide-bar";
+
 // eslint-disable-next-line
 let $ = JQuery;
 
@@ -40,16 +54,6 @@ const options = {
   confirmButtonColor: "#41b882",
   cancelButtonColor: "#ff7674"
 };
-
-// Install VeeValidate rules and localization
-// Object.keys(rules).forEach(rule => {
-//   extend(rule, rules[rule]);
-// });
-
-// localize("en", en);
-
-// Install VeeValidate components globally
-// Vue.component("ValidationObserver", ValidationObserver);
 
 Vue.use(BootstrapVue);
 Vue.use(OverlayPlugin);

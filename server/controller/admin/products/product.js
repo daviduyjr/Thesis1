@@ -46,15 +46,12 @@ module.exports = {
   addProduct: async (req, res, next) => {
     try {
       const prod = {
-        _id: req.body.id,
-        product_name: req.body.product_name,
-        orig_price: req.body.orig_price,
-        SRP: req.body.SRP,
-        reseller_price: req.body.reseller_price,
-        description: req.body.description,
-        category: req.body.category,
-        weight: req.body.weight,
-        quantity: req.body.quantity,
+        product_name: req.body.product.product_name,
+        unit_price: req.body.product.unit_price,
+        markup_price: req.body.product.markup_price,
+        SRP: req.body.product.SRP,
+        description: req.body.product.description,
+        category: req.body.product.category,
       };
 
       const findProduct = await ProductDetails.findOne({
@@ -71,34 +68,35 @@ module.exports = {
       const newProduct = new ProductDetails({
         _id: ProductCodeTeset,
         product_name: prod.product_name.toUpperCase(),
-        orig_price: prod.orig_price,
+        unit_price: prod.unit_price,
+        markup_price: prod.markup_price,
         SRP: prod.SRP,
-        reseller_price: prod.reseller_price,
         description: prod.description,
         category: prod.category,
-        weight: prod.weight,
         date_updated: Date.now(),
       });
 
       const newProductInventory = new ProductInventory({
         prodId: newProduct._id,
-        stock_onhand: prod.quantity,
+        stock_onhand: 0,
       });
 
-      await newProductInventory.save(async (err, data) => {
-        if (err) {
-          res
-            .status(400)
-            .json({ msg: 'Something Went Wrong In Product Inventory', success: false });
-        } else {
-          await newProduct.save().then((prod) => {
-            res.status(200).json({
-              success: true,
-              message: 'Succesfully Saved',
-              product: prod,
-            });
-          });
-        }
+      const prodInvtSaved = await newProductInventory.save().then((prodInt) => {
+        return prodInt;
+      });
+
+      await newProduct.save().then(async (prod) => {
+        const productNew = await ProductInventory.findById({ _id: prodInvtSaved._id }).populate({
+          path: 'prodId',
+          model: ProductDetails,
+          populate: { path: 'category', select: 'category_name', model: Category },
+        });
+
+        res.status(200).json({
+          success: true,
+          message: 'Succesfully Saved',
+          product: productNew,
+        });
       });
     } catch (err) {
       res.status(400).json({ msg: err, success: false });

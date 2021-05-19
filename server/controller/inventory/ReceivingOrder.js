@@ -14,7 +14,7 @@ module.exports = {
       populate: { path: 'product', select: 'product_name', model: ProductDetails },
     });
 
-    res.status(200).json({ result: RO });
+    res.status(200).json({ result: RO, success: true });
   },
 
   addRecievingOrder: async (req, res, next) => {
@@ -53,7 +53,7 @@ module.exports = {
           path: 'receiving_products',
           populate: { path: 'product', select: 'product_name', model: ProductDetails },
         });
-        res.status(200).json({ result: RO });
+        res.status(200).json({ result: RO, success: true });
       }, 1000);
     });
   },

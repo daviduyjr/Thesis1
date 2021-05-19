@@ -14,6 +14,8 @@ import buttons from "../views/basic-elements/buttons";
 
 import login from "../views/samples/user-pages/login";
 
+//POS
+import MainPOSVIEW from "../views/admin/POS/MainPOSView";
 // admin
 import adminProfile from "../views/admin/profile.admin";
 import usersList from "@/views/admin/usersList";
@@ -22,6 +24,8 @@ import userinfo from "@/components/admin/manageUser/user.profile";
 import editProfile from "@/views/admin/editProfile";
 import CategoriesView from "@/views/admin/manageProdView/CategoriesView";
 import productTabsView from "@/views/admin/manageProdView/productsTabsView";
+import receivingOrderView from "@/views/admin/inventory/ReceivingOrder";
+import distCustView from "../views/admin/Customer/CustomerView";
 
 // user
 import userProfile from "../views/user/userProfile";
@@ -42,6 +46,11 @@ const router = new Router({
       redirect: "/dashboard",
       component: mainView,
       children: [
+        {
+          path: "/POS",
+          name: "mainViewPOS",
+          component: MainPOSVIEW
+        },
         {
           path: "/dashboard",
           name: "dashboard",
@@ -97,6 +106,15 @@ const router = new Router({
           }
         },
         {
+          path: "/Customer",
+          name: "distCustView  ",
+          component: distCustView,
+          meta: {
+            requiresAuth: true,
+            requiresOnlyAdmin: true
+          }
+        },
+        {
           path: "/categories",
           name: "CategoriesView",
           component: CategoriesView,
@@ -109,6 +127,15 @@ const router = new Router({
           path: "/ManageRecords",
           name: "productTabsView",
           component: productTabsView,
+          meta: {
+            requiresAuth: true,
+            requiresOnlyAdmin: true
+          }
+        },
+        {
+          path: "/ReceivingOrders",
+          name: "receivingOrderView",
+          component: receivingOrderView,
           meta: {
             requiresAuth: true,
             requiresOnlyAdmin: true

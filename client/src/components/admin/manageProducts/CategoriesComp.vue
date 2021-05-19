@@ -350,19 +350,13 @@ export default {
 
     async getCatList() {
       //pang kuha ng list ng category
+      const res = await this.categoryList();
       this.isBusy = true;
-      axios
-        .get("http://localhost:5000/api/admin/categoryList")
-        .then(({ data }) => {
-          this.isBusy = false;
-          if (data.categories.lenght === 0) {
-            alert("no data");
-          }
-          this.categories = data.categories;
-        })
-        .catch(err => {
-          console.log("may error");
-        });
+      if (res.data.success == true) {
+        this.categories = res.data.categories;
+      } else {
+        console.log("error");
+      }
     },
     // start ng pang add and edit
 

@@ -7,6 +7,7 @@ import manageUser from "../Warehouse/admin/manageUser";
 import manageCategory from "../Warehouse/admin/manageCategory";
 import manageDistributor from "../Warehouse/admin/manageDistributor";
 import productDetails from "../Warehouse/admin/productDetails";
+import receivingOrder from "../Warehouse/admin/inventory/receivingOrder";
 
 Vue.use(Vuex);
 
@@ -16,7 +17,8 @@ export default new Vuex.Store({
     manageUser,
     manageCategory,
     manageDistributor,
-    productDetails
+    productDetails,
+    receivingOrder
   },
   state: {},
   mutations: {},

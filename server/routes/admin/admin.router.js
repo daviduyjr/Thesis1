@@ -46,24 +46,49 @@ router.put(
 );
 
 ///para sa distributors
-router.get('/distributorList', passportSignIn, adminDistributorController.distributorList);
+router.get(
+  '/distributorList',
+  passportSignIn,
+  adminController.grantAccess('readAny', 'distributor'),
+  adminDistributorController.distributorList
+);
 
-router.post('/addDistributor', passportSignIn, adminDistributorController.addDistributor);
+router.post(
+  '/addDistributor',
+  passportSignIn,
+  adminController.grantAccess('createAny', 'distributor'),
+  adminDistributorController.addDistributor
+);
 
-router.put('/updateDistributor', adminDistributorController.updateDistributor);
+router.put(
+  '/updateDistributor',
+  passportSignIn,
+  adminController.grantAccess('updateAny', 'distributor'),
+  adminDistributorController.updateDistributor
+);
 
 /// para sa productDetails
-router.post('/addProduct', adminProductController.addProduct);
+router.post(
+  '/addProduct',
+  passportSignIn,
+  adminController.grantAccess('createAny', 'products'),
+  adminProductController.addProduct
+);
 
-router.get('/productList', adminProductController.productList);
+router.get(
+  '/productList',
+  passportSignIn,
+  adminController.grantAccess('readAny', 'products'),
+  adminProductController.productList
+);
 
 // para sa product inventory
 
-router.get('/productInventory', adminProductController.productInventory);
+router.get('/productInventory', passportSignIn, adminProductController.productInventory);
 
 // para sa receiving order
-router.post('/addRecievingOrder', inventoryController.addRecievingOrder);
+router.post('/addRecievingOrder', passportSignIn, inventoryController.addRecievingOrder);
 
-router.get('/getReceivingOrderList', inventoryController.getReceivingOrderList);
+router.get('/getReceivingOrderList', passportSignIn, inventoryController.getReceivingOrderList);
 
 module.exports = router;

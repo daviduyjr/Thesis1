@@ -11,18 +11,19 @@ const productDetailsSchema = new Schema({
     type: String,
     required: true,
   },
-  orig_price: {
-    type: Number,
+  unit_price: {
+    type: String,
+    required: true,
+  },
+  markup_price: {
+    type: String,
     required: true,
   },
   SRP: {
-    type: Number,
+    type: String,
     required: true,
   },
-  reseller_price: {
-    type: Number,
-    required: true,
-  },
+
   description: {
     type: String,
     required: true,
@@ -31,10 +32,10 @@ const productDetailsSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'category',
   },
-  weight: {
-    type: String,
-    required: true,
-  },
+  // weight: {
+  //   type: String,
+  //   required: true,
+  // },
 
   isActive: {
     type: String,

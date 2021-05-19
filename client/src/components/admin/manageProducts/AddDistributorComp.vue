@@ -194,6 +194,9 @@ export default {
       if (result.data.success == false) {
         this.errMsg = result.data.msg;
       }
+    },
+    check() {
+      console.log("check");
     }
   }
 };

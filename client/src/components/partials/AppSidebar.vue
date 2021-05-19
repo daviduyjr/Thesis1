@@ -23,6 +23,12 @@
         <li class="nav-item nav-category">Main Menu</li>
         <!-- Para sa admin to -->
         <li class="nav-item">
+          <a href="/#/POS" class="nav-link">
+            <i class="menu-icon typcn typcn-document-add"></i>
+            <span class="menu-title">POS</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" v-b-toggle="'dashboard-dropdown'">
             <i class="menu-icon typcn typcn-document-text"></i>
             <span class="menu-title">Dashboard</span>
@@ -68,6 +74,29 @@
             </ul>
           </b-collapse>
         </li>
+        <li class="nav-item" v-if="isAdmin">
+          <a class="nav-link" v-b-toggle="'inventory'">
+            <i class="menu-icon typcn typcn-document-add"></i>
+            <span class="menu-title">Inventory</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <b-collapse id="inventory" v-if="user">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item">
+                <router-link class="nav-link" to="/ReceivingOrders"
+                  >Recieving Order</router-link
+                >
+              </li>
+            </ul>
+          </b-collapse>
+        </li>
+        <li class="nav-item" v-if="isAdmin">
+          <a href="/#/Customer" class="nav-link">
+            <i class="menu-icon typcn typcn-document-add"></i>
+            <span class="menu-title">Customer</span>
+          </a>
+        </li>
+
         <!-- Para sa Supervisor to -->
         <li class="nav-item" v-if="isSupervisor">
           <a class="nav-link" v-b-toggle="'SV'">

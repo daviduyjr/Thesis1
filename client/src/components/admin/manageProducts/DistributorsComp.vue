@@ -88,6 +88,8 @@
               :sort-by.sync="table.sortBy"
               :sort-desc.sync="table.sortDesc"
               sort-icon-left
+              empty-text="No data to available."
+              show-empty
             >
               <template #cell(actions)="row">
                 <b-button size="sm" @click="row.toggleDetails">
@@ -100,6 +102,9 @@
                 >
                   Edit
                 </b-button>
+              </template>
+              <template v-slot:empty="scope">
+                <h3 class="text-center">{{ scope.emptyText }}</h3>
               </template>
               <template #row-details="row">
                 <b-card>
