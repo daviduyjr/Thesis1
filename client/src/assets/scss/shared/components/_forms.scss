@@ -6,7 +6,7 @@
   color: $input-placeholder-color;
   width: auto;
   border: none;
-
+  height: 38px;
   .input-group-text {
     background: transparent;
     border-color: $border-color;
@@ -19,20 +19,31 @@
   font-family: $type-1;
   font-size: $input-font-size;
   color: $body-color;
-  padding: 0 .75rem;
+  padding: 0 0.75rem;
   line-height: 14px;
   font-weight: 300;
-  height: 45px;
+  height: 38px;
 
   &.form-control-lg {
-    padding: $input-btn-padding-y-lg .75rem;
+    padding: $input-btn-padding-y-lg 0.75rem;
   }
 
   &.form-control-sm {
-    padding: $input-btn-padding-y-sm .75rem;
+    padding: $input-btn-padding-y-sm 0.75rem;
   }
 }
-
+.inputOrderList {
+  display: inline-block;
+  border: 1px solid $border-color;
+  font-family: $type-1;
+  font-size: $input-font-size;
+  color: $body-color;
+  padding: 0 0.75rem;
+  line-height: 14px;
+  font-weight: 300;
+  height: 32px;
+  //width: 193px;
+}
 textarea.form-control {
   height: auto;
   padding-top: 1rem;

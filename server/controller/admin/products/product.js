@@ -30,8 +30,22 @@ module.exports = {
         model: ProductDetails,
         populate: { path: 'category', select: 'category_name', model: Category },
       });
-      //const products = await ProductDetails.find().populate('category');
-
+      // const products = await ProductInventory.aggregate([
+      //   {
+      //     $lookup: {
+      //       from: 'productdetails',
+      //       localField: 'prodId',
+      //       foreignField: '_id',
+      //       as: 'product',
+      //     },
+      //   },
+      //   {
+      //     $unwind: '$product',
+      //   },
+      //   {
+      //     $match: { 'product.isActive': 'Yes' },
+      //   },
+      // ]);
       if (products.length === 0) {
         res.status(400).json({ msg: 'No data available', success: false });
       } else {
@@ -43,6 +57,41 @@ module.exports = {
     }
   },
 
+  productListPOS: async (req, res, next) => {
+    try {
+      const products = await ProductInventory.aggregate([
+        {
+          $lookup: {
+            from: 'productdetails',
+            localField: 'prodId',
+            foreignField: '_id',
+            as: 'product',
+          },
+        },
+        { $unwind: '$product' },
+        {
+          $lookup: {
+            from: 'categories',
+            localField: 'product.category',
+            foreignField: '_id',
+            as: 'product.category',
+          },
+        },
+        {
+          $match: { 'product.isActive': 'Yes' },
+        },
+      ]);
+
+      if (products.length === 0) {
+        res.status(400).json({ msg: 'No data available', success: false });
+      } else {
+        res.status(200).json({ products: products, success: true });
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ msg: err, success: false });
+    }
+  },
   addProduct: async (req, res, next) => {
     try {
       const prod = {
@@ -59,9 +108,7 @@ module.exports = {
       });
 
       if (findProduct) {
-        return res
-          .status(400)
-          .json({ msg: `Product Name ${findProduct.product_name} already exist`, success: false });
+        return res.status(400).json({ msg: `Product Name ${findProduct.product_name} already exist`, success: false });
       }
       const ProductCodeTeset = await prodCode(prod.category);
 
@@ -122,22 +169,17 @@ var prodCode = async (catid) => {
     const catAbbv = cat.category_abbreviation;
 
     const prod = await new Promise((resolve, reject) => {
-      Counter.findOneAndUpdate(
-        { id: catAbbv },
-        { $inc: { seq: 1 } },
-        { new: true, useFindAndModify: false },
-        (error, result) => {
-          if (error) {
-            console.error(JSON.stringify(error));
-            return reject(error);
-          }
-
-          const prodId = result.id;
-
-          const newproductCode = `${prodId}-0${result.seq}`;
-          resolve(newproductCode);
+      Counter.findOneAndUpdate({ id: catAbbv }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false }, (error, result) => {
+        if (error) {
+          console.error(JSON.stringify(error));
+          return reject(error);
         }
-      );
+
+        const prodId = result.id;
+
+        const newproductCode = `${prodId}-0${result.seq}`;
+        resolve(newproductCode);
+      });
     });
 
     return prod;

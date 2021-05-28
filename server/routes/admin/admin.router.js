@@ -14,12 +14,7 @@ router.route('/profile').get(passportSignIn, adminController.profile);
 
 router.get('/usersList', passportSignIn, adminController.usersList);
 
-router.post(
-  '/register',
-  passportSignIn,
-  adminController.grantAccess('createAny', 'profile'),
-  adminController.register
-);
+router.post('/register', passportSignIn, adminController.grantAccess('createAny', 'profile'), adminController.register);
 // router.post('/register', adminController.register);
 
 router.put(
@@ -38,27 +33,12 @@ router.get('/categoryList', passportSignIn, adminCategoryController.categoryList
 // router.post('/addCategory', passportSignIn, adminController.grantAccess('createAny', 'category'), adminCategoryController.addCategory);
 router.post('/addCategory', adminCategoryController.addCategory);
 
-router.put(
-  '/updateCategoryName',
-  passportSignIn,
-  adminController.grantAccess('updateAny', 'category'),
-  adminCategoryController.updateCategoryName
-);
+router.put('/updateCategoryName', passportSignIn, adminController.grantAccess('updateAny', 'category'), adminCategoryController.updateCategoryName);
 
 ///para sa distributors
-router.get(
-  '/distributorList',
-  passportSignIn,
-  adminController.grantAccess('readAny', 'distributor'),
-  adminDistributorController.distributorList
-);
+router.get('/distributorList', passportSignIn, adminController.grantAccess('readAny', 'distributor'), adminDistributorController.distributorList);
 
-router.post(
-  '/addDistributor',
-  passportSignIn,
-  adminController.grantAccess('createAny', 'distributor'),
-  adminDistributorController.addDistributor
-);
+router.post('/addDistributor', passportSignIn, adminController.grantAccess('createAny', 'distributor'), adminDistributorController.addDistributor);
 
 router.put(
   '/updateDistributor',
@@ -68,19 +48,11 @@ router.put(
 );
 
 /// para sa productDetails
-router.post(
-  '/addProduct',
-  passportSignIn,
-  adminController.grantAccess('createAny', 'products'),
-  adminProductController.addProduct
-);
+router.post('/addProduct', passportSignIn, adminController.grantAccess('createAny', 'products'), adminProductController.addProduct);
 
-router.get(
-  '/productList',
-  passportSignIn,
-  adminController.grantAccess('readAny', 'products'),
-  adminProductController.productList
-);
+router.get('/productList', passportSignIn, adminController.grantAccess('readAny', 'products'), adminProductController.productList);
+
+router.get('/productListPOS', passportSignIn, adminController.grantAccess('readAny', 'products'), adminProductController.productListPOS);
 
 // para sa product inventory
 

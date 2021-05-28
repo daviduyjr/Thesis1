@@ -8,6 +8,7 @@ import manageCategory from "../Warehouse/admin/manageCategory";
 import manageDistributor from "../Warehouse/admin/manageDistributor";
 import productDetails from "../Warehouse/admin/productDetails";
 import receivingOrder from "../Warehouse/admin/inventory/receivingOrder";
+import POS from "../Warehouse/POS/POS";
 
 Vue.use(Vuex);
 
@@ -18,7 +19,8 @@ export default new Vuex.Store({
     manageCategory,
     manageDistributor,
     productDetails,
-    receivingOrder
+    receivingOrder,
+    POS
   },
   state: {},
   mutations: {},

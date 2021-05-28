@@ -31,7 +31,10 @@ const productDetailsSchema = new Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'category',
+    // type: String,
+    // required: true,
   },
+
   // weight: {
   //   type: String,
   //   required: true,

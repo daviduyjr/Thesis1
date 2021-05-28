@@ -293,6 +293,7 @@ export default {
     srpTotal() {
       const unit = this.unit_price;
       const markup = this.markup_price;
+      console.log(unit.replace(/\D+/g, ""));
       const total =
         Number(unit.replace(/\D+/g, "")) + Number(markup.replace(/\D+/g, ""));
 

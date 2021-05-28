@@ -8,9 +8,14 @@
             <div class="card-body">
               <h2 class="card-title text-center">P.O.S</h2>
               <div class="row">
-                <div class="col-7"></div>
-                <div class="col-5" style="border: 1px">
-                  <ProductListPOS />
+                <div class="col-7">
+                  <OrderList :toOrder="this.toOrder" />
+                </div>
+                <div
+                  class="col-5"
+                  style="padding-left: 0px; padding-right: 0px;"
+                >
+                  <ProductListPOS @clicked="addOrder" />
                 </div>
               </div>
             </div>
@@ -24,10 +29,41 @@
 <script>
 /* eslint-disable */
 import ProductListPOS from "../../../components/POS/ProductListPOS.vue";
-
+import OrderList from "../../../components/POS/OrderList";
 export default {
   name: "mainViewPOS",
-  components: { ProductListPOS }
+  data() {
+    return {
+      toOrder: [],
+      confirmExit: ""
+    };
+  },
+  components: { ProductListPOS, OrderList },
+  methods: {
+    addOrder(addOrder) {
+      this.toOrder.push(addOrder);
+      //console.log("toOrder", this.toOrder);
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    this.$bvModal
+      .msgBoxConfirm("Do you really want to leave? you have unsaved changes!", {
+        title: "Please Confirm",
+        okVariant: "danger",
+        centered: true
+      })
+      .then(value => {
+        this.confirmExit = value;
+        if (value == true) {
+          next();
+        } else {
+          next(false);
+        }
+      })
+      .catch(err => {
+        // An error occurred
+      });
+  }
 };
 </script>
 

@@ -55,6 +55,8 @@ const options = {
   cancelButtonColor: "#ff7674"
 };
 
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap-vue/dist/bootstrap-vue.css";
 Vue.use(BootstrapVue);
 Vue.use(OverlayPlugin);
 Vue.use(IconsPlugin);

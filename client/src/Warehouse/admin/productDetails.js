@@ -28,6 +28,7 @@ const actions = {
       let res = await axios.get("http://localhost:5000/api/admin/productList");
 
       commit("PRODUCT_LIST_RESULT", res.data.products);
+      debugger;
       return res;
     } catch (err) {
       let json = '{"msg": "No records available!", "success": false }';

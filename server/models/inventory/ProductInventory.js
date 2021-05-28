@@ -3,10 +3,10 @@ const Schema = mongoose.Schema;
 
 const productInventorySchema = new Schema({
   prodId: {
-    // type: mongoose.Schema.Types.ObjectId,
-    // ref: 'productDetails',
-    type: String,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'productDetails',
+    // type: String,
+    // required: true,
   },
   stock_onhand: {
     type: String,

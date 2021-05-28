@@ -85,11 +85,6 @@
               :options="options"
               @change="selectCat"
             >
-              <template #first>
-                <b-form-select-option :value="null">
-                  -- Select a category --</b-form-select-option
-                >
-              </template>
             </b-form-select>
           </b-form-group>
         </div>
@@ -291,7 +286,7 @@ export default {
       productDetails: [],
       products: [],
       categories: [],
-      options: [],
+      options: [{ value: "", text: "Searh Category" }],
       categorySelect: "",
       addProductModal: {
         id: "info-modal",

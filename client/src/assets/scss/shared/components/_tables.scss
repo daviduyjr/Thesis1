@@ -62,7 +62,7 @@
 
     .form-check {
       .form-check-label {
-        input:checked+.input-helper {
+        input:checked + .input-helper {
           &:after {
             line-height: 1px;
           }
@@ -70,6 +70,34 @@
       }
     }
   }
+
+  &.table-sm {
+    th {
+      vertical-align: middle;
+      font-size: $default-font-size;
+      line-height: 1;
+      white-space: nowrap;
+      height: 35px;
+    }
+
+    td {
+      padding: $table-cell-padding-sm;
+      //padding: 0px, 0px, 0px, 0px;
+    }
+  }
+  // &.productListTable {
+  //   th {
+  //     vertical-align: middle;
+  //     font-size: $default-font-size;
+  //     line-height: 1;
+  //     white-space: nowrap;
+  //     height: 35px;
+  //   }
+
+  //   td {
+  //     padding: 0px, 0px, 0px, 0px;
+  //   }
+  // }
 
   &.table-borderless {
     border: none;
@@ -138,11 +166,9 @@
   }
 
   &.table-stretched {
-
     thead,
     tbody {
       tr {
-
         th,
         td {
           &:first-child {

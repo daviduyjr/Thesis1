@@ -353,6 +353,7 @@ export default {
       const res = await this.categoryList();
       this.isBusy = true;
       if (res.data.success == true) {
+        this.isBusy = false;
         this.categories = res.data.categories;
       } else {
         console.log("error");
