@@ -2,13 +2,14 @@
   <section>
     <div class="card cardProdList">
       <div class="card-body cardBody w-100">
-        <h2 class="card-title text-center">PRODUCTS</h2>
+        <h2 class="card-title text-center mb-1">PRODUCTS</h2>
         <div class="row">
           <div class="col-12">
             <div class="row">
               <div class="col-6">
                 <div class="form-group">
-                  <label for="filter-input">Filter</label>
+                  <!-- <label for="filter-input">Filter</label> -->
+                  <small class="text-muted">Filter</small>
                   <b-input-group size="sm">
                     <b-form-input
                       v-model="table.filter"
@@ -31,7 +32,7 @@
               </div>
               <div class="col-6">
                 <div class="form-group">
-                  <label for="category">Category</label>
+                  <small class="text-muted">Category</small>
                   <b-form-select
                     id="category"
                     v-model="filters.selectCatName"
@@ -230,13 +231,19 @@ export default {
           {
             key: "id",
             label: "Item Code",
-            sortable: true
-            //thStyle: { width: "10%" }
+            sortable: true,
+            thStyle: { width: "10%" }
           },
           {
             key: "product_name",
             label: "Products Name",
             sortable: true
+            // thStyle: { width: "70%" }
+          },
+          {
+            key: "category_name",
+            label: "Category",
+            sortable: false
             // thStyle: { width: "70%" }
           },
           {

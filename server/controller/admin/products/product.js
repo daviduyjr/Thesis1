@@ -81,11 +81,15 @@ module.exports = {
           $match: { 'product.isActive': 'Yes' },
         },
       ]);
+      // const orderNum = await orderNo();
+      const newOr = await Counter.findOne({ id: 'orderNo' });
 
+      const orderNum = `0${newOr.seq}`;
+      console.log(orderNum);
       if (products.length === 0) {
         res.status(400).json({ msg: 'No data available', success: false });
       } else {
-        res.status(200).json({ products: products, success: true });
+        res.status(200).json({ products: products, orderNo: orderNum, success: true });
       }
     } catch (err) {
       console.log(err);
@@ -183,6 +187,36 @@ var prodCode = async (catid) => {
     });
 
     return prod;
+  } catch (err) {
+    return err;
+  }
+};
+
+var orderNo = async (orderno) => {
+  try {
+    const orderNoId = 'orderNo';
+    const orderNo = 0;
+    //check kung may orderNo na sa db, pag wala gumawa ng bago
+
+    const latestOrderId = await new Promise((resolve, reject) => {
+      Counter.findOneAndUpdate({ id: orderNoId }, { $inc: { seq: 1 } }, { new: true, useFindAndModify: false }, async (error, result) => {
+        if (error) {
+          console.error(JSON.stringify(error));
+          return reject(error);
+        }
+        if (!result) {
+          c = await new Counter({ id: orderNoId, seq: 1 });
+          await c.save();
+        }
+        const newOr = await Counter.findOne({ id: orderNoId });
+        const orderId = newOr.id;
+
+        const newOrderIdCode = `0${newOr.seq}`;
+        resolve(newOrderIdCode);
+      });
+    });
+
+    return latestOrderId;
   } catch (err) {
     return err;
   }

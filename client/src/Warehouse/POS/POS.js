@@ -8,6 +8,7 @@ import axios from "axios";
 // };
 const prodState = () => {
   return {
+    orderNo: "",
     productList: [],
     orderList: []
   };
@@ -22,7 +23,10 @@ const actions = {
         "http://localhost:5000/api/admin/productListPOS"
       );
 
-      commit("PRODUCT_LIST_POS", res.data.products);
+      commit("PRODUCT_LIST_POS", {
+        products: res.data.products,
+        orderNo: res.data.orderNo
+      });
 
       return res;
     } catch (err) {
@@ -50,8 +54,9 @@ const mutations = {
   resetState(state) {
     Object.assign(state, prodState());
   },
-  PRODUCT_LIST_POS(state, products) {
-    state.productList = products;
+  PRODUCT_LIST_POS(state, data) {
+    state.productList = data.products;
+    state.orderNo = data.orderNo;
   },
   SET_ORDER_LIST(state, order) {
     state.orderList.push(order);

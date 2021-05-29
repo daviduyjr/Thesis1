@@ -3,7 +3,17 @@
     <div class="wrapper">
       <div class="card cardProdList" style="height: 542px;">
         <div class="card-body">
-          <h2 class="card-title text-center">ORDER LIST</h2>
+          <div class="row">
+            <div class="col-5 pl-0">
+              <h2 class="orderNo float-left pt-1">Order No. {{ orderNo }}</h2>
+            </div>
+            <div class="col-7">
+              <h2 class="card-title float-left mb-1">
+                ORDER LIST
+              </h2>
+            </div>
+          </div>
+
           <div class="row">
             <div class="col-12">
               <div class="row">
@@ -56,11 +66,11 @@
             </div>
             <div class="col-12">
               <div class="row">
-                <div class="col-6">adsf</div>
+                <div class="col-6"></div>
                 <div class="col-6">
                   <div class="form-group row">
                     <label class="col-sm-6 col-form-label" for="subTotal"
-                      >Sub-total</label
+                      >VAT Sales</label
                     >
                     <div class="col-sm-6">
                       <input
@@ -151,6 +161,7 @@ export default {
   data() {
     return {
       formIsNotSaved: false,
+      orderNo: "",
       orders: [],
       subTotal: "",
       VAT: "",
@@ -248,13 +259,15 @@ export default {
           category_name: prod.category_name
         });
       });
+      //let subTotal = subtotalList + VAT;
+      let withOutVAT = (subtotalList / 1.12) * 1;
 
-      let VAT = subtotalList * 0.12;
-      let subTotal = subtotalList - VAT;
-      let TotalAmount = subTotal + VAT;
+      let VAT = subtotalList - withOutVAT;
+      let subtotal = subtotalList - VAT;
+      let TotalAmount = subtotal + VAT;
 
-      console.log(subTotal);
-      this.subTotal = this.convertToPeso(subTotal);
+      //console.log(subTotal);
+      this.subTotal = this.convertToPeso(subtotal);
       this.VAT = this.convertToPeso(VAT);
       this.totalDue = this.convertToPeso(TotalAmount);
       // console.log((minusToSubtotal * 100).toFixed(2));
@@ -272,9 +285,14 @@ export default {
     },
     checkOrder() {
       return this.$store.state.POS.orderList;
+    },
+    orderNoState() {
+      return this.$store.state.POS.orderNo;
     }
   },
-
+  mounted() {
+    this.setOrderNo();
+  },
   methods: {
     ...mapActions(["productList", "categoryList", "removeItem"]),
     convertToPeso(amount) {
@@ -283,6 +301,10 @@ export default {
         currency: "Php"
       });
       return Peso;
+    },
+    setOrderNo() {
+      const orderN = this.orderNoState;
+      this.orderNo = orderN;
     },
     rowClass(item, type) {
       if (item && type === "row") {
@@ -316,6 +338,9 @@ export default {
 
 <style scoped>
 .card-title {
+  font-size: 24px;
+}
+.orderNo {
   font-size: 19px;
 }
 .rowClass {

@@ -51,8 +51,8 @@ router.put(
 router.post('/addProduct', passportSignIn, adminController.grantAccess('createAny', 'products'), adminProductController.addProduct);
 
 router.get('/productList', passportSignIn, adminController.grantAccess('readAny', 'products'), adminProductController.productList);
-
-router.get('/productListPOS', passportSignIn, adminController.grantAccess('readAny', 'products'), adminProductController.productListPOS);
+//passportSignIn, adminController.grantAccess('readAny', 'products'),
+router.get('/productListPOS', adminProductController.productListPOS);
 
 // para sa product inventory
 
