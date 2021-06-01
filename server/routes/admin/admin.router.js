@@ -7,6 +7,7 @@ const adminCategoryController = require('../../controller/admin/products/addCate
 const adminDistributorController = require('../../controller/admin/products/distributor');
 const adminProductController = require('../../controller/admin/products/product');
 const inventoryController = require('../../controller/inventory/ReceivingOrder');
+const customerController = require('../../controller/admin/customer/customer');
 
 const passportSignIn = passport.authenticate('login', { session: false });
 
@@ -63,4 +64,8 @@ router.post('/addRecievingOrder', passportSignIn, inventoryController.addRecievi
 
 router.get('/getReceivingOrderList', passportSignIn, inventoryController.getReceivingOrderList);
 
+//par sa customer
+
+router.get('/customerList', customerController.CustomerList);
+router.post('/addCustomer', customerController.AddCustomer);
 module.exports = router;

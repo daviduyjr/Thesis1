@@ -267,8 +267,8 @@ export default {
     };
   },
   mounted() {
-    this.getProductList();
     this.getCategoryList();
+    this.prodList();
   },
   computed: {
     rows() {
@@ -291,20 +291,10 @@ export default {
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
-    async getProductList() {
-      this.table.isBusy = true;
-      const result = await this.productListPOS();
-      if (result.success === false) {
-        //this.errorInList = result.msg;
-      } else {
-        this.table.isBusy = false;
-        this.products = await this.prodList();
-        return;
-      }
-    },
     async prodList(product) {
       const arr = [];
       let filteredItems = [];
+      this.table.isBusy = true;
       this.productListState.forEach(async prod => {
         await arr.push({
           id: prod.product._id,
@@ -317,9 +307,9 @@ export default {
           isActive: prod.product.isActive
         });
       });
-      // console.log(arr);
-      // filteredItems = arr.filter(product => product.isActive.match("Yes"));
 
+      this.products = arr;
+      this.table.isBusy = false;
       return arr;
     },
     async getCategoryList() {
@@ -343,9 +333,7 @@ export default {
           this.products = await this.prodList();
           return;
         }
-
         let filteredItems = await this.prodList();
-        //console.log(filteredItems);
         filteredItems = filteredItems.filter(product =>
           product.category_id.match(id)
         );

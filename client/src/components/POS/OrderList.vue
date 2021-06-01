@@ -148,6 +148,17 @@
         ></b-icon-exclamation-triangle-fill>
       </div>
     </b-modal>
+    <b-modal
+      hide-footer
+      id="paymentModal"
+      title="Warning!"
+      ref="paymentModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="md"
+    >
+      <PaymentModal />
+    </b-modal>
   </section>
 </template>
 
@@ -155,9 +166,13 @@
 /* eslint-disable */
 import { mapActions } from "vuex";
 import { VMoney } from "v-money";
+
+import PaymentModal from "../POS/PaymentModal";
+
 export default {
   directives: { money: VMoney },
   name: "orderList",
+  components: { PaymentModal },
   data() {
     return {
       formIsNotSaved: false,
@@ -233,6 +248,7 @@ export default {
   },
   watch: {
     checkOrder(val) {
+      console.log("checkOrder");
       let subtotalList = 0;
       this.orders = [];
 
@@ -285,16 +301,22 @@ export default {
     },
     checkOrder() {
       return this.$store.state.POS.orderList;
-    },
-    orderNoState() {
-      return this.$store.state.POS.orderNo;
     }
+    // orderNoState() {
+    //   return this.$store.state.POS.orderNo;
+    // }
   },
   mounted() {
     this.setOrderNo();
+    this.getCustomerList();
   },
   methods: {
-    ...mapActions(["productList", "categoryList", "removeItem"]),
+    ...mapActions([
+      "productList",
+      "categoryList",
+      "removeItem",
+      "customerList"
+    ]),
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
         style: "currency",
@@ -302,21 +324,25 @@ export default {
       });
       return Peso;
     },
-    setOrderNo() {
-      const orderN = this.orderNoState;
+    async setOrderNo() {
+      console.log("prodListPOS");
+      const orderN = await this.$store.state.POS.orderNo;
       this.orderNo = orderN;
     },
-    rowClass(item, type) {
-      if (item && type === "row") {
-        if (item.released === true) {
-          return "text-success";
-        } else {
-          return "text-secondary";
-        }
-      } else {
-        return null;
-      }
+    getCustomerList() {
+      this.customerList();
     },
+    // rowClass(item, type) {
+    //   if (item && type === "row") {
+    //     if (item.released === true) {
+    //       return "text-success";
+    //     } else {
+    //       return "text-secondary";
+    //     }
+    //   } else {
+    //     return null;
+    //   }
+    // },
 
     removeOrder(item, index) {
       this.removeItem(index);
@@ -329,8 +355,7 @@ export default {
         this.$refs["emptyOrderWarningModal"].show();
         return;
       }
-      alert("may order");
-      console.log(orderList);
+      this.$refs["paymentModal"].show();
     }
   }
 };

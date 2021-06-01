@@ -30,6 +30,8 @@
 
 <script>
 /* eslint-disable */
+import { mapActions } from "vuex";
+
 import ProductListPOS from "../../../components/POS/ProductListPOS.vue";
 import OrderList from "../../../components/POS/OrderList";
 export default {
@@ -41,10 +43,21 @@ export default {
     };
   },
   components: { ProductListPOS, OrderList },
+  mounted() {
+    this.getProductList();
+  },
   methods: {
+    ...mapActions(["categoryList", "productListPOS"]),
     addOrder(addOrder) {
       this.toOrder.push(addOrder);
       //console.log("toOrder", this.toOrder);
+    },
+    async getProductList() {
+      const result = await this.productListPOS();
+      if (result.success === false) {
+        //this.errorInList = result.msg;
+      } else {
+      }
     }
   },
   beforeRouteLeave(to, from, next) {

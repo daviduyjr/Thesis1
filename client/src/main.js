@@ -47,6 +47,18 @@ Vue.use(money, { precision: 4 });
 
 import store from "./store/index";
 
+//para sa select2
+import vSelect from "vue-select";
+vSelect.props.components.default = () => ({
+  Deselect: {
+    render: createElement => createElement("span", "❌")
+  },
+  OpenIndicator: {
+    render: createElement => createElement("span", "🔽")
+  }
+});
+Vue.component("v-select", vSelect);
+
 // eslint-disable-next-line
 let $ = JQuery;
 

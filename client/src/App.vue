@@ -22,7 +22,7 @@ export default {
 
 <style lang="scss">
 @import "assets/scss/shared/style";
-
+@import "vue-select/src/scss/vue-select.scss";
 // @import "node_modules/bootstrap/scss/bootstrap.scss";
 // @import "node_modules/bootstrap-vue/src/index.scss";
 </style>

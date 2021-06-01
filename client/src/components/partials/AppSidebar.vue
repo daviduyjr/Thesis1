@@ -23,7 +23,7 @@
         <li class="nav-item nav-category">Main Menu</li>
         <!-- Para sa admin to -->
         <li class="nav-item">
-          <a href="/#/POS" class="nav-link">
+          <a href="/#/POS" class="nav-link" @click="toggleSideB()">
             <i class="menu-icon typcn typcn-document-add"></i>
             <span class="menu-title">POS</span>
           </a>
@@ -42,13 +42,27 @@
             </ul>
           </b-collapse>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" v-b-toggle="'dashboard-dropdown'">
+            <i class="menu-icon typcn typcn-document-text"></i>
+            <span class="menu-title">Dashboard</span>
+            <i class="menu-arrow"></i>
+          </a>
+          <b-collapse id="dashboard-dropdown">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item">
+                <router-link class="nav-link" to="/">Dashboard 2</router-link>
+              </li>
+            </ul>
+          </b-collapse>
+        </li>
         <li class="nav-item" v-if="isAdmin">
-          <a class="nav-link" v-b-toggle="'admin'">
+          <a class="nav-link" v-b-toggle="'admin-dropdown'">
             <i class="menu-icon typcn typcn-document-add"></i>
             <span class="menu-title">User Pages</span>
             <i class="menu-arrow"></i>
           </a>
-          <b-collapse id="admin" v-if="user">
+          <b-collapse id="admin-dropdown" v-if="user">
             <ul class="nav flex-column sub-menu">
               <li class="nav-item">
                 <router-link class="nav-link" to="/usersList"
@@ -173,7 +187,10 @@ export default {
     ])
   },
   methods: {
-    ...mapActions(['profile'])
+    ...mapActions(['profile']),
+    toggleSideB: () => {
+      $('body').toggleClass('sidebar-icon-only')
+    }
   },
   created () {
     this.profile()
