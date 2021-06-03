@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div class="card cardProdList">
+    <div class="card cardProdList" style="height: 590px;">
       <div class="card-body cardBody w-100">
         <h2 class="card-title text-center mb-1">PRODUCTS</h2>
         <div class="row">
@@ -347,10 +347,10 @@ export default {
     async addToOrder(item) {
       const list = await this.checkOrder;
       const found = list.some(el => el.id === item.id);
-      if (found == true) {
-        this.$refs["orderExistModal"].show();
-        return;
-      }
+      // if (found == true) {
+      //   this.$refs["orderExistModal"].show();
+      //   return;
+      // }
       const order = {
         id: item.id,
         product_name: item.product_name,

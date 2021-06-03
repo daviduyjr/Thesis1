@@ -81,8 +81,8 @@
     }
 
     td {
-      padding: $table-cell-padding-sm;
-      //padding: 0px, 0px, 0px, 0px;
+      //padding: $table-cell-padding-sm;
+      padding: 3px;
     }
   }
   // &.productListTable {

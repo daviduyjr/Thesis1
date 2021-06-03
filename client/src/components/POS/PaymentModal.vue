@@ -2,7 +2,7 @@
   <section>
     <div class="wrapper">
       <div class="row">
-        <div class="col-12 borderStyle">
+        <div class="col-12 borderStyle mb-1">
           <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
             <b-form-radio-group
               @change="radioChange"
@@ -15,40 +15,32 @@
         </div>
         <div class="col-12" id="inputCustomer">
           <div class="row">
-            <div class="col-7">
-              <b-form-group
-                label="Filter By: "
-                label-cols-sm="4"
-                class="mb-1 mt-1"
-              >
-                <v-select
-                  label="name"
-                  :options="customers"
-                  :value="$store.myValue"
-                  @input="setSelected"
-                  class="style-chooser"
-                ></v-select>
-                <!-- <b-form-radio-group
-                  class="pt-2"
-                  v-model="filterBy"
-                  :options="filterdByOptions"
-                  :aria-describedby="ariaDescribedBy"
-                  name="filterByRadio"
-                ></b-form-radio-group> -->
-              </b-form-group>
+            <div class="col-6">
+              <small class="text-muted">ID No.</small>
+              <v-select
+                label="id_no"
+                :options="selectIDNo"
+                :value="$store.myValue"
+                @input="setSelected"
+                class="style-chooser"
+              ></v-select>
             </div>
-            <div class="form-group">
-              <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
-                <b-form-radio-group
-                  class="pt-2"
-                  v-model="filterBy"
-                  :options="filterdByOptions"
-                  :aria-describedby="ariaDescribedBy"
-                  name="filterByRadio"
-                ></b-form-radio-group
-              ></b-form-group>
+            <div class="col-6">
+              <small class="text-muted">Name</small>
+              <v-select
+                label="full_name"
+                :options="selectFullName"
+                :value="$store.myValue"
+                @input="setSelected"
+                class="style-chooser"
+              ></v-select>
             </div>
           </div>
+        </div>
+        <div class="col-12 mt-2">
+          <b-button class="btn-block" pill variant="outline-primary"
+            >Save</b-button
+          >
         </div>
       </div>
     </div>
@@ -66,17 +58,13 @@ export default {
   data() {
     return {
       radioSelected: "none",
-      filterBy: "name",
       radioOptions: [
         { text: "None", value: "none" },
         { text: "Senior", value: "senior" },
         { text: "PWD", value: "PWD" }
       ],
-      filterdByOptions: [
-        { text: "ID", value: "id_no" },
-        { text: "Name", value: "full_name" }
-      ],
-      customers: []
+      selectFullName: [],
+      selectIDNo: []
     };
   },
   mounted() {
@@ -91,11 +79,12 @@ export default {
     ...mapActions(["filtercustomerList"]),
     setSelected(value) {
       //  trigger a mutation, or dispatch an action
-      //console.log(value);
+      console.log(value);
     },
     async radioChange() {
       if (this.radioSelected == "senior" || this.radioSelected == "PWD") {
-        this.customerFiltered(this.radioSelected);
+        this.customerFilteredFullName(this.radioSelected);
+        this.customerFilteredIDNo(this.radioSelected);
         $("#inputCustomer").show();
       }
       if (this.radioSelected == "none") {
@@ -103,15 +92,27 @@ export default {
         $("#inputCustomer").hide();
       }
     },
-    async customerFiltered(type) {
+    async customerFilteredFullName(type) {
       const res = await this.customerListState.filter(
         data => data.type == type
       );
-      this.customers = [];
+      this.selectFullName = [];
       res.forEach(data => {
-        this.customers.push({
-          id: data.id_no,
-          name: data.full_name
+        this.selectFullName.push({
+          id_no: data.id_no,
+          full_name: data.full_name
+        });
+      });
+    },
+    async customerFilteredIDNo(type) {
+      const res = await this.customerListState.filter(
+        data => data.type == type
+      );
+      this.selectIDNo = [];
+      res.forEach(data => {
+        this.selectIDNo.push({
+          id_no: data.id_no,
+          full_name: data.full_name
         });
       });
     }

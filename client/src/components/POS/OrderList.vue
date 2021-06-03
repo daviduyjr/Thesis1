@@ -1,8 +1,8 @@
 <template>
   <section>
     <div class="wrapper">
-      <div class="card cardProdList" style="height: 542px;">
-        <div class="card-body">
+      <div class="card" style="height: 590px;">
+        <div class="card-body pt-3 pb-1">
           <div class="row">
             <div class="col-5 pl-0">
               <h2 class="orderNo float-left pt-1">Order No. {{ orderNo }}</h2>
@@ -66,13 +66,47 @@
             </div>
             <div class="col-12">
               <div class="row">
-                <div class="col-6"></div>
                 <div class="col-6">
-                  <div class="form-group row">
-                    <label class="col-sm-6 col-form-label" for="subTotal"
-                      >VAT Sales</label
-                    >
-                    <div class="col-sm-6">
+                  <div class="row">
+                    <div class="col-12 borderStyle">
+                      <div class="col-12  mb-1">
+                        <b-form-group
+                          class="mb-1 mt-1"
+                          v-slot="{ ariaDescribedBy }"
+                        >
+                          <small class="">Discount</small>
+                          <b-form-radio-group
+                            @change="radioChange"
+                            v-model="radioSelected"
+                            :options="radioOptions"
+                            :aria-describedby="ariaDescribedBy"
+                            name="radioDiscount"
+                          ></b-form-radio-group>
+                        </b-form-group>
+                      </div>
+                      <div class="col-12" v-if="this.customer.id_no">
+                        <div class="form-group-row">
+                          <label for="" class="col-4 px-0 customerNameLabel"
+                            >ID:</label
+                          >
+                          <strong class="">{{ this.customer.id_no }}</strong>
+                        </div>
+                        <div class="form-group-row">
+                          <label for="" class="col-4 px-0 customerNameLabel"
+                            >Name:</label
+                          >
+                          <strong class="">{{
+                            this.customer.full_name
+                          }}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="row">
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="">VAT Sales</small>
                       <input
                         size="sm"
                         type="text"
@@ -83,24 +117,23 @@
                         disabled
                       />
                     </div>
-                    <label class="col-sm-6 col-form-label" for="VAT"
-                      >VAT(12%)</label
-                    >
-                    <div class="col-sm-6">
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="">VAT(12%)</small>
                       <input
                         size="sm"
                         type="text"
-                        class="form-control inputOrderList mt-1"
+                        class="form-control inputOrderList"
                         id="VAT"
                         v-model="VAT"
                         v-money="money"
                         disabled
                       />
                     </div>
-                    <label class="col-sm-6 col-form-label" for="totalDue"
-                      >Total Amount Due</label
-                    >
-                    <div class="col-sm-6">
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-md-6 mb-1"></div>
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="">Total Amount Due</small>
                       <input
                         size="sm"
                         type="text"
@@ -112,18 +145,22 @@
                       />
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-12 bottom">
-              <div class="row">
-                <div class="col-12">
-                  <button
-                    @click="pay"
-                    class="btn btn-lg btn-success float-right"
-                  >
-                    PAY
-                  </button>
+
+                  <div class="row">
+                    <div class="form-group col-md-6 mb-1"></div>
+                    <div class="form-group col-md-6 mt-2">
+                      <div class="col-12">
+                        <b-button
+                          @click="checkout"
+                          class="btn-block"
+                          pill
+                          variant="outline-primary"
+                        >
+                          Checkout</b-button
+                        >
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -159,20 +196,37 @@
     >
       <PaymentModal />
     </b-modal>
+    <b-modal
+      hide-footer
+      id="discountModal"
+      title="Discount"
+      ref="discountModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="md"
+    >
+      <DiscountModal
+        @customerSelected="customerSelected"
+        v-bind:type="this.radioSelected"
+      />
+    </b-modal>
   </section>
 </template>
 
 <script>
 /* eslint-disable */
+import JQuery from "jquery";
 import { mapActions } from "vuex";
 import { VMoney } from "v-money";
 
 import PaymentModal from "../POS/PaymentModal";
+import DiscountModal from "../POS/DiscountModal";
 
+let $ = JQuery;
 export default {
   directives: { money: VMoney },
   name: "orderList",
-  components: { PaymentModal },
+  components: { PaymentModal, DiscountModal },
   data() {
     return {
       formIsNotSaved: false,
@@ -184,6 +238,10 @@ export default {
       options: [{ value: "", text: "Select Category" }],
       filters: {
         selectCatName: ""
+      },
+      customer: {
+        id_no: "",
+        full_name: ""
       },
       table: {
         filter: "",
@@ -239,7 +297,13 @@ export default {
       modal: {
         headerBgVariant: "dark",
         headerTextVariant: "light"
-      }
+      },
+      radioSelected: "none",
+      radioOptions: [
+        { text: "None", value: "none" },
+        { text: "Senior", value: "senior" },
+        { text: "PWD", value: "PWD" }
+      ]
     };
   },
   props: ["toOrder"],
@@ -248,6 +312,33 @@ export default {
   },
   watch: {
     checkOrder(val) {
+      this.watchOrderList(val);
+    }
+  },
+  computed: {
+    rows() {
+      return this.orders.length;
+    },
+    checkOrder() {
+      return this.$store.state.POS.orderList;
+    }
+    // orderNoState() {
+    //   return this.$store.state.POS.orderNo;
+    // }
+  },
+  mounted() {
+    this.setOrderNo();
+    this.getCustomerList();
+    this.watchOrderList(this.checkOrder);
+  },
+  methods: {
+    ...mapActions([
+      "productList",
+      "categoryList",
+      "removeItem",
+      "customerList"
+    ]),
+    watchOrderList(val) {
       console.log("checkOrder");
       let subtotalList = 0;
       this.orders = [];
@@ -293,30 +384,7 @@ export default {
 
       TotalAmount = this.convertToPeso(TotalAmount);
       console.log("totalAmout", TotalAmount);
-    }
-  },
-  computed: {
-    rows() {
-      return this.orders.length;
     },
-    checkOrder() {
-      return this.$store.state.POS.orderList;
-    }
-    // orderNoState() {
-    //   return this.$store.state.POS.orderNo;
-    // }
-  },
-  mounted() {
-    this.setOrderNo();
-    this.getCustomerList();
-  },
-  methods: {
-    ...mapActions([
-      "productList",
-      "categoryList",
-      "removeItem",
-      "customerList"
-    ]),
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
         style: "currency",
@@ -348,7 +416,7 @@ export default {
       this.removeItem(index);
     },
 
-    pay() {
+    checkout() {
       const orderList = this.orders;
 
       if (orderList.length == 0) {
@@ -356,6 +424,25 @@ export default {
         return;
       }
       this.$refs["paymentModal"].show();
+    },
+
+    //para sa discount
+    async radioChange() {
+      if (this.radioSelected == "senior") {
+        this.$refs["discountModal"].show();
+      }
+      if (this.radioSelected == "PWD") {
+        this.$refs["discountModal"].show();
+      }
+      if (this.radioSelected == "none") {
+        this.customer.id_no = "";
+        this.customer.full_name = "";
+      }
+    },
+    customerSelected(item) {
+      this.customer.id_no = item.id_no;
+      this.customer.full_name = item.full_name;
+      this.$bvModal.hide("discountModal");
     }
   }
 };
@@ -395,8 +482,12 @@ export default {
 .cardProdList {
   padding-top: 0px !important;
 }
-/* .card-body {
-  padding-left: 5px;
-  padding-right: 5px;
-} */
+.borderStyle {
+  border: 1px solid #0000ff;
+  border-radius: 10px 10px;
+}
+.customerNameLabel {
+  max-width: 19.33333%;
+  font-size: 14px;
+}
 </style>
