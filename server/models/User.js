@@ -47,6 +47,11 @@ const UserSchema = new Schema({
     enum: ['Yes', 'No'],
     required: true,
   },
+  security_code: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   date_created: {
     type: Date,
     default: Date.now,

@@ -10,13 +10,28 @@ const prodState = () => {
   return {
     orderNo: "",
     productList: [],
-    orderList: []
+    orderList: [],
+    adminId: ""
   };
 };
 const state = prodState();
 const getters = {};
 
 const actions = {
+  async POSSecurity({ commit }, securityCode) {
+    try {
+      let res = await axios.post(
+        "http://localhost:5000/api/admin/posSecurity",
+        {
+          securityCode: securityCode
+        }
+      );
+      commit("SECURITY_SUCCESS", res.data.userId);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+    }
+  },
   async productListPOS({ commit }) {
     try {
       let res = await axios.get(
@@ -64,8 +79,9 @@ const mutations = {
   REMOVE_ORDER(state, index) {
     state.orderList.splice(index, 1);
     for (var i = state.orderList.length - 1; i >= 0; i--) {}
-    // state.orderList.splice(index);
-    //state.orderList.push(order);
+  },
+  SECURITY_SUCCESS(state, userId) {
+    state.adminId = userId;
   }
 };
 

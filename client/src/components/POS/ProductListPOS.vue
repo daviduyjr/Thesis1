@@ -8,7 +8,6 @@
             <div class="row">
               <div class="col-6">
                 <div class="form-group">
-                  <!-- <label for="filter-input">Filter</label> -->
                   <small class="text-muted">Filter</small>
                   <b-input-group size="sm">
                     <b-form-input
@@ -18,15 +17,6 @@
                       placeholder="Search products."
                     >
                     </b-form-input>
-                    <!-- <b-input-group-append>
-                      <button
-                        :disabled="!table.filter"
-                        @click="table.filter = ''"
-                        class="btn btn-dark btn-sm"
-                      >
-                        Clear
-                      </button>
-                    </b-input-group-append> -->
                   </b-input-group>
                 </div>
               </div>

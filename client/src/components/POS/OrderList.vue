@@ -131,7 +131,18 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="form-group col-md-6 mb-1"></div>
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="discount">SC/PWD Discount</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList discount mt-1"
+                        id="discount"
+                        v-model="discount"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
                     <div class="form-group col-md-6 mb-1">
                       <small class="">Total Amount Due</small>
                       <input
@@ -168,6 +179,7 @@
         </div>
       </div>
     </div>
+    <!-- modal para sa warning -->
     <b-modal
       hide-footer
       id="orderExist"
@@ -185,6 +197,7 @@
         ></b-icon-exclamation-triangle-fill>
       </div>
     </b-modal>
+    <!-- modal para payment -->
     <b-modal
       hide-footer
       id="paymentModal"
@@ -196,6 +209,7 @@
     >
       <PaymentModal />
     </b-modal>
+    <!-- modal para discount -->
     <b-modal
       hide-footer
       id="discountModal"
@@ -210,6 +224,22 @@
         v-bind:type="this.radioSelected"
       />
     </b-modal>
+    <!-- modal para discount security -->
+    <b-modal
+      hide-footer
+      @hide="onCancel()"
+      id="discountSecurityModal"
+      :title="securityModal.title"
+      ref="discountSecurityModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="sm"
+    >
+      <DiscountSecurity
+        @successAccess="successAccess"
+        @accessDenied="accessDenied"
+      />
+    </b-modal>
   </section>
 </template>
 
@@ -221,12 +251,13 @@ import { VMoney } from "v-money";
 
 import PaymentModal from "../POS/PaymentModal";
 import DiscountModal from "../POS/DiscountModal";
+import DiscountSecurity from "../POS/Security";
 
 let $ = JQuery;
 export default {
   directives: { money: VMoney },
   name: "orderList",
-  components: { PaymentModal, DiscountModal },
+  components: { PaymentModal, DiscountModal, DiscountSecurity },
   data() {
     return {
       formIsNotSaved: false,
@@ -234,7 +265,9 @@ export default {
       orders: [],
       subTotal: "",
       VAT: "",
+      discount: "",
       totalDue: "",
+      adminId: "",
       options: [{ value: "", text: "Select Category" }],
       filters: {
         selectCatName: ""
@@ -298,6 +331,9 @@ export default {
         headerBgVariant: "dark",
         headerTextVariant: "light"
       },
+      securityModal: {
+        title: "Security"
+      },
       radioSelected: "none",
       radioOptions: [
         { text: "None", value: "none" },
@@ -339,7 +375,6 @@ export default {
       "customerList"
     ]),
     watchOrderList(val) {
-      console.log("checkOrder");
       let subtotalList = 0;
       this.orders = [];
 
@@ -428,21 +463,46 @@ export default {
 
     //para sa discount
     async radioChange() {
+      if (this.radioSelected == "none") {
+        this.customer.id_no = "";
+        this.customer.full_name = "";
+        return;
+      }
+      this.$bvModal.show("discountSecurityModal");
+    },
+    customerSelected(item) {
+      this.customer.id_no = item.id_no;
+      this.customer.full_name = item.full_name;
+
+      const vatExemptSales = Number(this.subTotal.replace(/\₱|,/g, ""));
+      const VAT = Number(this.VAT.replace(/\₱|,/g, ""));
+      const seniorDiscount = vatExemptSales * 0.2;
+      this.discount = this.convertToPeso(seniorDiscount);
+      const totalDueWithDisc = vatExemptSales - seniorDiscount;
+      this.totalDue = this.convertToPeso(totalDueWithDisc);
+      console.log(this.convertToPeso(this.totalDue));
+
+      this.$bvModal.hide("discountModal");
+    },
+    successAccess(userId) {
+      this.adminId = userId;
+      this.$bvModal.hide("discountSecurityModal");
       if (this.radioSelected == "senior") {
         this.$refs["discountModal"].show();
       }
       if (this.radioSelected == "PWD") {
         this.$refs["discountModal"].show();
       }
-      if (this.radioSelected == "none") {
-        this.customer.id_no = "";
-        this.customer.full_name = "";
-      }
     },
-    customerSelected(item) {
-      this.customer.id_no = item.id_no;
-      this.customer.full_name = item.full_name;
-      this.$bvModal.hide("discountModal");
+    accessDenied() {
+      this.securityModal.title = "ERROR!";
+      this.modal.headerBgVariant = "danger";
+    },
+    onCancel() {
+      this.$bvModal.hide("discountSecurityModal");
+      this.securityModal.title = "Security";
+      this.modal.headerBgVariant = "dark";
+      this.modal.headerTextVariant = "light";
     }
   }
 };

@@ -42,20 +42,6 @@
             </ul>
           </b-collapse>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" v-b-toggle="'dashboard-dropdown'">
-            <i class="menu-icon typcn typcn-document-text"></i>
-            <span class="menu-title">Dashboard</span>
-            <i class="menu-arrow"></i>
-          </a>
-          <b-collapse id="dashboard-dropdown">
-            <ul class="nav flex-column sub-menu">
-              <li class="nav-item">
-                <router-link class="nav-link" to="/">Dashboard 2</router-link>
-              </li>
-            </ul>
-          </b-collapse>
-        </li>
         <li class="nav-item" v-if="isAdmin">
           <a class="nav-link" v-b-toggle="'admin-dropdown'">
             <i class="menu-icon typcn typcn-document-add"></i>
