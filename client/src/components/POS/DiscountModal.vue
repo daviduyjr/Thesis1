@@ -165,6 +165,15 @@
         </b-col>
       </div>
     </div>
+    <div class="col-12">
+      <b-button
+        @click="cancel"
+        class="btn-block mt-1"
+        pill
+        variant="outline-warning"
+        >Cancel</b-button
+      >
+    </div>
   </div>
 </template>
 
@@ -259,6 +268,9 @@ export default {
     },
     closeAddCustForm() {
       $(".addCustForm").hide();
+    },
+    cancel() {
+      this.$emit("cancelDiscount");
     }
   }
 };

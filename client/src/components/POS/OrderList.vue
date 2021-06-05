@@ -42,7 +42,7 @@
                     <div class="col-12 col-md-6 pr-1">
                       <b-button
                         size="sm"
-                        @click="removeOrder(row.item, row.index, $event.target)"
+                        @click="edit(row.item, row.index, $event.target)"
                         class="btn-success btn-block"
                       >
                         Edit
@@ -51,10 +51,10 @@
                     <div class="col-12 col-md-6  pl-0">
                       <b-button
                         size="sm"
-                        @click="removeOrder(row.item, row.index, $event.target)"
+                        @click="voidItem(row.item, row.index, $event.target)"
                         class="btn-success btn-block"
                       >
-                        Delete
+                        Void
                       </b-button>
                     </div>
                   </div>
@@ -106,25 +106,25 @@
                 <div class="col-6">
                   <div class="row">
                     <div class="form-group col-md-6 mb-1">
-                      <small class="">VAT Sales</small>
+                      <small class="">VAT Exempt</small>
                       <input
                         size="sm"
                         type="text"
                         class="form-control inputOrderList"
-                        id="inputPassword"
-                        v-model="subTotal"
+                        id="vatExempt"
+                        v-model="vatExempt"
                         v-money="money"
                         disabled
                       />
                     </div>
                     <div class="form-group col-md-6 mb-1">
-                      <small class="">VAT(12%)</small>
+                      <small class="">VAT Sales</small>
                       <input
                         size="sm"
                         type="text"
                         class="form-control inputOrderList"
-                        id="VAT"
-                        v-model="VAT"
+                        id="subTotal"
+                        v-model="subTotal"
                         v-money="money"
                         disabled
                       />
@@ -144,6 +144,21 @@
                       />
                     </div>
                     <div class="form-group col-md-6 mb-1">
+                      <small class="">VAT(12%)</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList"
+                        id="VAT"
+                        v-model="VAT"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-md-6 mb-1"></div>
+                    <div class="form-group col-md-6 mb-1">
                       <small class="">Total Amount Due</small>
                       <input
                         size="sm"
@@ -156,7 +171,6 @@
                       />
                     </div>
                   </div>
-
                   <div class="row">
                     <div class="form-group col-md-6 mb-1"></div>
                     <div class="form-group col-md-6 mt-2">
@@ -215,29 +229,39 @@
       id="discountModal"
       title="Discount"
       ref="discountModal"
+      :hide-header-close="modal.headerClose"
       :header-bg-variant="modal.headerBgVariant"
       :header-text-variant="modal.headerTextVariant"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
       size="md"
     >
-      <DiscountModal
-        @customerSelected="customerSelected"
-        v-bind:type="this.radioSelected"
-      />
+      <div v-if="this.isDiscount">
+        <DiscountModal
+          @cancelDiscount="cancelDiscount"
+          @customerSelected="customerSelected"
+          v-bind:type="this.radioSelected"
+        />
+      </div>
+      <div v-if="this.void">
+        <VoidReasonModal v-if="this.void" />
+      </div>
     </b-modal>
     <!-- modal para discount security -->
     <b-modal
       hide-footer
-      @hide="onCancel()"
-      id="discountSecurityModal"
+      :hide-header-close="modal.headerClose"
+      id="securityModal"
       :title="securityModal.title"
-      ref="discountSecurityModal"
+      ref="securityModal"
       :header-bg-variant="modal.headerBgVariant"
       :header-text-variant="modal.headerTextVariant"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
       size="sm"
     >
       <DiscountSecurity
         @successAccess="successAccess"
         @accessDenied="accessDenied"
+        @cancelSecurity="cancelSecurity"
       />
     </b-modal>
   </section>
@@ -252,22 +276,32 @@ import { VMoney } from "v-money";
 import PaymentModal from "../POS/PaymentModal";
 import DiscountModal from "../POS/DiscountModal";
 import DiscountSecurity from "../POS/Security";
+import VoidReasonModal from "../POS/VoidReasonModal";
 
 let $ = JQuery;
 export default {
   directives: { money: VMoney },
   name: "orderList",
-  components: { PaymentModal, DiscountModal, DiscountSecurity },
+  components: {
+    PaymentModal,
+    DiscountModal,
+    DiscountSecurity,
+    VoidReasonModal
+  },
   data() {
     return {
       formIsNotSaved: false,
       orderNo: "",
       orders: [],
       subTotal: "",
+      vatExempt: "",
       VAT: "",
       discount: "",
       totalDue: "",
       adminId: "",
+      void: false,
+      isDiscount: false,
+      toVoid: [],
       options: [{ value: "", text: "Select Category" }],
       filters: {
         selectCatName: ""
@@ -329,7 +363,9 @@ export default {
       },
       modal: {
         headerBgVariant: "dark",
-        headerTextVariant: "light"
+        headerTextVariant: "light",
+        headerClose: true,
+        closeOnBackdrop: true
       },
       securityModal: {
         title: "Security"
@@ -446,11 +482,23 @@ export default {
     //     return null;
     //   }
     // },
-
-    removeOrder(item, index) {
-      this.removeItem(index);
+    edit(item) {
+      console.log("edit", item);
     },
-
+    voidItem(item, index) {
+      this.void = true;
+      this.isDiscount = false;
+      this.toVoid.push({
+        index: index,
+        item: item
+      });
+      this.$bvModal.show("securityModal");
+    },
+    voidItemFinal() {
+      console.log("allitem", this.toVoid);
+      const item = this.toVoid.slice(-1)[0];
+      this.removeItem(item.index);
+    },
     checkout() {
       const orderList = this.orders;
 
@@ -461,36 +509,58 @@ export default {
       this.$refs["paymentModal"].show();
     },
 
-    //para sa discount
+    //pag namili ng discount radio button
     async radioChange() {
       if (this.radioSelected == "none") {
         this.customer.id_no = "";
         this.customer.full_name = "";
         return;
       }
-      this.$bvModal.show("discountSecurityModal");
+      this.securityModal.title = "Security";
+      this.$bvModal.show("securityModal");
     },
+    // naka select na ng customer na eligible for discount
     customerSelected(item) {
       this.customer.id_no = item.id_no;
       this.customer.full_name = item.full_name;
-
+      this.vatExempt = this.subTotal;
       const vatExemptSales = Number(this.subTotal.replace(/\₱|,/g, ""));
       const VAT = Number(this.VAT.replace(/\₱|,/g, ""));
       const seniorDiscount = vatExemptSales * 0.2;
-      this.discount = this.convertToPeso(seniorDiscount);
       const totalDueWithDisc = vatExemptSales - seniorDiscount;
+
+      this.VAT = this.convertToPeso(0);
+      this.subTotal = this.convertToPeso(0);
+      this.discount = this.convertToPeso(seniorDiscount);
       this.totalDue = this.convertToPeso(totalDueWithDisc);
       console.log(this.convertToPeso(this.totalDue));
 
       this.$bvModal.hide("discountModal");
     },
+    //para sa security ng discount
     successAccess(userId) {
+      this.modal.headerBgVariant = "dark";
+      this.modal.headerTextVariant = "light";
       this.adminId = userId;
-      this.$bvModal.hide("discountSecurityModal");
+      this.$bvModal.hide("securityModal");
+
       if (this.radioSelected == "senior") {
+        this.void = false;
+        this.isDiscount = true;
         this.$refs["discountModal"].show();
+        return;
       }
       if (this.radioSelected == "PWD") {
+        this.isDiscount = true;
+        this.$refs["discountModal"].show();
+        return;
+      }
+      if (this.void == true) {
+        //this.voidItemFinal();
+        debugger;
+        this.isDiscount = false;
+        this.void = true;
+        console.log(this.isDiscount);
         this.$refs["discountModal"].show();
       }
     },
@@ -498,11 +568,26 @@ export default {
       this.securityModal.title = "ERROR!";
       this.modal.headerBgVariant = "danger";
     },
-    onCancel() {
-      this.$bvModal.hide("discountSecurityModal");
+    //para sa pag hide ng mga modal
+    cancelDiscount() {
+      if (this.radioSelected != null) {
+        this.$bvModal.hide("discountModal");
+        this.radioSelected = "none";
+        this.isDiscount = false;
+        this.void = false;
+        return;
+      }
+      this.$bvModal.hide("discountModal");
+      this.radioSelected = "none";
+      this.isDiscount = false;
+      this.void = false;
+    },
+    cancelSecurity() {
+      this.$bvModal.hide("securityModal");
       this.securityModal.title = "Security";
       this.modal.headerBgVariant = "dark";
       this.modal.headerTextVariant = "light";
+      this.radioSelected = "none";
     }
   }
 };

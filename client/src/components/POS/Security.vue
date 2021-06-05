@@ -11,7 +11,7 @@
             <small class="">Access Code</small>
             <input
               size="sm"
-              type="text"
+              type="password"
               class="form-control mt-1"
               id="securityCode"
               v-model="securityCode"
@@ -38,6 +38,15 @@
             pill
             variant="outline-primary"
             >Ok</b-button
+          >
+        </div>
+        <div class="col-12">
+          <b-button
+            @click="cancel"
+            class="btn-block mt-1"
+            pill
+            variant="outline-warning"
+            >Cancel</b-button
           >
         </div>
       </form>
@@ -69,6 +78,9 @@ export default {
       }
       this.errMsg = "Access Denied";
       this.$emit("accessDenied");
+    },
+    cancel() {
+      this.$emit("cancelSecurity");
     }
   }
 };
