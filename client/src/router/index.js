@@ -12,6 +12,7 @@ import mainView from "../mainView";
 
 import buttons from "../views/basic-elements/buttons";
 
+import errorPage from "../views/404Page";
 import login from "../views/samples/user-pages/login";
 
 //POS
@@ -140,6 +141,11 @@ const router = new Router({
             requiresAuth: true,
             requiresOnlyAdmin: true
           }
+        },
+        {
+          path: "/errorPage",
+          name: "404Page",
+          component: errorPage
         }
       ]
     },
@@ -178,18 +184,7 @@ const router = new Router({
     },
     {
       path: "*",
-      redirect: "/pages/error_404",
-      component: {
-        render(c) {
-          return c("router-view");
-        }
-      },
-      children: [
-        {
-          path: "/pages/login",
-          component: login
-        }
-      ]
+      redirect: "/errorPage"
     }
   ]
 });

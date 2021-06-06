@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <div>
     <div class="wrapper">
       <div class="card" style="height: 590px;">
         <div class="card-body pt-3 pb-1">
@@ -243,7 +243,11 @@
         />
       </div>
       <div v-if="this.void">
-        <VoidReasonModal v-if="this.void" />
+        <VoidReasonModal
+          @cancelVoid="cancelDiscount"
+          @voidReason="voidReason"
+          v-if="this.void"
+        />
       </div>
     </b-modal>
     <!-- modal para discount security -->
@@ -264,7 +268,7 @@
         @cancelSecurity="cancelSecurity"
       />
     </b-modal>
-  </section>
+  </div>
 </template>
 
 <script>
@@ -301,7 +305,8 @@ export default {
       adminId: "",
       void: false,
       isDiscount: false,
-      toVoid: [],
+      toVoid: {},
+      voidProducts: [],
       options: [{ value: "", text: "Select Category" }],
       filters: {
         selectCatName: ""
@@ -454,7 +459,6 @@ export default {
       //  this.totalDue = this.subTotal + this.VAT;
 
       TotalAmount = this.convertToPeso(TotalAmount);
-      console.log("totalAmout", TotalAmount);
     },
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
@@ -464,7 +468,6 @@ export default {
       return Peso;
     },
     async setOrderNo() {
-      console.log("prodListPOS");
       const orderN = await this.$store.state.POS.orderNo;
       this.orderNo = orderN;
     },
@@ -488,16 +491,23 @@ export default {
     voidItem(item, index) {
       this.void = true;
       this.isDiscount = false;
-      this.toVoid.push({
+      this.toVoid = {
         index: index,
         item: item
-      });
+      };
       this.$bvModal.show("securityModal");
     },
-    voidItemFinal() {
-      console.log("allitem", this.toVoid);
-      const item = this.toVoid.slice(-1)[0];
-      this.removeItem(item.index);
+    voidReason(reason) {
+      // const item = this.toVoid.slice(-1)[0];
+      // console.log("item to removed", item);
+      this.voidProducts.push({
+        index: this.toVoid.index,
+        item: this.toVoid.item,
+        reason: reason
+      });
+      this.$bvModal.hide("discountModal");
+      this.removeItem(this.toVoid.index);
+      console.log("allitem removed", this.voidProducts);
     },
     checkout() {
       const orderList = this.orders;
@@ -557,7 +567,6 @@ export default {
       }
       if (this.void == true) {
         //this.voidItemFinal();
-        debugger;
         this.isDiscount = false;
         this.void = true;
         console.log(this.isDiscount);
