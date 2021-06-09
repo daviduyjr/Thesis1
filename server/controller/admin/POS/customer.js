@@ -32,12 +32,20 @@ module.exports = {
 
   AddCustomer: async (req, res, next) => {
     try {
-      const { id_no, full_name, type } = req.body;
+      const checkIfExisting = await Customer.findOne({ id_no: req.body.customer.id_no });
+
+      if (checkIfExisting) {
+        res.status(200).json({
+          success: false,
+          message: 'Already existing',
+        });
+        return;
+      }
 
       const newCustomer = new Customer({
-        id_no: id_no,
-        full_name: full_name,
-        type: type,
+        id_no: req.body.customer.id_no,
+        full_name: req.body.customer.full_name,
+        type: req.body.customer.type,
       });
 
       newCustomer.save().then((data) => {
@@ -47,6 +55,11 @@ module.exports = {
           customer: data,
         });
       });
-    } catch (err) {}
+    } catch (err) {
+      res.status(200).json({
+        success: false,
+        message: 'Error',
+      });
+    }
   },
 };

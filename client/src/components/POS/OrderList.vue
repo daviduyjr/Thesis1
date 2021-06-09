@@ -123,8 +123,8 @@
                         size="sm"
                         type="text"
                         class="form-control inputOrderList"
-                        id="subTotal"
-                        v-model="subTotal"
+                        id="VATSales"
+                        v-model="VATSales"
                         v-money="money"
                         disabled
                       />
@@ -297,7 +297,7 @@ export default {
       formIsNotSaved: false,
       orderNo: "",
       orders: [],
-      subTotal: "",
+      VATSales: "",
       vatExempt: "",
       VAT: "",
       discount: "",
@@ -307,6 +307,16 @@ export default {
       isDiscount: false,
       toVoid: {},
       voidProducts: [],
+      priceNoDiscount: {
+        VATSales: "",
+        VAT: "",
+        totalDue: ""
+      },
+      priceWithDiscount: {
+        vatExempt: "",
+        discount: "",
+        totalDue: ""
+      },
       options: [{ value: "", text: "Select Category" }],
       filters: {
         selectCatName: ""
@@ -405,7 +415,6 @@ export default {
   },
   mounted() {
     this.setOrderNo();
-    this.getCustomerList();
     this.watchOrderList(this.checkOrder);
   },
   methods: {
@@ -430,8 +439,7 @@ export default {
         });
 
         subtotalList += Number(total.replace(/\₱|,/g, ""));
-        const test = Number(total.replace(/\₱|,/g, ""));
-        //console.log("test", test);
+
         await this.orders.push({
           id: prod.id,
           product_name: prod.product_name,
@@ -442,23 +450,19 @@ export default {
           category_name: prod.category_name
         });
       });
-      //let subTotal = subtotalList + VAT;
       let withOutVAT = (subtotalList / 1.12) * 1;
 
       let VAT = subtotalList - withOutVAT;
       let subtotal = subtotalList - VAT;
       let TotalAmount = subtotal + VAT;
 
-      //console.log(subTotal);
-      this.subTotal = this.convertToPeso(subtotal);
+      this.VATSales = this.convertToPeso(subtotal);
       this.VAT = this.convertToPeso(VAT);
       this.totalDue = this.convertToPeso(TotalAmount);
-      // console.log((minusToSubtotal * 100).toFixed(2));
-      // this.subTotal = subTotalFinal - minusToSubtotal;
-      // this.VAT = Math.round(this.subTotal * (12 / 100));
-      //  this.totalDue = this.subTotal + this.VAT;
 
-      TotalAmount = this.convertToPeso(TotalAmount);
+      this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
+      this.priceNoDiscount.VAT = this.convertToPeso(VAT);
+      this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
     },
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
@@ -471,8 +475,8 @@ export default {
       const orderN = await this.$store.state.POS.orderNo;
       this.orderNo = orderN;
     },
-    getCustomerList() {
-      this.customerList();
+    async getCustomerList() {
+      await this.customerList();
     },
     // rowClass(item, type) {
     //   if (item && type === "row") {
@@ -522,45 +526,53 @@ export default {
     //pag namili ng discount radio button
     async radioChange() {
       if (this.radioSelected == "none") {
+        await this.watchOrderList(this.checkOrder);
         this.customer.id_no = "";
         this.customer.full_name = "";
+        this.vatExempt = this.convertToPeso(0);
+        this.discount = this.convertToPeso(0);
         return;
       }
       this.securityModal.title = "Security";
       this.$bvModal.show("securityModal");
     },
     // naka select na ng customer na eligible for discount
-    customerSelected(item) {
+    async customerSelected(item) {
       this.customer.id_no = item.id_no;
       this.customer.full_name = item.full_name;
-      this.vatExempt = this.subTotal;
-      const vatExemptSales = Number(this.subTotal.replace(/\₱|,/g, ""));
-      const VAT = Number(this.VAT.replace(/\₱|,/g, ""));
+
+      this.vatExempt = this.priceNoDiscount.VATSales;
+      const vatExemptSales = Number(
+        this.priceNoDiscount.VATSales.replace(/\₱|,/g, "")
+      );
+      const VAT = Number(this.priceNoDiscount.VAT.replace(/\₱|,/g, ""));
       const seniorDiscount = vatExemptSales * 0.2;
       const totalDueWithDisc = vatExemptSales - seniorDiscount;
 
       this.VAT = this.convertToPeso(0);
-      this.subTotal = this.convertToPeso(0);
+      this.VATSales = this.convertToPeso(0);
       this.discount = this.convertToPeso(seniorDiscount);
       this.totalDue = this.convertToPeso(totalDueWithDisc);
-      console.log(this.convertToPeso(this.totalDue));
 
       this.$bvModal.hide("discountModal");
     },
+
     //para sa security ng discount
-    successAccess(userId) {
+    async successAccess(userId) {
       this.modal.headerBgVariant = "dark";
       this.modal.headerTextVariant = "light";
       this.adminId = userId;
       this.$bvModal.hide("securityModal");
 
       if (this.radioSelected == "senior") {
+        await this.getCustomerList();
         this.void = false;
         this.isDiscount = true;
         this.$refs["discountModal"].show();
         return;
       }
       if (this.radioSelected == "PWD") {
+        await this.getCustomerList();
         this.isDiscount = true;
         this.$refs["discountModal"].show();
         return;

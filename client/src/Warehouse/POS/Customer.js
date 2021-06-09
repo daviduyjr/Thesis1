@@ -1,5 +1,6 @@
 /*eslint-disable */
 import axios from "axios";
+import { AddCustomer } from "../../../../server/controller/admin/POS/customer";
 
 const state = {
   customerList: [],
@@ -22,6 +23,17 @@ const actions = {
     console.log(res);
     commit("FILTERED_CUSTOMER", res);
     return res;
+  },
+  async addCustomer({ commit }, customer) {
+    try {
+      let res = await axios.post(
+        "http://localhost:5000/api/admin/addCustomer",
+        {
+          customer: customer
+        }
+      );
+      return res.data;
+    } catch (err) {}
   }
 };
 

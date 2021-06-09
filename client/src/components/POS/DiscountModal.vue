@@ -3,7 +3,7 @@
   <div class="row">
     <div class="col-12">
       <b-button
-        @click="addCustomer"
+        @click="addCustomerBtn"
         class="btn-block"
         pill
         variant="outline-primary"
@@ -27,7 +27,7 @@
               <div class="form-group col-sm-6 mb-1">
                 <ValidationProvider
                   name="ID"
-                  rules="required|min:3"
+                  rules="required"
                   v-slot="idNoValidation"
                 >
                   <small class="">ID</small>
@@ -48,43 +48,30 @@
                 </ValidationProvider>
               </div>
 
-              <!-- <div class="col-lg-6 mb-1">
-                <ValidationProvider
-                  name="Product Name"
-                  rules="required|min:3"
-                  v-slot="idNoValidation"
-                >
-                  <b-form-group
-                    class="mb-0"
-                    label-for="prodName"
-                    label="ID"
-                    label-size="sm"
-                  >
-                    <b-form-input
-                      id="id_no"
-                      name="id_no"
-                      type="text"
-                      v-model="id_no"
-                      class="form-control"
-                      :state="getValidationState(idNoValidation)"
-                      aria-describedby="idNoFeedBack"
-                      autocomplete="off"
-                    ></b-form-input>
-                    <b-form-invalid-feedback id="idNoFeedBack">
-                      {{ idNoValidation.errors[0] }}
-                    </b-form-invalid-feedback>
-                  </b-form-group>
-                </ValidationProvider>
-              </div> -->
               <div class="form-group col-sm-6 mb-1">
-                <small class="">Name</small>
-                <input
-                  size="sm"
-                  type="text"
-                  class="form-control mt-1"
-                  id="full_name"
-                  v-model="full_name"
-                />
+                <ValidationProvider
+                  name="Name"
+                  rules="required|min:3|alpha_spaces"
+                  v-slot="nameValidation"
+                >
+                  <small class="">Name</small>
+                  <input
+                    size="sm"
+                    type="text"
+                    class="form-control mt-1"
+                    id="full_name"
+                    v-model="full_name"
+                    :state="getValidationState(nameValidation)"
+                    aria-describedby="idNoFeedBack"
+                    autocomplete="off"
+                  />
+                  <div class="text-danger">
+                    <small> {{ nameValidation.errors[0] }}</small>
+                  </div>
+                </ValidationProvider>
+              </div>
+              <div class="col-12 text-danger text-center">
+                <small id="idErrorMsg"></small>
               </div>
               <b-button
                 type="submit"
@@ -174,27 +161,45 @@
         >Cancel</b-button
       >
     </div>
+    <b-overlay :show="busy" no-wrap @shown="onShown">
+      <template #overlay>
+        <div v-if="processing" class="text-center">
+          <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
+          <p id="cancel-label">Please wait...</p>
+        </div>
+        <div
+          v-else
+          ref="dialog"
+          tabindex="-1"
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="form-confirm-label"
+          class="text-center p-3"
+        >
+          <p><strong id="form-confirm-label">Are you sure?</strong></p>
+          <div class="d-flex">
+            <b-button
+              variant="outline-danger"
+              class="mr-3"
+              @click="onCancelConfirmation"
+            >
+              Cancel
+            </b-button>
+            <b-button variant="outline-success" @click="saveAndSelectFinal"
+              >OK</b-button
+            >
+          </div>
+        </div>
+      </template>
+    </b-overlay>
   </div>
 </template>
 
 <script>
 /* eslint-disable */
 import JQuery from "jquery";
-import { extend } from "vee-validate";
-
-extend("testing", {
-  validate(value) {
-    console.log(value);
-    // const unit = value.replace(/\D+/g, "");
-
-    // if (unit === "000") {
-    //   return false;
-    // } else {
-    //   return true;
-    // }
-  },
-  message: "{_field_} field is required."
-});
+import { mapActions } from "vuex";
+import { listIndexes } from "../../../../server/models/inventory/RecievingOrder";
 
 let $ = JQuery;
 export default {
@@ -227,7 +232,10 @@ export default {
           { key: "actions", label: "Actions" }
         ],
         sortDirection: "desc"
-      }
+      },
+      //para sa overlay
+      busy: false,
+      processing: false
     };
   },
   mounted() {
@@ -241,13 +249,17 @@ export default {
       return this.customers.length;
     }
   },
+  watch: {
+    id_no: async function(value) {}
+  },
   methods: {
+    ...mapActions(["addCustomer"]),
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
     async checkType() {
       $(".addCustForm").hide();
-      const list = this.customerListState;
+      const list = await this.customerListState;
       const res = await list.filter(data => data.type == this.type);
       res.forEach(data => {
         this.customers.push({
@@ -260,17 +272,59 @@ export default {
       //console.log(item);
       this.$emit("customerSelected", item);
     },
-    addCustomer() {
+    addCustomerBtn() {
       $(".addCustForm").show();
     },
-    saveAndSelect() {
-      console.log("saveAndSelect");
+    async saveAndSelect() {
+      const list = this.customerListState;
+      const bytype = await list.filter(data => data.type == this.type);
+      const res = await bytype.filter(data => data.id_no == this.id_no);
+
+      if (res.length > 0) {
+        $("#idErrorMsg").text("Customer Already Exist");
+        this.table.filter = this.id_no;
+        return;
+      } else {
+        $("#idErrorMsg").text("");
+        this.table.filter = "";
+        this.processing = false;
+        this.busy = true;
+      }
     },
+    async saveAndSelectFinal() {
+      this.processing = true;
+      const customer = {
+        id_no: this.id_no,
+        full_name: this.full_name,
+        type: this.type
+      };
+      setTimeout(() => {
+        this.addCustomer(customer).then(data => {
+          console.log(data);
+          if (data.success == true) {
+            this.$emit("customerSelected", data.customer);
+          }
+        });
+        console.log("asdf");
+        this.processing = false;
+        this.busy = false;
+      }, 2000);
+    },
+
     closeAddCustForm() {
       $(".addCustForm").hide();
+      this.id_no = "";
+      this.full_name = "";
     },
     cancel() {
       this.$emit("cancelDiscount");
+    },
+    onShown() {
+      // Focus the dialog prompt
+      this.$refs.dialog.focus();
+    },
+    onCancelConfirmation() {
+      this.busy = false;
     }
   }
 };

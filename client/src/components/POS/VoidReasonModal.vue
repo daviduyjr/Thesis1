@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-12  mb-1">
       <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
-        <small class="">Discount</small>
+        <small class="">Reason</small>
         <b-form-radio-group
           @change="radioVoidChange"
           v-model="radioVoidSelected"
@@ -40,8 +40,6 @@ export default {
   },
   methods: {
     radioVoidChange() {
-      const reason = this.radioVoidChange;
-
       this.$emit("voidReason", this.radioVoidSelected);
     },
     cancelVoid() {
