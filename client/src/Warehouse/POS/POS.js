@@ -62,6 +62,13 @@ const actions = {
     } catch (err) {
       console.log(err);
     }
+  },
+  async payment({ commit }, item) {
+    try {
+      let res = await axios.post("http://localhost:5000/api/admin/payment", {
+        data: item
+      });
+    } catch (err) {}
   }
 };
 

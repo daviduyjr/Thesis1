@@ -9,7 +9,7 @@ const adminProductController = require('../../controller/admin/products/product'
 const inventoryController = require('../../controller/inventory/ReceivingOrder');
 const customerController = require('../../controller/admin/POS/customer');
 const securityPOS = require('../../controller/admin/POS/security');
-
+const transaction = require('../../controller/admin/POS/transaction');
 const passportSignIn = passport.authenticate('login', { session: false });
 
 router.route('/profile').get(passportSignIn, adminController.profile);
@@ -71,4 +71,7 @@ router.post('/addCustomer', customerController.AddCustomer);
 
 //para sa security sa POS
 router.post('/posSecurity', securityPOS.checkIfAdmin);
+
+//para sa POS
+router.post('/payment', transaction.payment);
 module.exports = router;

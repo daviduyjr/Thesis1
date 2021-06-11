@@ -270,7 +270,12 @@ export default {
     },
     selectCustomer(item) {
       //console.log(item);
-      this.$emit("customerSelected", item);
+      const customer = {
+        id_no: item.id_no,
+        full_name: item.full_name,
+        type: this.type
+      };
+      this.$emit("customerSelected", customer);
     },
     addCustomerBtn() {
       $(".addCustForm").show();

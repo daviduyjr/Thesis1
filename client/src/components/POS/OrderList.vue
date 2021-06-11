@@ -215,13 +215,13 @@
     <b-modal
       hide-footer
       id="paymentModal"
-      title="Warning!"
+      title="Payment"
       ref="paymentModal"
       :header-bg-variant="modal.headerBgVariant"
       :header-text-variant="modal.headerTextVariant"
-      size="md"
+      size="sm"
     >
-      <PaymentModal />
+      <PaymentModal v-bind:allData="this.allData" />
     </b-modal>
     <!-- modal para discount -->
     <b-modal
@@ -323,7 +323,8 @@ export default {
       },
       customer: {
         id_no: "",
-        full_name: ""
+        full_name: "",
+        type: ""
       },
       table: {
         filter: "",
@@ -390,7 +391,8 @@ export default {
         { text: "None", value: "none" },
         { text: "Senior", value: "senior" },
         { text: "PWD", value: "PWD" }
-      ]
+      ],
+      allData: []
     };
   },
   props: ["toOrder"],
@@ -502,8 +504,6 @@ export default {
       this.$bvModal.show("securityModal");
     },
     voidReason(reason) {
-      // const item = this.toVoid.slice(-1)[0];
-      // console.log("item to removed", item);
       this.voidProducts.push({
         index: this.toVoid.index,
         item: this.toVoid.item,
@@ -511,15 +511,27 @@ export default {
       });
       this.$bvModal.hide("discountModal");
       this.removeItem(this.toVoid.index);
-      console.log("allitem removed", this.voidProducts);
     },
-    checkout() {
-      const orderList = this.orders;
+    async checkout() {
+      const orderList = await this.orders;
 
       if (orderList.length == 0) {
         this.$refs["emptyOrderWarningModal"].show();
         return;
       }
+      this.allData = [];
+      await this.allData.push({
+        orderNo: this.orderNo,
+        orderList: orderList,
+        VATSales: this.VATSales,
+        VatExempt: this.vatExempt,
+        VAT: this.VAT,
+        discount: this.discount,
+        totalDue: this.totalDue,
+        adminId: this.adminId,
+        customer: this.customer.id_no == "" ? "none" : this.customer
+      });
+
       this.$refs["paymentModal"].show();
     },
 
@@ -529,6 +541,7 @@ export default {
         await this.watchOrderList(this.checkOrder);
         this.customer.id_no = "";
         this.customer.full_name = "";
+        this.customer.type = "none";
         this.vatExempt = this.convertToPeso(0);
         this.discount = this.convertToPeso(0);
         return;
@@ -540,6 +553,7 @@ export default {
     async customerSelected(item) {
       this.customer.id_no = item.id_no;
       this.customer.full_name = item.full_name;
+      this.customer.type = item.type;
 
       this.vatExempt = this.priceNoDiscount.VATSales;
       const vatExemptSales = Number(
@@ -581,7 +595,7 @@ export default {
         //this.voidItemFinal();
         this.isDiscount = false;
         this.void = true;
-        console.log(this.isDiscount);
+
         this.$refs["discountModal"].show();
       }
     },
@@ -591,12 +605,17 @@ export default {
     },
     //para sa pag hide ng mga modal
     cancelDiscount() {
-      if (this.radioSelected != null) {
-        this.$bvModal.hide("discountModal");
-        this.radioSelected = "none";
-        this.isDiscount = false;
-        this.void = false;
-        return;
+      if (this.customer.id_no != null) {
+        if (this.customer.type === "senior") {
+          this.radioSelected = "senior";
+          this.$bvModal.hide("discountModal");
+          return;
+        }
+        if (this.customer.type === "PWD") {
+          this.radioSelected = "PWD";
+          this.$bvModal.hide("discountModal");
+          return;
+        }
       }
       this.$bvModal.hide("discountModal");
       this.radioSelected = "none";
@@ -604,6 +623,18 @@ export default {
       this.void = false;
     },
     cancelSecurity() {
+      if (this.customer.id_no != null) {
+        if (this.customer.type === "senior") {
+          this.radioSelected = "senior";
+          this.$bvModal.hide("securityModal");
+          return;
+        }
+        if (this.customer.type === "PWD") {
+          this.radioSelected = "PWD";
+          this.$bvModal.hide("securityModal");
+          return;
+        }
+      }
       this.$bvModal.hide("securityModal");
       this.securityModal.title = "Security";
       this.modal.headerBgVariant = "dark";

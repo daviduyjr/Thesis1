@@ -1,47 +1,71 @@
 <template>
   <section>
-    <div class="wrapper">
-      <div class="row">
-        <div class="col-12 borderStyle mb-1">
-          <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
-            <b-form-radio-group
-              @change="radioChange"
-              v-model="radioSelected"
-              :options="radioOptions"
-              :aria-describedby="ariaDescribedBy"
-              name="radioDiscount"
-            ></b-form-radio-group>
-          </b-form-group>
-        </div>
-        <div class="col-12" id="inputCustomer">
-          <div class="row">
-            <div class="col-6">
-              <small class="text-muted">ID No.</small>
-              <v-select
-                label="id_no"
-                :options="selectIDNo"
-                :value="$store.myValue"
-                @input="setSelected"
-                class="style-chooser"
-              ></v-select>
+    <div class="row">
+      <div class="col-12">
+        <ValidationObserver v-slot="{ handleSubmit }">
+          <form @submit.prevent="handleSubmit(onSubmit)">
+            <ValidationProvider name="Total">
+              <div class="col-12">
+                <small class="">Total Amount Due</small>
+                <input
+                  size="sm"
+                  type="text"
+                  class="form-control mt-1"
+                  id="totalDue"
+                  v-model="totalDue"
+                  v-money="money"
+                  disabled
+                />
+              </div>
+            </ValidationProvider>
+
+            <div class="col-12">
+              <ValidationProvider
+                name="Cash"
+                rules="checkValid:@Total"
+                v-slot="markUpVal"
+              >
+                <small class="">Cash</small>
+                <b-form-input
+                  id="cash"
+                  name="cash"
+                  type="text"
+                  v-model="cash"
+                  aria-describedby="prodNameFeedBack"
+                  :state="getValidationState(markUpVal)"
+                  autocomplete="off"
+                  v-money="money"
+                  v-on:keyup="getChange"
+                ></b-form-input>
+                <!-- v-on:input="inputCash" -->
+                <div class="text-danger">
+                  <small> {{ markUpVal.errors[0] }}</small>
+                </div>
+              </ValidationProvider>
             </div>
-            <div class="col-6">
-              <small class="text-muted">Name</small>
-              <v-select
-                label="full_name"
-                :options="selectFullName"
-                :value="$store.myValue"
-                @input="setSelected"
-                class="style-chooser"
-              ></v-select>
+            <div class="col-12">
+              <small class="">Change</small>
+              <input
+                size="sm"
+                type="text"
+                class="form-control mt-1"
+                id="cashChange"
+                v-model="cashChange"
+                v-money="money"
+                disabled
+              />
             </div>
-          </div>
-        </div>
-        <div class="col-12 mt-2">
-          <b-button class="btn-block" pill variant="outline-primary"
-            >Save</b-button
-          >
-        </div>
+            <div class="col-12 mt-3">
+              <b-button
+                type="submit"
+                class="btn-block"
+                pill
+                variant="outline-primary"
+                >Pay</b-button
+              >
+            </div>
+          </form>
+        </ValidationObserver>
       </div>
     </div>
   </section>
@@ -49,72 +73,106 @@
 
 <script>
 /* eslint-disable */
+import { VMoney } from "v-money";
 import { mapActions } from "vuex";
+import { extend } from "vee-validate";
 import JQuery from "jquery";
 let $ = JQuery;
+
+extend("customRequired", {
+  validate(value) {
+    const unit = value.replace(/\D+/g, "");
+
+    if (unit === "000") {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  message: "{_field_} field is required."
+});
+
+extend("checkValid", {
+  params: ["target"],
+  validate(value, { target }) {
+    const totalDue = Number(target.replace(/\₱|,/g, ""));
+
+    const cash = Number(value.replace(/\₱|,/g, ""));
+
+    if (cash < totalDue) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  message: "{_field_} is insufficient."
+});
+
 export default {
+  directives: { money: VMoney },
   name: "paymentModal",
   components: {},
   data() {
     return {
-      radioSelected: "none",
-      radioOptions: [
-        { text: "None", value: "none" },
-        { text: "Senior", value: "senior" },
-        { text: "PWD", value: "PWD" }
-      ],
-      selectFullName: [],
-      selectIDNo: []
+      totalDue: "",
+      cash: "",
+      id_no: "",
+      cashChange: "",
+      money: {
+        decimal: ".",
+        thousands: ",",
+        prefix: "₱ ",
+        suffix: "",
+        precision: 2,
+        masked: false
+      },
+      onSubmitItems: {}
     };
   },
+  props: ["allData"],
   mounted() {
-    $("#inputCustomer").hide();
+    this.setAllData();
   },
-  computed: {
-    customerListState() {
-      return this.$store.state.Customer.customerList;
-    }
-  },
+  computed: {},
   methods: {
-    ...mapActions(["filtercustomerList"]),
-    setSelected(value) {
-      //  trigger a mutation, or dispatch an action
-      console.log(value);
+    ...mapActions(["payment"]),
+    getValidationState({ dirty, validated, valid = null }) {
+      return dirty || validated ? valid : null;
     },
-    async radioChange() {
-      if (this.radioSelected == "senior" || this.radioSelected == "PWD") {
-        this.customerFilteredFullName(this.radioSelected);
-        this.customerFilteredIDNo(this.radioSelected);
-        $("#inputCustomer").show();
+    getChange() {
+      const totalDue = Number(this.totalDue.replace(/\₱|,/g, ""));
+      var cash = Number(this.cash.replace(/\₱|,/g, ""));
+      if (cash > totalDue) {
+        const change = cash - totalDue;
+
+        this.cashChange = change.toFixed(2);
+        return;
       }
-      if (this.radioSelected == "none") {
-        this.filtercustomerList(this.radioSelected);
-        $("#inputCustomer").hide();
-      }
+      this.cashChange = 0;
     },
-    async customerFilteredFullName(type) {
-      const res = await this.customerListState.filter(
-        data => data.type == type
-      );
-      this.selectFullName = [];
-      res.forEach(data => {
-        this.selectFullName.push({
-          id_no: data.id_no,
-          full_name: data.full_name
-        });
+    setAllData() {
+      this.allData.forEach(items => {
+        const data = {
+          orderNo: items.orderNo,
+          orderList: items.orderList,
+          VATSales: items.VATSales,
+          VatExempt: items.VatExempt,
+          VAT: items.VAT,
+          discount: items.discount,
+          totalDue: items.totalDue,
+          adminId: items.adminId,
+          customer: items.customer
+        };
+
+        this.onSubmitItems = data;
       });
+      this.totalDue = this.onSubmitItems.totalDue;
+      console.log(this.onSubmitItems);
     },
-    async customerFilteredIDNo(type) {
-      const res = await this.customerListState.filter(
-        data => data.type == type
-      );
-      this.selectIDNo = [];
-      res.forEach(data => {
-        this.selectIDNo.push({
-          id_no: data.id_no,
-          full_name: data.full_name
-        });
-      });
+    async onSubmit() {
+      const cash = Number(this.cash.replace(/\₱|,/g, ""));
+      Object.assign(this.onSubmitItems, { cash: cash });
+      await this.payment(this.onSubmitItems);
     }
   }
 };
