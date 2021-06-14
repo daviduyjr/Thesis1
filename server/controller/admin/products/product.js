@@ -87,13 +87,13 @@ module.exports = {
       const orderNum = `0${newOr.seq}`;
       console.log(orderNum);
       if (products.length === 0) {
-        res.status(400).json({ msg: 'No data available', success: false });
+        res.status(200).json({ msg: 'No data available', success: false });
       } else {
         res.status(200).json({ products: products, orderNo: orderNum, success: true });
       }
     } catch (err) {
       console.log(err);
-      res.status(400).json({ msg: err, success: false });
+      res.status(200).json({ product: null, success: false });
     }
   },
   addProduct: async (req, res, next) => {

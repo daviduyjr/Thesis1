@@ -38,10 +38,17 @@ const actions = {
         "http://localhost:5000/api/admin/productListPOS"
       );
 
-      commit("PRODUCT_LIST_POS", {
-        products: res.data.products,
-        orderNo: res.data.orderNo
-      });
+      if (res.data.success == true) {
+        commit("PRODUCT_LIST_POS", {
+          products: res.data.products,
+          orderNo: res.data.orderNo
+        });
+      } else {
+        commit("PRODUCT_LIST_POS", {
+          products: [],
+          orderNo: res.data.orderNo
+        });
+      }
 
       return res;
     } catch (err) {
@@ -76,8 +83,9 @@ const mutations = {
   resetState(state) {
     Object.assign(state, prodState());
   },
-  PRODUCT_LIST_POS(state, data) {
-    state.productList = data.products;
+  async PRODUCT_LIST_POS(state, data) {
+    state.productList = [];
+    await state.productList.push(data.products);
     state.orderNo = data.orderNo;
   },
   SET_ORDER_LIST(state, order) {

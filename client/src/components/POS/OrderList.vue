@@ -99,6 +99,12 @@
                             this.customer.full_name
                           }}</strong>
                         </div>
+                        <div class="form-group-row">
+                          <label for="" class="col-4 px-0 customerNameLabel"
+                            >Type:</label
+                          >
+                          <strong class="">{{ this.customer.type }}</strong>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -235,20 +241,28 @@
       :no-close-on-backdrop="modal.closeOnBackdrop"
       size="md"
     >
-      <div v-if="this.isDiscount">
-        <DiscountModal
-          @cancelDiscount="cancelDiscount"
-          @customerSelected="customerSelected"
-          v-bind:type="this.radioSelected"
-        />
-      </div>
-      <div v-if="this.void">
-        <VoidReasonModal
-          @cancelVoid="cancelDiscount"
-          @voidReason="voidReason"
-          v-if="this.void"
-        />
-      </div>
+      <DiscountModal
+        @cancelDiscount="cancelDiscount"
+        @customerSelected="customerSelected"
+        v-bind:type="this.radioSelected"
+      />
+    </b-modal>
+    <b-modal
+      hide-footer
+      id="voidModal"
+      title="Void"
+      ref="voidModal"
+      :hide-header-close="modal.headerClose"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
+      size="sm"
+    >
+      <VoidReasonModal
+        @cancelVoid="cancelVoid"
+        @voidReason="voidReason"
+        v-bind:type="this.radioSelected"
+      />
     </b-modal>
     <!-- modal para discount security -->
     <b-modal
@@ -452,19 +466,49 @@ export default {
           category_name: prod.category_name
         });
       });
-      let withOutVAT = (subtotalList / 1.12) * 1;
+      if (this.isDiscount == true) {
+        let withOutVAT = (subtotalList / 1.12) * 1;
 
-      let VAT = subtotalList - withOutVAT;
-      let subtotal = subtotalList - VAT;
-      let TotalAmount = subtotal + VAT;
+        let VAT = subtotalList - withOutVAT;
+        let subtotal = subtotalList - VAT;
+        let TotalAmount = subtotal + VAT;
 
-      this.VATSales = this.convertToPeso(subtotal);
-      this.VAT = this.convertToPeso(VAT);
-      this.totalDue = this.convertToPeso(TotalAmount);
+        this.VATSales = this.convertToPeso(subtotal);
+        this.VAT = this.convertToPeso(VAT);
+        this.totalDue = this.convertToPeso(TotalAmount);
 
-      this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
-      this.priceNoDiscount.VAT = this.convertToPeso(VAT);
-      this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
+        this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
+        this.priceNoDiscount.VAT = this.convertToPeso(VAT);
+        this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
+        this.radioSelected = "senior";
+        this.discountComputation();
+        // if (this.radioSelected == "senior") {
+        //   console.log("checkDiscountType");
+        //   this.radioSelected = "senior";
+        //   return;
+        // }
+        // if (this.radioSelected == "PWD") {
+        //   this.radioSelected = "PWD";
+        //   return;
+        // }
+        // this.checkDiscountType();
+
+        return;
+      } else {
+        let withOutVAT = (subtotalList / 1.12) * 1;
+
+        let VAT = subtotalList - withOutVAT;
+        let subtotal = subtotalList - VAT;
+        let TotalAmount = subtotal + VAT;
+
+        this.VATSales = this.convertToPeso(subtotal);
+        this.VAT = this.convertToPeso(VAT);
+        this.totalDue = this.convertToPeso(TotalAmount);
+
+        this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
+        this.priceNoDiscount.VAT = this.convertToPeso(VAT);
+        this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
+      }
     },
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
@@ -496,7 +540,7 @@ export default {
     },
     voidItem(item, index) {
       this.void = true;
-      this.isDiscount = false;
+      //this.isDiscount = false;
       this.toVoid = {
         index: index,
         item: item
@@ -504,13 +548,18 @@ export default {
       this.$bvModal.show("securityModal");
     },
     voidReason(reason) {
+      this.void = false;
+
+      // console.log(this.radioSelected);
+      this.radioSelected = reason.type;
       this.voidProducts.push({
         index: this.toVoid.index,
         item: this.toVoid.item,
-        reason: reason
+        reason: reason.reason
       });
-      this.$bvModal.hide("discountModal");
+      this.$bvModal.hide("voidModal");
       this.removeItem(this.toVoid.index);
+      console.log(this.radioSelected);
     },
     async checkout() {
       const orderList = await this.orders;
@@ -538,6 +587,7 @@ export default {
     //pag namili ng discount radio button
     async radioChange() {
       if (this.radioSelected == "none") {
+        this.isDiscount = false;
         await this.watchOrderList(this.checkOrder);
         this.customer.id_no = "";
         this.customer.full_name = "";
@@ -546,7 +596,9 @@ export default {
         this.discount = this.convertToPeso(0);
         return;
       }
+
       this.securityModal.title = "Security";
+      console.log("radioChange", this.radioSelected);
       this.$bvModal.show("securityModal");
     },
     // naka select na ng customer na eligible for discount
@@ -555,6 +607,12 @@ export default {
       this.customer.full_name = item.full_name;
       this.customer.type = item.type;
 
+      this.discountComputation();
+
+      this.$bvModal.hide("discountModal");
+    },
+
+    discountComputation() {
       this.vatExempt = this.priceNoDiscount.VATSales;
       const vatExemptSales = Number(
         this.priceNoDiscount.VATSales.replace(/\₱|,/g, "")
@@ -567,10 +625,7 @@ export default {
       this.VATSales = this.convertToPeso(0);
       this.discount = this.convertToPeso(seniorDiscount);
       this.totalDue = this.convertToPeso(totalDueWithDisc);
-
-      this.$bvModal.hide("discountModal");
     },
-
     //para sa security ng discount
     async successAccess(userId) {
       this.modal.headerBgVariant = "dark";
@@ -578,6 +633,11 @@ export default {
       this.adminId = userId;
       this.$bvModal.hide("securityModal");
 
+      if (this.void == true) {
+        this.radioSelected = this.radioSelected;
+        this.$refs["voidModal"].show();
+        return;
+      }
       if (this.radioSelected == "senior") {
         await this.getCustomerList();
         this.void = false;
@@ -587,16 +647,10 @@ export default {
       }
       if (this.radioSelected == "PWD") {
         await this.getCustomerList();
+        this.void = false;
         this.isDiscount = true;
         this.$refs["discountModal"].show();
         return;
-      }
-      if (this.void == true) {
-        //this.voidItemFinal();
-        this.isDiscount = false;
-        this.void = true;
-
-        this.$refs["discountModal"].show();
       }
     },
     accessDenied() {
@@ -622,6 +676,10 @@ export default {
       this.isDiscount = false;
       this.void = false;
     },
+    cancelVoid() {
+      this.void = false;
+      this.$bvModal.hide("voidModal");
+    },
     cancelSecurity() {
       if (this.customer.id_no != null) {
         if (this.customer.type === "senior") {
@@ -640,7 +698,8 @@ export default {
       this.modal.headerBgVariant = "dark";
       this.modal.headerTextVariant = "light";
       this.radioSelected = "none";
-    }
+    },
+    checkDiscountType() {}
   }
 };
 </script>

@@ -256,16 +256,14 @@ export default {
       }
     };
   },
+  props: ["productsMain"],
   mounted() {
     this.getCategoryList();
-    this.prodList();
+    this.getProdList();
   },
   computed: {
     rows() {
       return this.products.length;
-    },
-    productListState() {
-      return this.$store.state.POS.productList;
     },
     checkOrder() {
       return this.$store.state.POS.orderList;
@@ -281,20 +279,21 @@ export default {
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
-    async prodList(product) {
+    async getProdList() {
       const arr = [];
-      let filteredItems = [];
       this.table.isBusy = true;
-      this.productListState.forEach(async prod => {
-        await arr.push({
-          id: prod.product._id,
-          product_name: prod.product.product_name,
-          description: prod.product.description,
-          SRP: prod.product.SRP,
-          category_name: prod.product.category[0].category_name,
-          category_id: prod.product.category[0]._id,
-          stock_onhand: prod.stock_onhand,
-          isActive: prod.product.isActive
+      this.productsMain.forEach(async data => {
+        data.forEach(async prod => {
+          await arr.push({
+            id: prod.product._id,
+            product_name: prod.product.product_name,
+            description: prod.product.description,
+            SRP: prod.product.SRP,
+            category_name: prod.product.category[0].category_name,
+            category_id: prod.product.category[0]._id,
+            stock_onhand: prod.stock_onhand,
+            isActive: prod.product.isActive
+          });
         });
       });
 
@@ -320,10 +319,10 @@ export default {
         const arr = [];
 
         if (id === null) {
-          this.products = await this.prodList();
+          this.products = await this.getProdList();
           return;
         }
-        let filteredItems = await this.prodList();
+        let filteredItems = await this.getProdList();
         filteredItems = filteredItems.filter(product =>
           product.category_id.match(id)
         );
@@ -337,10 +336,10 @@ export default {
     async addToOrder(item) {
       const list = await this.checkOrder;
       const found = list.some(el => el.id === item.id);
-      // if (found == true) {
-      //   this.$refs["orderExistModal"].show();
-      //   return;
-      // }
+      if (found == true) {
+        this.$refs["orderExistModal"].show();
+        return;
+      }
       const order = {
         id: item.id,
         product_name: item.product_name,

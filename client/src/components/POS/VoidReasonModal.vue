@@ -38,9 +38,14 @@ export default {
       ]
     };
   },
+  props: ["type"],
   methods: {
     radioVoidChange() {
-      this.$emit("voidReason", this.radioVoidSelected);
+      const data = {
+        reason: this.radioVoidSelected,
+        type: this.type
+      };
+      this.$emit("voidReason", data);
     },
     cancelVoid() {
       this.$emit("cancelVoid");

@@ -17,7 +17,11 @@
                   class="col-5"
                   style="padding-left: 0px; padding-right: 0px;"
                 >
-                  <ProductListPOS @clicked="addOrder" />
+                  <ProductListPOS
+                    v-if="this.isMounted"
+                    :productsMain="this.prodList"
+                    @clicked="addOrder"
+                  />
                 </div>
               </div>
             </div>
@@ -39,7 +43,9 @@ export default {
   data() {
     return {
       toOrder: [],
-      confirmExit: ""
+      confirmExit: "",
+      prodList: [],
+      isMounted: false
     };
   },
   components: { ProductListPOS, OrderList },
@@ -54,10 +60,10 @@ export default {
     },
     async getProductList() {
       const result = await this.productListPOS();
-      if (result.success === false) {
-        //this.errorInList = result.msg;
-      } else {
-      }
+      const product = await this.$store.state.POS.productList;
+
+      this.prodList = await product;
+      this.isMounted = true;
     }
   },
   beforeRouteLeave(to, from, next) {
