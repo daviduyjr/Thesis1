@@ -336,10 +336,10 @@ export default {
     async addToOrder(item) {
       const list = await this.checkOrder;
       const found = list.some(el => el.id === item.id);
-      if (found == true) {
-        this.$refs["orderExistModal"].show();
-        return;
-      }
+      // if (found == true) {
+      //   this.$refs["orderExistModal"].show();
+      //   return;
+      // }
       const order = {
         id: item.id,
         product_name: item.product_name,

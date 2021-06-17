@@ -161,7 +161,8 @@ export default {
           discount: items.discount,
           totalDue: items.totalDue,
           adminId: items.adminId,
-          customer: items.customer
+          customer: items.customer,
+          isDiscounted: items.isDiscounted
         };
 
         this.onSubmitItems = data;

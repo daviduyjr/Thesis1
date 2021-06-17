@@ -15,15 +15,10 @@
           </div>
 
           <div class="row">
-            <div class="col-12">
-              <div class="row">
-                <div class="col-6"></div>
-              </div>
-            </div>
-            <div class="col-12 table-sm">
+            <div class="col-12 table-sm" style="height: 310px;">
               <b-table
                 class=""
-                sticky-header="272px"
+                sticky-header="300px"
                 :items="orders"
                 :fields="table.fields"
                 :busy="table.isBusy"
@@ -36,6 +31,7 @@
                 show-empty
                 empty-text="No transaction."
                 tbody-td-class="rowClass"
+                style="height: 310px;"
               >
                 <template #cell(actions)="row">
                   <div class="row">
@@ -68,42 +64,59 @@
               <div class="row">
                 <div class="col-6">
                   <div class="row">
-                    <div class="col-12 borderStyle">
-                      <div class="col-12  mb-1">
-                        <b-form-group
-                          class="mb-1 mt-1"
-                          v-slot="{ ariaDescribedBy }"
-                        >
-                          <small class="">Discount</small>
-                          <b-form-radio-group
-                            @change="radioChange"
-                            v-model="radioSelected"
-                            :options="radioOptions"
-                            :aria-describedby="ariaDescribedBy"
-                            name="radioDiscount"
-                          ></b-form-radio-group>
-                        </b-form-group>
+                    <div v-if="this.isDiscount" class="col-12 borderStyle">
+                      <small class="">Discount</small>
+                      <div class="col-12 px-0" v-if="this.customer.id_no">
+                        <div class="row">
+                          <div class="col-4">
+                            <div class="form-group-row">
+                              <label for="" class="col-4 px-0 customerNameLabel"
+                                >ID:</label
+                              >
+                              <strong class="">{{
+                                this.customer.id_no
+                              }}</strong>
+                            </div>
+                          </div>
+                          <div class="col-8">
+                            <div class="form-group-row">
+                              <label for="" class="col-4 px-0 customerNameLabel"
+                                >Name:</label
+                              >
+                              <strong class="">{{
+                                this.customer.full_name
+                              }}</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-4">
+                            <div class="form-group-row">
+                              <small for="" class="col-5 px-0">Type:</small>
+                              <strong class="">{{ this.customer.type }}</strong>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <div class="col-12" v-if="this.customer.id_no">
-                        <div class="form-group-row">
-                          <label for="" class="col-4 px-0 customerNameLabel"
-                            >ID:</label
+                        <div class="form-inline mb-1 float-right">
+                          <b-button
+                            pill
+                            @click="changeCustomer"
+                            variant="outline-primary"
+                            size="sm"
                           >
-                          <strong class="">{{ this.customer.id_no }}</strong>
-                        </div>
-                        <div class="form-group-row">
-                          <label for="" class="col-4 px-0 customerNameLabel"
-                            >Name:</label
+                            Change</b-button
                           >
-                          <strong class="">{{
-                            this.customer.full_name
-                          }}</strong>
-                        </div>
-                        <div class="form-group-row">
-                          <label for="" class="col-4 px-0 customerNameLabel"
-                            >Type:</label
+                          <b-button
+                            @click="cancelDiscount"
+                            class="ml-1"
+                            pill
+                            variant="outline-danger"
+                            size="sm"
                           >
-                          <strong class="">{{ this.customer.type }}</strong>
+                            Cancel</b-button
+                          >
                         </div>
                       </div>
                     </div>
@@ -177,21 +190,32 @@
                       />
                     </div>
                   </div>
-                  <div class="row">
-                    <div class="form-group col-md-6 mb-1"></div>
-                    <div class="form-group col-md-6 mt-2">
-                      <div class="col-12">
-                        <b-button
-                          @click="checkout"
-                          class="btn-block"
-                          pill
-                          variant="outline-primary"
-                        >
-                          Checkout</b-button
-                        >
-                      </div>
-                    </div>
-                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 mb-3">
+              <div class="row">
+                <div class="col-md-4">
+                  <b-button
+                    @click="discountBtn"
+                    class="float-left"
+                    pill
+                    variant="outline-primary"
+                    size="lg"
+                  >
+                    SC/PWD Discount</b-button
+                  >
+                </div>
+                <div class="col-md-4">
+                  <b-button
+                    @click="checkout"
+                    class="float-left"
+                    pill
+                    variant="outline-primary"
+                    size="lg"
+                  >
+                    Checkout</b-button
+                  >
                 </div>
               </div>
             </div>
@@ -242,9 +266,8 @@
       size="md"
     >
       <DiscountModal
-        @cancelDiscount="cancelDiscount"
+        @cancelDiscountModal="cancelDiscountModal"
         @customerSelected="customerSelected"
-        v-bind:type="this.radioSelected"
       />
     </b-modal>
     <b-modal
@@ -258,11 +281,7 @@
       :no-close-on-backdrop="modal.closeOnBackdrop"
       size="sm"
     >
-      <VoidReasonModal
-        @cancelVoid="cancelVoid"
-        @voidReason="voidReason"
-        v-bind:type="this.radioSelected"
-      />
+      <VoidReasonModal @cancelVoid="cancelVoid" @voidReason="voidReason" />
     </b-modal>
     <!-- modal para discount security -->
     <b-modal
@@ -400,12 +419,6 @@ export default {
       securityModal: {
         title: "Security"
       },
-      radioSelected: "none",
-      radioOptions: [
-        { text: "None", value: "none" },
-        { text: "Senior", value: "senior" },
-        { text: "PWD", value: "PWD" }
-      ],
       allData: []
     };
   },
@@ -441,7 +454,7 @@ export default {
       "customerList"
     ]),
     watchOrderList(val) {
-      let subtotalList = 0;
+      let subTotalist = 0;
       this.orders = [];
 
       val.forEach(async prod => {
@@ -454,7 +467,7 @@ export default {
           currency: "Php"
         });
 
-        subtotalList += Number(total.replace(/\₱|,/g, ""));
+        subTotalist += Number(total.replace(/\₱|,/g, ""));
 
         await this.orders.push({
           id: prod.id,
@@ -467,48 +480,27 @@ export default {
         });
       });
       if (this.isDiscount == true) {
-        let withOutVAT = (subtotalList / 1.12) * 1;
-
-        let VAT = subtotalList - withOutVAT;
-        let subtotal = subtotalList - VAT;
-        let TotalAmount = subtotal + VAT;
-
-        this.VATSales = this.convertToPeso(subtotal);
-        this.VAT = this.convertToPeso(VAT);
-        this.totalDue = this.convertToPeso(TotalAmount);
-
-        this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
-        this.priceNoDiscount.VAT = this.convertToPeso(VAT);
-        this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
-        this.radioSelected = "senior";
+        this.calculate(subTotalist);
         this.discountComputation();
-        // if (this.radioSelected == "senior") {
-        //   console.log("checkDiscountType");
-        //   this.radioSelected = "senior";
-        //   return;
-        // }
-        // if (this.radioSelected == "PWD") {
-        //   this.radioSelected = "PWD";
-        //   return;
-        // }
-        // this.checkDiscountType();
-
         return;
       } else {
-        let withOutVAT = (subtotalList / 1.12) * 1;
-
-        let VAT = subtotalList - withOutVAT;
-        let subtotal = subtotalList - VAT;
-        let TotalAmount = subtotal + VAT;
-
-        this.VATSales = this.convertToPeso(subtotal);
-        this.VAT = this.convertToPeso(VAT);
-        this.totalDue = this.convertToPeso(TotalAmount);
-
-        this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
-        this.priceNoDiscount.VAT = this.convertToPeso(VAT);
-        this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
+        this.calculate(subTotalist);
       }
+    },
+    calculate(subTotal) {
+      let withOutVAT = (subTotal / 1.12) * 1;
+
+      let VAT = subTotal - withOutVAT;
+      let subtotal = subTotal - VAT;
+      let TotalAmount = subtotal + VAT;
+
+      this.VATSales = this.convertToPeso(subtotal);
+      this.VAT = this.convertToPeso(VAT);
+      this.totalDue = this.convertToPeso(TotalAmount);
+
+      this.priceNoDiscount.VATSales = this.convertToPeso(subtotal);
+      this.priceNoDiscount.VAT = this.convertToPeso(VAT);
+      this.priceNoDiscount.totalDue = this.convertToPeso(TotalAmount);
     },
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
@@ -519,7 +511,7 @@ export default {
     },
     async setOrderNo() {
       const orderN = await this.$store.state.POS.orderNo;
-      this.orderNo = orderN;
+      this.orderNo = "0" + (Number(orderN) + 1);
     },
     async getCustomerList() {
       await this.customerList();
@@ -550,8 +542,6 @@ export default {
     voidReason(reason) {
       this.void = false;
 
-      // console.log(this.radioSelected);
-      this.radioSelected = reason.type;
       this.voidProducts.push({
         index: this.toVoid.index,
         item: this.toVoid.item,
@@ -559,7 +549,6 @@ export default {
       });
       this.$bvModal.hide("voidModal");
       this.removeItem(this.toVoid.index);
-      console.log(this.radioSelected);
     },
     async checkout() {
       const orderList = await this.orders;
@@ -578,31 +567,19 @@ export default {
         discount: this.discount,
         totalDue: this.totalDue,
         adminId: this.adminId,
-        customer: this.customer.id_no == "" ? "none" : this.customer
+        customer: this.customer.id_no == "" ? "none" : this.customer,
+        isDiscounted: this.customer.id_no == "" ? false : true
       });
 
       this.$refs["paymentModal"].show();
     },
-
-    //pag namili ng discount radio button
-    async radioChange() {
-      if (this.radioSelected == "none") {
-        this.isDiscount = false;
-        await this.watchOrderList(this.checkOrder);
-        this.customer.id_no = "";
-        this.customer.full_name = "";
-        this.customer.type = "none";
-        this.vatExempt = this.convertToPeso(0);
-        this.discount = this.convertToPeso(0);
-        return;
-      }
-
-      this.securityModal.title = "Security";
-      console.log("radioChange", this.radioSelected);
+    //pag pili ng discount
+    discountBtn() {
       this.$bvModal.show("securityModal");
     },
     // naka select na ng customer na eligible for discount
     async customerSelected(item) {
+      this.isDiscount = true;
       this.customer.id_no = item.id_no;
       this.customer.full_name = item.full_name;
       this.customer.type = item.type;
@@ -611,7 +588,16 @@ export default {
 
       this.$bvModal.hide("discountModal");
     },
-
+    //pag palit ng customer
+    changeCustomer() {
+      this.$bvModal.show("securityModal");
+    },
+    cancelDiscount() {
+      this.isDiscount = false;
+      this.customer.id_no = "";
+      this.customer.full_name = "";
+      this.customer.type = "";
+    },
     discountComputation() {
       this.vatExempt = this.priceNoDiscount.VATSales;
       const vatExemptSales = Number(
@@ -626,53 +612,31 @@ export default {
       this.discount = this.convertToPeso(seniorDiscount);
       this.totalDue = this.convertToPeso(totalDueWithDisc);
     },
+
     //para sa security ng discount
     async successAccess(userId) {
+      await this.getCustomerList();
       this.modal.headerBgVariant = "dark";
       this.modal.headerTextVariant = "light";
       this.adminId = userId;
       this.$bvModal.hide("securityModal");
 
       if (this.void == true) {
-        this.radioSelected = this.radioSelected;
         this.$refs["voidModal"].show();
         return;
       }
-      if (this.radioSelected == "senior") {
-        await this.getCustomerList();
-        this.void = false;
-        this.isDiscount = true;
-        this.$refs["discountModal"].show();
-        return;
-      }
-      if (this.radioSelected == "PWD") {
-        await this.getCustomerList();
-        this.void = false;
-        this.isDiscount = true;
-        this.$refs["discountModal"].show();
-        return;
-      }
+      this.$bvModal.show("discountModal");
     },
     accessDenied() {
       this.securityModal.title = "ERROR!";
       this.modal.headerBgVariant = "danger";
     },
     //para sa pag hide ng mga modal
-    cancelDiscount() {
+    cancelDiscountModal() {
       if (this.customer.id_no != null) {
-        if (this.customer.type === "senior") {
-          this.radioSelected = "senior";
-          this.$bvModal.hide("discountModal");
-          return;
-        }
-        if (this.customer.type === "PWD") {
-          this.radioSelected = "PWD";
-          this.$bvModal.hide("discountModal");
-          return;
-        }
+        this.$bvModal.hide("discountModal");
       }
       this.$bvModal.hide("discountModal");
-      this.radioSelected = "none";
       this.isDiscount = false;
       this.void = false;
     },
@@ -682,22 +646,12 @@ export default {
     },
     cancelSecurity() {
       if (this.customer.id_no != null) {
-        if (this.customer.type === "senior") {
-          this.radioSelected = "senior";
-          this.$bvModal.hide("securityModal");
-          return;
-        }
-        if (this.customer.type === "PWD") {
-          this.radioSelected = "PWD";
-          this.$bvModal.hide("securityModal");
-          return;
-        }
+        this.$bvModal.hide("discountModal");
       }
       this.$bvModal.hide("securityModal");
       this.securityModal.title = "Security";
       this.modal.headerBgVariant = "dark";
       this.modal.headerTextVariant = "light";
-      this.radioSelected = "none";
     },
     checkDiscountType() {}
   }
@@ -741,6 +695,7 @@ export default {
 .borderStyle {
   border: 1px solid #0000ff;
   border-radius: 10px 10px;
+  padding-right: 0px;
 }
 .customerNameLabel {
   max-width: 19.33333%;

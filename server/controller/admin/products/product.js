@@ -81,11 +81,16 @@ module.exports = {
           $match: { 'product.isActive': 'Yes' },
         },
       ]);
-      // const orderNum = await orderNo();
-      const newOr = await Counter.findOne({ id: 'orderNo' });
+      // await orderNo();
+      const checkOrderNo = await Counter.findOne({ id: 'orderNo' });
+      if (!checkOrderNo) {
+        c = await new Counter({ id: orderNoId, seq: 1 });
+        await c.save();
+      }
+      const findOrderNo = await Counter.findOne({ id: 'orderNo' });
 
-      const orderNum = `0${newOr.seq}`;
-      console.log(orderNum);
+      const orderNum = `0${findOrderNo.seq}`;
+
       if (products.length === 0) {
         res.status(200).json({ msg: 'No data available', success: false });
       } else {
@@ -209,7 +214,7 @@ var orderNo = async (orderno) => {
           await c.save();
         }
         const newOr = await Counter.findOne({ id: orderNoId });
-        const orderId = newOr.id;
+        // const orderId = newOr.id;
 
         const newOrderIdCode = `0${newOr.seq}`;
         resolve(newOrderIdCode);

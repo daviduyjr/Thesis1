@@ -70,6 +70,17 @@
                   </div>
                 </ValidationProvider>
               </div>
+              <div class="col-12">
+                <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
+                  <small class="text-muted">Type</small>
+                  <b-form-radio-group
+                    v-model="addCustType"
+                    :options="radioOptions"
+                    :aria-describedby="ariaDescribedBy"
+                    name="radioDiscount"
+                  ></b-form-radio-group>
+                </b-form-group>
+              </div>
               <div class="col-12 text-danger text-center">
                 <small id="idErrorMsg"></small>
               </div>
@@ -85,18 +96,32 @@
         </div>
       </form>
     </ValidationObserver>
-    <div class="col-12">
-      <div class="form-group">
-        <small class="text-muted">Filter</small>
-        <b-input-group size="sm">
-          <b-form-input
-            v-model="table.filter"
-            type="search"
-            id="filter-input"
-            placeholder="Search customer."
-          >
-          </b-form-input>
-        </b-input-group>
+    <div class="col-12 mb-2">
+      <div class="row">
+        <div class="col-6">
+          <small class="text-muted">Filter</small>
+          <b-input-group size="sm">
+            <b-form-input
+              v-model="table.filter"
+              type="search"
+              id="filter-input"
+              placeholder="Search customer."
+            >
+            </b-form-input>
+          </b-input-group>
+        </div>
+        <div class="col-6">
+          <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
+            <small class="text-muted">Filter By:</small>
+            <b-form-radio-group
+              @change="radioChange"
+              v-model="radioSelected"
+              :options="radioOptions"
+              :aria-describedby="ariaDescribedBy"
+              name="radioDiscount"
+            ></b-form-radio-group>
+          </b-form-group>
+        </div>
       </div>
     </div>
     <div class="col-12 table-sm">
@@ -204,12 +229,12 @@ import { listIndexes } from "../../../../server/models/inventory/RecievingOrder"
 let $ = JQuery;
 export default {
   name: "discountModal",
-  props: ["type"],
   data() {
     return {
       customers: [],
       id_no: "",
       full_name: "",
+      addCustType: "SENIOR",
       table: {
         filter: "",
         headVariant: "dark",
@@ -229,17 +254,26 @@ export default {
             label: "Name",
             sortable: true
           },
+          {
+            key: "type",
+            label: "Type"
+          },
           { key: "actions", label: "Actions" }
         ],
         sortDirection: "desc"
       },
+      radioSelected: "SENIOR",
+      radioOptions: [
+        { text: "SENIOR", value: "SENIOR" },
+        { text: "PWD", value: "PWD" }
+      ],
       //para sa overlay
       busy: false,
       processing: false
     };
   },
   mounted() {
-    this.checkType();
+    this.getCustomer(this.radioSelected);
   },
   computed: {
     customerListState() {
@@ -257,32 +291,38 @@ export default {
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
-    async checkType() {
+    async getCustomer(type) {
       $(".addCustForm").hide();
+      this.customers = [];
       const list = await this.customerListState;
-      const res = await list.filter(data => data.type == this.type);
+      const res = await list.filter(data => data.type == type);
       res.forEach(data => {
         this.customers.push({
           id_no: data.id_no,
-          full_name: data.full_name
+          full_name: data.full_name,
+          type: data.type
         });
       });
     },
-    selectCustomer(item) {
-      //console.log(item);
-      const customer = {
+    async selectCustomer(item) {
+      const customer = await {
         id_no: item.id_no,
         full_name: item.full_name,
-        type: this.type
+        type: item.type
       };
       this.$emit("customerSelected", customer);
     },
     addCustomerBtn() {
       $(".addCustForm").show();
     },
+    async radioChange() {
+      console.log(this.radioSelected);
+      this.getCustomer(this.radioSelected);
+    },
     async saveAndSelect() {
+      console.log("saveAndSelect");
       const list = this.customerListState;
-      const bytype = await list.filter(data => data.type == this.type);
+      const bytype = await list.filter(data => data.type == this.addCustType);
       const res = await bytype.filter(data => data.id_no == this.id_no);
 
       if (res.length > 0) {
@@ -301,7 +341,7 @@ export default {
       const customer = {
         id_no: this.id_no,
         full_name: this.full_name,
-        type: this.type
+        type: this.addCustType
       };
       setTimeout(() => {
         this.addCustomer(customer).then(data => {
@@ -318,11 +358,12 @@ export default {
 
     closeAddCustForm() {
       $(".addCustForm").hide();
+      this.getCustomer(this.radioSelected);
       this.id_no = "";
       this.full_name = "";
     },
     cancel() {
-      this.$emit("cancelDiscount");
+      this.$emit("cancelDiscountModal");
     },
     onShown() {
       // Focus the dialog prompt
