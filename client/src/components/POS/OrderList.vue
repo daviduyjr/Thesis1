@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <section>
     <div class="wrapper">
-      <div class="card" style="height: 590px;">
+      <div class="card fixed-wrapper">
         <div class="card-body pt-3 pb-1">
           <div class="row">
             <div class="col-5 pl-0">
@@ -15,60 +15,102 @@
           </div>
 
           <div class="row">
-            <div class="col-12 table-sm" style="height: 310px;">
-              <b-table
-                class=""
-                sticky-header="300px"
-                :items="orders"
-                :fields="table.fields"
-                :busy="table.isBusy"
-                :filter="table.filter"
-                head-variant="dark"
-                small
-                bordered
-                responsive
-                foot-clone
-                show-empty
-                empty-text="No transaction."
-                tbody-td-class="rowClass"
-                style="height: 310px;"
-              >
-                <template #cell(actions)="row">
-                  <div class="row">
-                    <div class="col-12 col-md-6 pr-1">
-                      <b-button
-                        size="sm"
-                        @click="edit(row.item, row.index, $event.target)"
-                        class="btn-success btn-block"
-                      >
-                        Edit
-                      </b-button>
-                    </div>
-                    <div class="col-12 col-md-6  pl-0">
-                      <b-button
-                        size="sm"
-                        @click="voidItem(row.item, row.index, $event.target)"
-                        class="btn-success btn-block"
-                      >
-                        Void
-                      </b-button>
-                    </div>
-                  </div>
-                </template>
-                <template v-slot:empty="scope">
-                  <h3 class="text-center">{{ scope.emptyText }}</h3>
-                </template>
-              </b-table>
-            </div>
-            <div class="col-12">
+            <div class="col-12 mb-2">
               <div class="row">
-                <div class="col-6">
+                <div class="col-3">
+                  <small class="text-muted">Search Product</small>
+                  <v-select
+                    label="prodName"
+                    :options="selectProduct"
+                    :value="$store.myValue"
+                    @input="prodSelected"
+                    class="style-chooser"
+                    v-model="select2"
+                  ></v-select>
+                </div>
+                <div class="col-3">
+                  <div class="form-group">
+                    <small class="text-muted">Category</small>
+                    <b-form-select
+                      id="category"
+                      v-model="filterByCategory"
+                      :options="categoryOptions"
+                      @change="selectCat"
+                      size="sm"
+                    >
+                    </b-form-select>
+                  </div>
+                </div>
+                <div class="col-3 pt-3">
+                  <b-button
+                    @click="$bvModal.show('allProduct')"
+                    pill
+                    variant="outline-primary"
+                    size="lg"
+                  >
+                    All Products</b-button
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-12 col-sm-12 pl-0" style="height: 310px;">
+              <div class="row">
+                <div class="col-8">
+                  <b-table
+                    sticky-header
+                    :items="orders"
+                    :fields="table.fields"
+                    :busy="table.isBusy"
+                    :filter="table.filter"
+                    head-variant="dark"
+                    small
+                    bordered
+                    foot-clone
+                    show-empty
+                    empty-text="No transaction."
+                    responsive
+                  >
+                    <template #cell(actions)="row">
+                      <div class="row">
+                        <div class="col-12 col-md-6 pr-0">
+                          <b-button
+                            size="sm"
+                            @click="edit(row.item, row.index, $event.target)"
+                            class="btn-success btn-block"
+                            v-b-tooltip.hover
+                            title="Edit"
+                          >
+                            <b-icon icon="pencil-square"></b-icon>
+                          </b-button>
+                        </div>
+                        <div class="col-12 col-md-6 pl-1">
+                          <b-button
+                            size="sm"
+                            @click="
+                              voidItem(row.item, row.index, $event.target)
+                            "
+                            class="btn-success btn-block  "
+                            v-b-tooltip.hover
+                            title="Delete"
+                          >
+                            <b-icon icon="trash"></b-icon>
+                          </b-button>
+                        </div>
+                      </div>
+                    </template>
+                    <template v-slot:empty="scope">
+                      <h3 class="text-center">{{ scope.emptyText }}</h3>
+                    </template>
+                  </b-table>
+                </div>
+                <div class="col-4">
                   <div class="row">
-                    <div v-if="this.isDiscount" class="col-12 borderStyle">
+                    <div v-if="this.isDiscount" class="row mx-1 borderStyle">
                       <small class="">Discount</small>
                       <div class="col-12 px-0" v-if="this.customer.id_no">
                         <div class="row">
-                          <div class="col-4">
+                          <div class="col-4 pr-0">
                             <div class="form-group-row">
                               <label for="" class="col-4 px-0 customerNameLabel"
                                 >ID:</label
@@ -78,9 +120,9 @@
                               }}</strong>
                             </div>
                           </div>
-                          <div class="col-8">
+                          <div class="col-8 pr-0">
                             <div class="form-group-row">
-                              <label for="" class="col-4 px-0 customerNameLabel"
+                              <label for="" class="col-5 px-0 customerNameLabel"
                                 >Name:</label
                               >
                               <strong class="">{{
@@ -120,9 +162,137 @@
                         </div>
                       </div>
                     </div>
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="">VAT Exempt</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList"
+                        id="vatExempt"
+                        v-model="vatExempt"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="">VAT Sales</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList"
+                        id="VATSales"
+                        v-model="VATSales"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-md-6 col-sm-6 mb-1">
+                      <small class="discount">SC/PWD Discount</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList discount mt-1"
+                        id="discount"
+                        v-model="discount"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
+                    <div class="form-group col-md-6 col-sm-6  mb-1">
+                      <small class="">VAT(12%)</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList"
+                        id="VAT"
+                        v-model="VAT"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="form-group col-md-6 mb-1"></div>
+                    <div class="form-group col-md-6 mb-1">
+                      <small class="col-xs-12">Total Amount Due</small>
+                      <input
+                        size="sm"
+                        type="text"
+                        class="form-control inputOrderList mt-1"
+                        id="totalDue"
+                        v-model="totalDue"
+                        v-money="money"
+                        disabled
+                      />
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="row">
                 <div class="col-6">
+                  <!-- <div class="row"> -->
+                  <!-- <div v-if="this.isDiscount" class="row borderStyle">
+                    <small class="">Discount</small>
+                    <div class="col-12 px-0" v-if="this.customer.id_no">
+                      <div class="row">
+                        <div class="col-4 pr-0">
+                          <div class="form-group-row">
+                            <label for="" class="col-4 px-0 customerNameLabel"
+                              >ID:</label
+                            >
+                            <strong class="">{{ this.customer.id_no }}</strong>
+                          </div>
+                        </div>
+                        <div class="col-8 pr-0">
+                          <div class="form-group-row">
+                            <label for="" class="col-5 px-0 customerNameLabel"
+                              >Name:</label
+                            >
+                            <strong class="">{{
+                              this.customer.full_name
+                            }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-4">
+                          <div class="form-group-row">
+                            <small for="" class="col-5 px-0">Type:</small>
+                            <strong class="">{{ this.customer.type }}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12" v-if="this.customer.id_no">
+                      <div class="form-inline mb-1 float-right">
+                        <b-button
+                          pill
+                          @click="changeCustomer"
+                          variant="outline-primary"
+                          size="sm"
+                        >
+                          Change</b-button
+                        >
+                        <b-button
+                          @click="cancelDiscount"
+                          class="ml-1"
+                          pill
+                          variant="outline-danger"
+                          size="sm"
+                        >
+                          Cancel</b-button
+                        >
+                      </div>
+                    </div>
+                  </div> -->
+                  <!-- </div> -->
+                </div>
+                <!-- <div class="col-6">
                   <div class="row">
                     <div class="form-group col-md-6 mb-1">
                       <small class="">VAT Exempt</small>
@@ -150,7 +320,7 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="form-group col-md-6 mb-1">
+                    <div class="form-group col-md-6 col-sm-6 mb-1">
                       <small class="discount">SC/PWD Discount</small>
                       <input
                         size="sm"
@@ -162,7 +332,7 @@
                         disabled
                       />
                     </div>
-                    <div class="form-group col-md-6 mb-1">
+                    <div class="form-group col-md-6 col-sm-6  mb-1">
                       <small class="">VAT(12%)</small>
                       <input
                         size="sm"
@@ -178,7 +348,7 @@
                   <div class="row">
                     <div class="form-group col-md-6 mb-1"></div>
                     <div class="form-group col-md-6 mb-1">
-                      <small class="">Total Amount Due</small>
+                      <small class="col-xs-12">Total Amount Due</small>
                       <input
                         size="sm"
                         type="text"
@@ -190,15 +360,15 @@
                       />
                     </div>
                   </div>
-                </div>
+                </div> -->
               </div>
             </div>
-            <div class="col-12 mb-3">
-              <div class="row">
-                <div class="col-md-4">
+            <div class="col-12 mt-3 mb-3" style="text-align: right;">
+              <!-- <div class="row" style="text-align: right;"> -->
+              <span>
+                <div class="inline">
                   <b-button
                     @click="discountBtn"
-                    class="float-left"
                     pill
                     variant="outline-primary"
                     size="lg"
@@ -206,10 +376,10 @@
                     SC/PWD Discount</b-button
                   >
                 </div>
-                <div class="col-md-4">
+
+                <div class="inline">
                   <b-button
                     @click="checkout"
-                    class="float-left"
                     pill
                     variant="outline-primary"
                     size="lg"
@@ -217,16 +387,61 @@
                     Checkout</b-button
                   >
                 </div>
-              </div>
+              </span>
+              <!-- </div> -->
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- modal para sa warning -->
     <b-modal
       hide-footer
+      id="prodOutLook"
+      title="Product OutLook"
+      ref="prodOutLookModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="md"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
+      @hide="prodOutlookHide"
+    >
+      <ProductOutLook :product="this.selectedProduct" />
+    </b-modal>
+    <b-modal
+      hide-footer
+      id="allProduct"
+      title="Products"
+      ref="allProductModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="lg"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
+      @hide="prodOutlookHide"
+    >
+      <ProductListPOS />
+    </b-modal>
+    <!-- modal para sa warning -->
+    <b-modal
+      @hide="prodOutlookHide"
+      hide-footer
       id="orderExist"
+      title="Warning!"
+      ref="orderExistModal"
+      header-bg-variant="danger"
+      :header-text-variant="modal.headerTextVariant"
+      size="sm"
+    >
+      <div class="col-12" style="font-size:20px">
+        <label>Item already in the list</label>
+        <b-icon-exclamation-triangle-fill
+          variant="danger"
+          animation="fade"
+        ></b-icon-exclamation-triangle-fill>
+      </div>
+    </b-modal>
+    <b-modal
+      hide-footer
+      id="emptyOrder"
       title="Warning!"
       ref="emptyOrderWarningModal"
       header-bg-variant="danger"
@@ -301,7 +516,7 @@
         @cancelSecurity="cancelSecurity"
       />
     </b-modal>
-  </div>
+  </section>
 </template>
 
 <script>
@@ -314,6 +529,8 @@ import PaymentModal from "../POS/PaymentModal";
 import DiscountModal from "../POS/DiscountModal";
 import DiscountSecurity from "../POS/Security";
 import VoidReasonModal from "../POS/VoidReasonModal";
+import ProductOutLook from "../POS/ProductOutLook";
+import ProductListPOS from "@/components/POS/ProductListPOS.vue";
 
 let $ = JQuery;
 export default {
@@ -323,7 +540,9 @@ export default {
     PaymentModal,
     DiscountModal,
     DiscountSecurity,
-    VoidReasonModal
+    VoidReasonModal,
+    ProductOutLook,
+    ProductListPOS
   },
   data() {
     return {
@@ -419,10 +638,22 @@ export default {
       securityModal: {
         title: "Security"
       },
-      allData: []
+      //para sa select2
+      allData: [],
+      select2: "",
+      selectProduct: [],
+      selectedProduct: {},
+      //para sa category filter
+      categoryOptions: [
+        {
+          value: null,
+          text: "All items"
+        }
+      ],
+      filterByCategory: ""
     };
   },
-  props: ["toOrder"],
+  props: ["toOrder", "productsMain"],
   mounted() {
     this.checkOrder;
   },
@@ -445,6 +676,8 @@ export default {
   mounted() {
     this.setOrderNo();
     this.watchOrderList(this.checkOrder);
+    this.getProdName();
+    this.getCategoryList();
   },
   methods: {
     ...mapActions([
@@ -453,12 +686,89 @@ export default {
       "removeItem",
       "customerList"
     ]),
+    async getProdName() {
+      //   console.log("OrderList", this.productsMain);
+      const arr = [];
+      this.selectProduct = [];
+      this.productsMain.forEach(data => {
+        data.forEach(async prod => {
+          await arr.push({
+            prod_id: prod.prodId,
+            prodName: prod.product.product_name,
+            description: prod.product.description,
+            SRP: prod.product.SRP,
+            category_name: prod.product.category[0].category_name,
+            category_id: prod.product.category[0]._id,
+            stock_onhand: prod.stock_onhand,
+            isActive: prod.product.isActive
+          });
+        });
+      });
+      this.selectProduct = arr;
+      return arr;
+    },
+    async prodSelected(value) {
+      if (value == null) {
+        this.select2 = "";
+        return;
+      }
+      const list = await this.checkOrder;
+      const found = await list.some(el => el.id === value.prod_id);
+      if (found == true) {
+        this.$refs["orderExistModal"].show();
+        return;
+      }
+      if (Number(value.stock_onhand) < 10) {
+        this.modal.headerBgVariant = "danger";
+        this.selectedProduct = value;
+
+        this.$bvModal.show("prodOutLook");
+        return;
+      }
+      this.modal.headerBgVariant = "dark";
+      this.selectedProduct = value;
+
+      this.$bvModal.show("prodOutLook");
+    },
+    async getCategoryList() {
+      const res = await this.categoryList();
+      if (res.data.success == true) {
+        res.data.categories.forEach(data => {
+          this.categoryOptions.push({
+            value: data._id,
+            text: data.category_name
+          });
+        });
+      }
+    },
+    async selectCat(e) {
+      try {
+        const id = this.filterByCategory;
+        if (id === null) {
+          await this.getProdName();
+          return;
+        }
+        let filteredItems = await this.getProdName();
+
+        filteredItems = await filteredItems.filter(product => {
+          return product.category_id.match(id);
+        });
+        this.selectProduct = filteredItems;
+      } catch (err) {
+        let json = '{"msg": "No records available!", "success": false }';
+        let msg = JSON.parse(json);
+        return msg;
+      }
+    },
+    prodOutlookHide() {
+      this.select2 = "";
+    },
     watchOrderList(val) {
       let subTotalist = 0;
       this.orders = [];
 
       val.forEach(async prod => {
-        const SRP = Number(prod.SRP.replace(/\,/g, ""));
+        const SRP = Number(prod.SRP.replace(/\₱|,/g, ""));
 
         const totalComputation = SRP * prod.quantity;
 
@@ -594,6 +904,9 @@ export default {
     },
     cancelDiscount() {
       this.isDiscount = false;
+      this.watchOrderList(this.checkOrder);
+      this.vatExempt = 0;
+      this.discount = 0;
       this.customer.id_no = "";
       this.customer.full_name = "";
       this.customer.type = "";
@@ -648,6 +961,8 @@ export default {
       if (this.customer.id_no != null) {
         this.$bvModal.hide("discountModal");
       }
+      this.void = false;
+
       this.$bvModal.hide("securityModal");
       this.securityModal.title = "Security";
       this.modal.headerBgVariant = "dark";
@@ -665,12 +980,7 @@ export default {
 .orderNo {
   font-size: 19px;
 }
-.rowClass {
-  padding: 0px !important;
-}
-.table-sm {
-  padding: 0px;
-}
+
 .btnAdd {
   padding-left: 12px;
   margin-left: 30px;
@@ -681,6 +991,10 @@ export default {
 .wrapper {
   position: relative;
 }
+.fixed-wrapper {
+  position: sticky;
+}
+
 .bottom {
   position: absolute;
   bottom: 12px;
@@ -696,9 +1010,29 @@ export default {
   border: 1px solid #0000ff;
   border-radius: 10px 10px;
   padding-right: 0px;
+  padding-left: 15px;
 }
 .customerNameLabel {
-  max-width: 19.33333%;
+  max-width: 23.33333%;
   font-size: 14px;
+}
+/* .cardBody {
+  padding-left: 17px;
+  padding-right: 17px;
+} */
+.style-chooser .vs__search::placeholder,
+.style-chooser .vs__dropdown-toggle,
+.style-chooser .vs__dropdown-menu {
+  background: #dfe5fb;
+  border: none;
+  color: red;
+  text-transform: uppercase;
+  font-variant: small-caps;
+}
+.inline {
+  display: inline-block;
+  margin-right: 5px;
+}
+.b-table-sticky-header {
 }
 </style>

@@ -1,98 +1,96 @@
 <template>
   <section>
-    <div class="card cardProdList" style="height: 590px;">
-      <div class="card-body cardBody w-100">
-        <h2 class="card-title text-center mb-1">PRODUCTS</h2>
+    <div class="row">
+      <div class="col-12">
         <div class="row">
-          <div class="col-12">
-            <div class="row">
-              <div class="col-6">
-                <div class="form-group">
-                  <small class="text-muted">Filter</small>
-                  <b-input-group size="sm">
-                    <b-form-input
-                      v-model="table.filter"
-                      type="search"
-                      id="filter-input"
-                      placeholder="Search products."
-                    >
-                    </b-form-input>
-                  </b-input-group>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="form-group">
-                  <small class="text-muted">Category</small>
-                  <b-form-select
-                    id="category"
-                    v-model="filters.selectCatName"
-                    :options="options"
-                    @change="selectCat"
-                    size="sm"
-                  >
-                  </b-form-select>
-                </div>
-              </div>
+          <div class="col-6">
+            <div class="form-group">
+              <small class="text-muted">Filter</small>
+              <b-input-group size="sm">
+                <b-form-input
+                  v-model="table.filter"
+                  type="search"
+                  id="filter-input"
+                  placeholder="Search products."
+                >
+                </b-form-input>
+              </b-input-group>
             </div>
           </div>
-          <div class="col-12" style="height: 320px;">
-            <b-table
-              class="productListTable"
-              sticky-header
-              :items="products"
-              :fields="table.fields"
-              :busy="table.isBusy"
-              :filter="table.filter"
-              :per-page="table.perPage"
-              :current-page="table.currentPage"
-              head-variant="dark"
-              bordered
-              small
-              foot-clone
-              show-empty
-              empty-text="No data to available."
-            >
-              <template #cell(actions)="row">
-                <b-button
-                  size="sm"
-                  @click="addToOrder(row.item, row.index, $event.target)"
-                  class="btn-success btn-block"
-                >
-                  Add
-                </b-button>
-              </template>
-              <template v-slot:empty="scope">
-                <h3 class="text-center">{{ scope.emptyText }}</h3>
-              </template>
-            </b-table>
-          </div>
-          <div class="col-12">
-            <div class="row perPagePagiGroup">
-              <div class="col-6 ">
-                <div class="form-group ">
-                  <small class="text-muted">Per Page</small>
-                  <b-form-select
-                    id="per-page-select"
-                    v-model="table.perPage"
-                    :options="table.pageOptions"
-                    size="md"
-                    class="perPage"
-                  ></b-form-select>
-                </div>
-              </div>
-              <b-col cols="6" class="perPageSelect">
-                <b-pagination
-                  v-model="table.currentPage"
-                  :total-rows="rows"
-                  :per-page="table.perPage"
-                >
-                </b-pagination>
-              </b-col>
+          <div class="col-6">
+            <div class="form-group">
+              <small class="text-muted">Category</small>
+              <b-form-select
+                id="category"
+                v-model="filters.selectCatName"
+                :options="options"
+                @change="selectCat"
+                size="sm"
+              >
+              </b-form-select>
             </div>
           </div>
         </div>
       </div>
+      <div class="col-12 table-sm" style="height: 320px;">
+        <b-table
+          sticky-header
+          :items="products"
+          :fields="table.fields"
+          :busy="table.isBusy"
+          :filter="table.filter"
+          :per-page="table.perPage"
+          :current-page="table.currentPage"
+          head-variant="dark"
+          bordered
+          small
+          foot-clone
+          show-empty
+          empty-text="No data to available."
+        >
+          <template #cell(actions)="row">
+            <b-button
+              size="sm"
+              @click="addToOrder(row.item, row.index, $event.target)"
+              class="btn-info btn-block"
+              px-0
+              v-b-tooltip.hover
+              title="Add"
+            >
+              <b-icon icon="cart-plus"></b-icon>
+            </b-button>
+          </template>
+          <template v-slot:empty="scope">
+            <h3 class="text-center">{{ scope.emptyText }}</h3>
+          </template>
+        </b-table>
+      </div>
+      <div class="col-12">
+        <div class="row perPagePagiGroup">
+          <div class="col-6 ">
+            <div class="form-group ">
+              <small class="text-muted">Per Page</small>
+              <b-form-select
+                id="per-page-select"
+                v-model="table.perPage"
+                :options="table.pageOptions"
+                size="md"
+                class="perPage"
+              ></b-form-select>
+            </div>
+          </div>
+          <b-col cols="6" class="perPageSelect">
+            <b-pagination
+              v-model="table.currentPage"
+              :total-rows="rows"
+              :per-page="table.perPage"
+            >
+            </b-pagination>
+          </b-col>
+        </div>
+      </div>
     </div>
+
     <b-modal
       hide-footer
       id="quantityModal"
@@ -227,26 +225,27 @@ export default {
           {
             key: "product_name",
             label: "Products Name",
-            sortable: true
-            // thStyle: { width: "70%" }
+            sortable: true,
+            thStyle: { width: "40%" }
           },
           {
             key: "category_name",
             label: "Category",
-            sortable: false
-            // thStyle: { width: "70%" }
+            sortable: false,
+            thStyle: { width: "13%" }
           },
           {
             key: "SRP",
             label: "Price",
-            sortable: false
+            sortable: false,
+            thStyle: { width: "13%" }
           },
           {
             key: "stock_onhand",
             label: "Stock",
             sortable: false
           },
-          { key: "actions", label: "Actions", thStyle: { width: "30%" } }
+          { key: "actions", label: "Actions", thStyle: { width: "10%" } }
         ],
         sortDirection: "desc"
       },
@@ -282,18 +281,18 @@ export default {
     async getProdList() {
       const arr = [];
       this.table.isBusy = true;
-      this.productsMain.forEach(async data => {
-        data.forEach(async prod => {
-          await arr.push({
-            id: prod.product._id,
-            product_name: prod.product.product_name,
-            description: prod.product.description,
-            SRP: prod.product.SRP,
-            category_name: prod.product.category[0].category_name,
-            category_id: prod.product.category[0]._id,
-            stock_onhand: prod.stock_onhand,
-            isActive: prod.product.isActive
-          });
+      const prod = await this.productList();
+
+      await prod.data.products.forEach(async data => {
+        await arr.push({
+          id: data.prodId._id,
+          product_name: data.prodId.product_name,
+          description: data.prodId.description,
+          SRP: data.prodId.SRP,
+          category_name: data.prodId.category.category_name,
+          category_id: data.prodId.category._id,
+          stock_onhand: data.stock_onhand,
+          isActive: data.prodId.isActive
         });
       });
 
@@ -336,10 +335,10 @@ export default {
     async addToOrder(item) {
       const list = await this.checkOrder;
       const found = list.some(el => el.id === item.id);
-      // if (found == true) {
-      //   this.$refs["orderExistModal"].show();
-      //   return;
-      // }
+      if (found == true) {
+        this.$refs["orderExistModal"].show();
+        return;
+      }
       const order = {
         id: item.id,
         product_name: item.product_name,

@@ -2,26 +2,34 @@
 <template>
   <div>
     <section class="register">
-      <div class="row">
-        <div class="col-lg-12 grid-margin stretch-card">
-          <div class="card">
-            <div class="card-body pt-2">
-              <h2 class="card-title text-center mb-1">
-                P.O.S
-              </h2>
-              <div class="row">
-                <div class="col-7">
-                  <OrderList :toOrder="this.toOrder" />
-                </div>
-                <div
-                  class="col-5"
-                  style="padding-left: 0px; padding-right: 0px;"
-                >
-                  <ProductListPOS
-                    v-if="this.isMounted"
-                    :productsMain="this.prodList"
-                    @clicked="addOrder"
-                  />
+      <div class="wrapper">
+        <div class=" fixed-wrapper">
+          <div class="row">
+            <div class="col-lg-12 grid-margin">
+              <div class="card">
+                <div class="card-body pt-2">
+                  <h2 class="card-title text-center mb-1">
+                    P.O.S
+                  </h2>
+                  <div class="row">
+                    <!-- <div class="col-7">
+                      <ProductListPOS
+                        v-if="this.isMounted"
+                        :productsMain="this.prodList"
+                        @clicked="addOrder"
+                      />
+                    </div> -->
+                    <div
+                      class="col-12"
+                      style="padding-left: 0px; padding-right: 0px;"
+                    >
+                      <OrderList
+                        v-if="this.isMounted"
+                        :productsMain="this.prodList"
+                        :toOrder="this.toOrder"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -91,5 +99,11 @@ export default {
 <style scoped>
 .card-title {
   font-size: 30px;
+}
+.wrapper {
+  position: relative;
+}
+.fixed-wrapper {
+  position: sticky;
 }
 </style>
