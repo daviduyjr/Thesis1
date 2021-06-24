@@ -2,18 +2,19 @@
   <section>
     <div class="wrapper">
       <div class="card fixed-wrapper">
-        <div class="card-body pt-3 pb-1">
+        <div class="card-header py-3">
           <div class="row">
             <div class="col-5 pl-0">
               <h2 class="orderNo float-left pt-1">Order No. {{ orderNo }}</h2>
             </div>
             <div class="col-7">
-              <h2 class="card-title float-left mb-1">
-                ORDER LIST
+              <h2 class="card-title float-left ">
+                POS
               </h2>
             </div>
           </div>
-
+        </div>
+        <div class="card-body pt-3 pb-1">
           <div class="row">
             <div class="col-12 mb-2">
               <div class="row">
@@ -135,7 +136,9 @@
                           <div class="col-4">
                             <div class="form-group-row">
                               <small for="" class="col-5 px-0">Type:</small>
-                              <strong class="">{{ this.customer.type }}</strong>
+                              <strong class="">{{
+                                this.customer.custType
+                              }}</strong>
                             </div>
                           </div>
                         </div>
@@ -412,7 +415,7 @@
       id="allProduct"
       title="Products"
       ref="allProductModal"
-      :header-bg-variant="modal.headerBgVariant"
+      header-bg-variant="dark"
       :header-text-variant="modal.headerTextVariant"
       size="lg"
       :no-close-on-backdrop="modal.closeOnBackdrop"
@@ -464,9 +467,13 @@
       ref="paymentModal"
       :header-bg-variant="modal.headerBgVariant"
       :header-text-variant="modal.headerTextVariant"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
       size="sm"
     >
-      <PaymentModal v-bind:allData="this.allData" />
+      <PaymentModal
+        @paymentSuccess="paymentSuccess"
+        v-bind:allData="this.allData"
+      />
     </b-modal>
     <!-- modal para discount -->
     <b-modal
@@ -576,7 +583,7 @@ export default {
       customer: {
         id_no: "",
         full_name: "",
-        type: ""
+        custType: ""
       },
       table: {
         filter: "",
@@ -661,6 +668,9 @@ export default {
     checkOrder(val) {
       this.watchOrderList(val);
     }
+    // orderNoState() {
+    //   return this.$store.state.POS.orderNo;
+    // }
   },
   computed: {
     rows() {
@@ -668,10 +678,16 @@ export default {
     },
     checkOrder() {
       return this.$store.state.POS.orderList;
+    },
+    getCashierDetails() {
+      return this.$store.state.Auth.user;
+    },
+    orderNoState() {
+      return this.$store.state.POS.orderNo;
+    },
+    productState() {
+      return this.$store.state.POS.productList;
     }
-    // orderNoState() {
-    //   return this.$store.state.POS.orderNo;
-    // }
   },
   mounted() {
     this.setOrderNo();
@@ -684,13 +700,18 @@ export default {
       "productList",
       "categoryList",
       "removeItem",
-      "customerList"
+      "customerList",
+      "productListPOS"
     ]),
     async getProdName() {
       //   console.log("OrderList", this.productsMain);
+      const arr = await this.getProducts(this.productsMain);
+      return arr;
+    },
+    async getProducts(data) {
       const arr = [];
       this.selectProduct = [];
-      this.productsMain.forEach(data => {
+      data.forEach(data => {
         data.forEach(async prod => {
           await arr.push({
             prod_id: prod.prodId,
@@ -762,6 +783,7 @@ export default {
     },
     prodOutlookHide() {
       this.select2 = "";
+      this.modal.headerBgVariant = "dark";
     },
     watchOrderList(val) {
       let subTotalist = 0;
@@ -820,23 +842,13 @@ export default {
       return Peso;
     },
     async setOrderNo() {
-      const orderN = await this.$store.state.POS.orderNo;
+      const orderN = await this.orderNoState;
+
       this.orderNo = "0" + (Number(orderN) + 1);
     },
     async getCustomerList() {
       await this.customerList();
     },
-    // rowClass(item, type) {
-    //   if (item && type === "row") {
-    //     if (item.released === true) {
-    //       return "text-success";
-    //     } else {
-    //       return "text-secondary";
-    //     }
-    //   } else {
-    //     return null;
-    //   }
-    // },
     edit(item) {
       console.log("edit", item);
     },
@@ -862,6 +874,7 @@ export default {
     },
     async checkout() {
       const orderList = await this.orders;
+      const cashierId = await this.getCashierDetails;
 
       if (orderList.length == 0) {
         this.$refs["emptyOrderWarningModal"].show();
@@ -876,6 +889,7 @@ export default {
         VAT: this.VAT,
         discount: this.discount,
         totalDue: this.totalDue,
+        cashierId: cashierId,
         adminId: this.adminId,
         customer: this.customer.id_no == "" ? "none" : this.customer,
         isDiscounted: this.customer.id_no == "" ? false : true
@@ -892,7 +906,7 @@ export default {
       this.isDiscount = true;
       this.customer.id_no = item.id_no;
       this.customer.full_name = item.full_name;
-      this.customer.type = item.type;
+      this.customer.custType = item.type;
 
       this.discountComputation();
 
@@ -909,7 +923,7 @@ export default {
       this.discount = 0;
       this.customer.id_no = "";
       this.customer.full_name = "";
-      this.customer.type = "";
+      this.customer.custType = "";
     },
     discountComputation() {
       this.vatExempt = this.priceNoDiscount.VATSales;
@@ -944,6 +958,19 @@ export default {
       this.securityModal.title = "ERROR!";
       this.modal.headerBgVariant = "danger";
     },
+
+    //para sa success transaction
+    async paymentSuccess() {
+      const res = await this.productListPOS();
+      await this.getProducts(this.productState);
+      await this.setOrderNo();
+      this.isDiscount = false;
+      this.customer.id_no = "";
+      this.customer.full_name = "";
+      this.customer.custType = "";
+      this.$bvModal.hide("paymentModal");
+    },
+
     //para sa pag hide ng mga modal
     cancelDiscountModal() {
       if (this.customer.id_no != null) {

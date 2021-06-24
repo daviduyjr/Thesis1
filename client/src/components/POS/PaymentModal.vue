@@ -61,13 +61,62 @@
                 class="btn-block"
                 pill
                 variant="outline-primary"
-                >Pay</b-button
+                >Pay/Print Reciept</b-button
+              >
+            </div>
+            <div class="col-12 mt-3">
+              <b-button
+                @click="printInvoice"
+                class="btn-block"
+                pill
+                variant="outline-primary"
+                >Preview Reciept</b-button
               >
             </div>
           </form>
         </ValidationObserver>
       </div>
     </div>
+    <b-overlay :show="busy" no-wrap @shown="onShown">
+      <template #overlay>
+        <div v-if="processing" class="text-center">
+          <b-icon icon="stopwatch" font-scale="3" animation="cylon"></b-icon>
+          <p id="cancel-label">Please wait...</p>
+        </div>
+        <div
+          v-else
+          ref="dialog"
+          tabindex="-1"
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="form-confirm-label"
+          class="text-center p-3"
+        >
+          <p><strong id="form-confirm-label">Are you sure?</strong></p>
+          <div class="d-flex">
+            <b-button
+              variant="outline-danger"
+              class="mr-3"
+              @click="onCancelConfirmation"
+            >
+              Cancel
+            </b-button>
+            <b-button variant="outline-success" @click="onSubmitFinal"
+              >OK</b-button
+            >
+          </div>
+        </div>
+      </template>
+    </b-overlay>
+    <b-modal
+      hide-footer
+      id="invoice"
+      title="Product OutLook"
+      ref="invoice"
+      size="md"
+    >
+      <Invoice :onSubmitItems="this.onSubmitItems" />
+    </b-modal>
   </section>
 </template>
 
@@ -78,6 +127,8 @@ import { mapActions } from "vuex";
 import { extend } from "vee-validate";
 import JQuery from "jquery";
 let $ = JQuery;
+
+import Invoice from "../POS/Invoice";
 
 extend("customRequired", {
   validate(value) {
@@ -111,7 +162,7 @@ extend("checkValid", {
 export default {
   directives: { money: VMoney },
   name: "paymentModal",
-  components: {},
+  components: { Invoice },
   data() {
     return {
       totalDue: "",
@@ -126,7 +177,10 @@ export default {
         precision: 2,
         masked: false
       },
-      onSubmitItems: {}
+      onSubmitItems: {},
+      //para sa overlay
+      busy: false,
+      processing: false
     };
   },
   props: ["allData"],
@@ -160,6 +214,7 @@ export default {
           VAT: items.VAT,
           discount: items.discount,
           totalDue: items.totalDue,
+          cashierId: items.cashierId,
           adminId: items.adminId,
           customer: items.customer,
           isDiscounted: items.isDiscounted
@@ -171,9 +226,37 @@ export default {
       console.log(this.onSubmitItems);
     },
     async onSubmit() {
+      this.processing = false;
+      this.busy = true;
+    },
+    async onSubmitFinal() {
+      this.processing = true;
       const cash = Number(this.cash.replace(/\₱|,/g, ""));
-      Object.assign(this.onSubmitItems, { cash: cash });
-      await this.payment(this.onSubmitItems);
+      const change = Number(this.cashChange.replace(/\₱|,/g, ""));
+      Object.assign(this.onSubmitItems, { cash, change });
+      this.$bvModal.show("invoice");
+      // setTimeout(async () => {
+      //   this.processing = true;
+      //   const res = await this.payment(this.onSubmitItems);
+      //   if (res.data.success == true) {
+      //     this.processing = false;
+      //     this.busy = false;
+      //     this.$emit("paymentSuccess");
+      //   }
+      // }, 2000);
+    },
+    printInvoice() {
+      const cash = this.cash;
+      const change = this.cashChange;
+      Object.assign(this.onSubmitItems, { cash, change });
+      this.$bvModal.show("invoice");
+    },
+    onShown() {
+      // Focus the dialog prompt
+      this.$refs.dialog.focus();
+    },
+    onCancelConfirmation() {
+      this.busy = false;
     }
   }
 };

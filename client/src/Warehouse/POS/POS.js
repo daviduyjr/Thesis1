@@ -11,7 +11,8 @@ const prodState = () => {
     orderNo: "",
     productList: [],
     orderList: [],
-    adminId: ""
+    adminId: "",
+    successTransaction: {}
   };
 };
 const state = prodState();
@@ -75,6 +76,10 @@ const actions = {
       let res = await axios.post("http://localhost:5000/api/admin/payment", {
         data: item
       });
+
+      commit("TRANSACTION_SUCCESS", res.data.trans);
+
+      return res;
     } catch (err) {}
   }
 };
@@ -94,6 +99,10 @@ const mutations = {
   REMOVE_ORDER(state, index) {
     state.orderList.splice(index, 1);
     for (var i = state.orderList.length - 1; i >= 0; i--) {}
+  },
+  TRANSACTION_SUCCESS(state, trans) {
+    state.orderList = [];
+    state.successTransaction = trans;
   },
   SECURITY_SUCCESS(state, userId) {
     state.adminId = userId;

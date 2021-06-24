@@ -11,7 +11,8 @@ const Counter = require('../../../models/inventory/counter');
 module.exports = {
   payment: async (req, res, next) => {
     try {
-      const { orderNo, VATSales, VatExempt, VAT, discount, totalDue, adminId, customer, isDiscounted } = req.body.data;
+      const { orderNo, VATSales, VatExempt, VAT, discount, totalDue, cash, change, cashierId, adminId, customer, isDiscounted } = req.body.data;
+      console.log('cash', cash, 'change', change);
       let orders = [];
       await req.body.data.orderList.forEach(async (item) => {
         try {
@@ -19,8 +20,8 @@ module.exports = {
 
           orders.push({
             prodId: item.id,
-            quantity: item.quantity,
-            total: item.total,
+            quantity: Number(item.quantity),
+            total: Number(item.total.replace(/\₱|,/g, '')),
           });
 
           await ProductInventory.update({ prodId: item.id }, { $inc: { stock_onhand: -test } }).then((data) => {
@@ -30,28 +31,40 @@ module.exports = {
           console.log(err);
         }
       });
-
+      console.log('orders', orders);
       const newTransaction = await new Transaction({
         order_no: orderNo,
-        list_of_orders: orderNo,
+        list_of_orders: orders,
         VAT: Number(VAT.replace(/\₱|,/g, '')),
         VATSales: Number(VATSales.replace(/\₱|,/g, '')),
         VatExempt: Number(VatExempt.replace(/\₱|,/g, '')),
         discount: Number(discount.replace(/\₱|,/g, '')),
         total_amount: Number(totalDue.replace(/\₱|,/g, '')),
+        cash: Number(cash),
+        change: Number(change),
         customer: customer,
         isDiscounted: isDiscounted,
         adminId: adminId,
+        cashierId,
       });
-      console.log(newTransaction);
-      // console.log(req.body.data.customer);
+
+      const test = await updateOrder();
+      console.log(test);
+      newTransaction
+        .save()
+        .then((data) => {
+          res.status(200).json({ trans: data, success: true });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     } catch (err) {
       console.log(err);
     }
   },
 };
 
-var order_no = async () => {
+var updateOrder = async () => {
   try {
     const orderNoId = 'orderNo';
     const orderNo = 0;

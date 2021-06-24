@@ -6,30 +6,16 @@
         <div class=" fixed-wrapper">
           <div class="row">
             <div class="col-lg-12 grid-margin">
-              <div class="card">
-                <div class="card-body pt-2">
-                  <h2 class="card-title text-center mb-1">
-                    P.O.S
-                  </h2>
-                  <div class="row">
-                    <!-- <div class="col-7">
-                      <ProductListPOS
-                        v-if="this.isMounted"
-                        :productsMain="this.prodList"
-                        @clicked="addOrder"
-                      />
-                    </div> -->
-                    <div
-                      class="col-12"
-                      style="padding-left: 0px; padding-right: 0px;"
-                    >
-                      <OrderList
-                        v-if="this.isMounted"
-                        :productsMain="this.prodList"
-                        :toOrder="this.toOrder"
-                      />
-                    </div>
-                  </div>
+              <div class="row">
+                <div
+                  class="col-12"
+                  style="padding-left: 0px; padding-right: 0px;"
+                >
+                  <OrderList
+                    v-if="this.isMounted"
+                    :productsMain="this.prodList"
+                    :toOrder="this.toOrder"
+                  />
                 </div>
               </div>
             </div>
@@ -62,10 +48,7 @@ export default {
   },
   methods: {
     ...mapActions(["categoryList", "productListPOS"]),
-    addOrder(addOrder) {
-      this.toOrder.push(addOrder);
-      //console.log("toOrder", this.toOrder);
-    },
+
     async getProductList() {
       const result = await this.productListPOS();
       const product = await this.$store.state.POS.productList;
