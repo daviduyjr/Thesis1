@@ -1,5 +1,6 @@
 /*eslint-disable */
 import axios from "axios";
+import { getTransactionById } from "../../../../server/controller/admin/POS/transaction";
 
 // const state = {
 //   productList: [],
@@ -80,6 +81,14 @@ const actions = {
       commit("TRANSACTION_SUCCESS", res.data.trans);
 
       return res;
+    } catch (err) {}
+  },
+
+  async getTransactionById({ commit }, id) {
+    try {
+      let res = await axios.get(
+        `http://localhost:5000/api/admin/transactionId/${id}`
+      );
     } catch (err) {}
   }
 };

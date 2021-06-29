@@ -62,6 +62,10 @@ module.exports = {
       console.log(err);
     }
   },
+
+  getTransactionById: async (req, res, next) => {
+    console.log(req.params.id);
+  },
 };
 
 var updateOrder = async () => {

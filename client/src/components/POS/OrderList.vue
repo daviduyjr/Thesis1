@@ -235,140 +235,19 @@
               </div>
             </div>
 
-            <div class="col-12">
-              <div class="row">
-                <div class="col-6">
-                  <!-- <div class="row"> -->
-                  <!-- <div v-if="this.isDiscount" class="row borderStyle">
-                    <small class="">Discount</small>
-                    <div class="col-12 px-0" v-if="this.customer.id_no">
-                      <div class="row">
-                        <div class="col-4 pr-0">
-                          <div class="form-group-row">
-                            <label for="" class="col-4 px-0 customerNameLabel"
-                              >ID:</label
-                            >
-                            <strong class="">{{ this.customer.id_no }}</strong>
-                          </div>
-                        </div>
-                        <div class="col-8 pr-0">
-                          <div class="form-group-row">
-                            <label for="" class="col-5 px-0 customerNameLabel"
-                              >Name:</label
-                            >
-                            <strong class="">{{
-                              this.customer.full_name
-                            }}</strong>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                        <div class="col-4">
-                          <div class="form-group-row">
-                            <small for="" class="col-5 px-0">Type:</small>
-                            <strong class="">{{ this.customer.type }}</strong>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-12" v-if="this.customer.id_no">
-                      <div class="form-inline mb-1 float-right">
-                        <b-button
-                          pill
-                          @click="changeCustomer"
-                          variant="outline-primary"
-                          size="sm"
-                        >
-                          Change</b-button
-                        >
-                        <b-button
-                          @click="cancelDiscount"
-                          class="ml-1"
-                          pill
-                          variant="outline-danger"
-                          size="sm"
-                        >
-                          Cancel</b-button
-                        >
-                      </div>
-                    </div>
-                  </div> -->
-                  <!-- </div> -->
-                </div>
-                <!-- <div class="col-6">
-                  <div class="row">
-                    <div class="form-group col-md-6 mb-1">
-                      <small class="">VAT Exempt</small>
-                      <input
-                        size="sm"
-                        type="text"
-                        class="form-control inputOrderList"
-                        id="vatExempt"
-                        v-model="vatExempt"
-                        v-money="money"
-                        disabled
-                      />
-                    </div>
-                    <div class="form-group col-md-6 mb-1">
-                      <small class="">VAT Sales</small>
-                      <input
-                        size="sm"
-                        type="text"
-                        class="form-control inputOrderList"
-                        id="VATSales"
-                        v-model="VATSales"
-                        v-money="money"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="form-group col-md-6 col-sm-6 mb-1">
-                      <small class="discount">SC/PWD Discount</small>
-                      <input
-                        size="sm"
-                        type="text"
-                        class="form-control inputOrderList discount mt-1"
-                        id="discount"
-                        v-model="discount"
-                        v-money="money"
-                        disabled
-                      />
-                    </div>
-                    <div class="form-group col-md-6 col-sm-6  mb-1">
-                      <small class="">VAT(12%)</small>
-                      <input
-                        size="sm"
-                        type="text"
-                        class="form-control inputOrderList"
-                        id="VAT"
-                        v-model="VAT"
-                        v-money="money"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="form-group col-md-6 mb-1"></div>
-                    <div class="form-group col-md-6 mb-1">
-                      <small class="col-xs-12">Total Amount Due</small>
-                      <input
-                        size="sm"
-                        type="text"
-                        class="form-control inputOrderList mt-1"
-                        id="totalDue"
-                        v-model="totalDue"
-                        v-money="money"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                </div> -->
-              </div>
-            </div>
             <div class="col-12 mt-3 mb-3" style="text-align: right;">
               <!-- <div class="row" style="text-align: right;"> -->
               <span>
+                <div class="inline">
+                  <b-button
+                    @click="$bvModal.show('returnModal')"
+                    pill
+                    variant="outline-primary"
+                    size="lg"
+                  >
+                    Refund</b-button
+                  >
+                </div>
                 <div class="inline">
                   <b-button
                     @click="discountBtn"
@@ -475,6 +354,17 @@
         v-bind:allData="this.allData"
       />
     </b-modal>
+    <!-- para sa invoice -->
+    <b-modal
+      hide-footer
+      id="invoice"
+      title="Product OutLook"
+      ref="invoice"
+      size="sm"
+    >
+      <Invoice :invoiceReciept="this.invoiceReciept" />
+      <!-- <Invoice2 /> -->
+    </b-modal>
     <!-- modal para discount -->
     <b-modal
       hide-footer
@@ -523,6 +413,19 @@
         @cancelSecurity="cancelSecurity"
       />
     </b-modal>
+    <b-modal
+      hide-footer
+      id="returnModal"
+      title="returnModal"
+      ref="returnModalModal"
+      :header-bg-variant="modal.headerBgVariant"
+      :header-text-variant="modal.headerTextVariant"
+      size="md"
+      :no-close-on-backdrop="modal.closeOnBackdrop"
+      @hide="prodOutlookHide"
+    >
+      <ReturnItem />
+    </b-modal>
   </section>
 </template>
 
@@ -538,6 +441,8 @@ import DiscountSecurity from "../POS/Security";
 import VoidReasonModal from "../POS/VoidReasonModal";
 import ProductOutLook from "../POS/ProductOutLook";
 import ProductListPOS from "@/components/POS/ProductListPOS.vue";
+import Invoice from "../POS/Invoice";
+import ReturnItem from "../POS/ReturnItem";
 
 let $ = JQuery;
 export default {
@@ -549,7 +454,9 @@ export default {
     DiscountSecurity,
     VoidReasonModal,
     ProductOutLook,
-    ProductListPOS
+    ProductListPOS,
+    Invoice,
+    ReturnItem
   },
   data() {
     return {
@@ -576,6 +483,7 @@ export default {
         discount: "",
         totalDue: ""
       },
+      invoiceReciept: {},
       options: [{ value: "", text: "Select Category" }],
       filters: {
         selectCatName: ""
@@ -960,7 +868,8 @@ export default {
     },
 
     //para sa success transaction
-    async paymentSuccess() {
+    async paymentSuccess(data) {
+      this.invoiceReciept = data;
       const res = await this.productListPOS();
       await this.getProducts(this.productState);
       await this.setOrderNo();
@@ -969,6 +878,7 @@ export default {
       this.customer.full_name = "";
       this.customer.custType = "";
       this.$bvModal.hide("paymentModal");
+      this.$bvModal.show("invoice");
     },
 
     //para sa pag hide ng mga modal

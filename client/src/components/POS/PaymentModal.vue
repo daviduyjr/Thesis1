@@ -108,15 +108,6 @@
         </div>
       </template>
     </b-overlay>
-    <b-modal
-      hide-footer
-      id="invoice"
-      title="Product OutLook"
-      ref="invoice"
-      size="md"
-    >
-      <Invoice :onSubmitItems="this.onSubmitItems" />
-    </b-modal>
   </section>
 </template>
 
@@ -129,6 +120,7 @@ import JQuery from "jquery";
 let $ = JQuery;
 
 import Invoice from "../POS/Invoice";
+import Invoice2 from "../POS/Invoice2";
 
 extend("customRequired", {
   validate(value) {
@@ -162,7 +154,7 @@ extend("checkValid", {
 export default {
   directives: { money: VMoney },
   name: "paymentModal",
-  components: { Invoice },
+  components: { Invoice, Invoice2 },
   data() {
     return {
       totalDue: "",
@@ -233,19 +225,20 @@ export default {
       this.processing = true;
       const cash = Number(this.cash.replace(/\₱|,/g, ""));
       const change = Number(this.cashChange.replace(/\₱|,/g, ""));
-      Object.assign(this.onSubmitItems, { cash, change });
-      this.$bvModal.show("invoice");
-      // setTimeout(async () => {
-      //   this.processing = true;
-      //   const res = await this.payment(this.onSubmitItems);
-      //   if (res.data.success == true) {
-      //     this.processing = false;
-      //     this.busy = false;
-      //     this.$emit("paymentSuccess");
-      //   }
-      // }, 2000);
+      await Object.assign(this.onSubmitItems, { cash, change });
+
+      setTimeout(async () => {
+        this.processing = true;
+        const res = await this.payment(this.onSubmitItems);
+        if (res.data.success == true) {
+          this.processing = false;
+          this.busy = false;
+          this.$emit("paymentSuccess", this.onSubmitItems);
+        }
+      }, 2000);
     },
     printInvoice() {
+      console.log("printInvoice");
       const cash = this.cash;
       const change = this.cashChange;
       Object.assign(this.onSubmitItems, { cash, change });

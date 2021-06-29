@@ -30,22 +30,57 @@
             <td class="Rate"><h2>Sub Total</h2></td>
           </tr>
 
-          <tr class="service">
-            <td class="tableitem"><p class="itemtext">Communication</p></td>
-            <td class="tableitem"><p class="itemtext">5</p></td>
-            <td class="tableitem"><p class="itemtext">$375.00</p></td>
+          <tr v-for="(item, i) in orders" :key="i" class="service">
+            <td class="tableitem">
+              <p class="itemtext">{{ item.product_name }}</p>
+            </td>
+            <td class="tableitem">
+              <p class="itemtext">{{ item.quantity }}</p>
+            </td>
+            <td class="tableitem">
+              <p class="itemtext">{{ item.total }}</p>
+            </td>
           </tr>
-
+          <tr class="itemtextTotal service">
+            <td class="">
+              <strong><h4>TOTAL</h4></strong>
+            </td>
+            <td colspan="2" style="text-align: right;">
+              <h4>{{ this.totalDue }}</h4>
+            </td>
+          </tr>
+          <!-- <div class=" itemtextTotal">
+            <strong>TOTAL</strong>
+            {{ this.totalDue }}
+          </div> -->
           <tr class="tabletitle">
             <td></td>
-            <td class="Rate"><h2>tax</h2></td>
-            <td class="payment"><h2>$419.25</h2></td>
+            <td class="Rate"><h2>VAT Sales</h2></td>
+            <td class="payment">
+              <h2>{{ this.VATSales }}</h2>
+            </td>
+          </tr>
+          <tr class="tabletitle">
+            <td></td>
+            <td class="Rate"><h2>VAT Exempt</h2></td>
+            <td class="payment">
+              <h2>{{ this.VatExempt }}</h2>
+            </td>
+          </tr>
+          <tr class="tabletitle">
+            <td></td>
+            <td class="Rate"><h2>VAT</h2></td>
+            <td class="payment">
+              <h2>{{ this.VAT }}</h2>
+            </td>
           </tr>
 
           <tr class="tabletitle">
             <td></td>
             <td class="Rate"><h2>Total</h2></td>
-            <td class="payment"><h2>$3,644.25</h2></td>
+            <td class="payment">
+              <h2>{{ this.totalDue }}</h2>
+            </td>
           </tr>
         </table>
       </div>
@@ -60,26 +95,82 @@
       </div>
     </div>
     <!--End InvoiceBot-->
+    <button @click="exportToPDF" class="btn btn-success">PDF</button>
   </div>
   <!--End Invoice-->
 </template>
 
 <script>
 /* eslint-disable */
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import html2pdf from "html2pdf.js";
 export default {
   name: "invoice",
-  props: ["onSubmitItems"],
+  data() {
+    return {
+      orders: [],
+      VAT: "",
+      VATSales: "",
+      VatExempt: "",
+      totalDue: ""
+    };
+  },
+  props: ["invoiceReciept"],
   mounted() {
     this.getOrderList();
   },
   computed: {
-    checkOrder() {
-      return this.$store.state.POS.orderList;
-    }
+    // checkOrder() {
+    //   return this.$store.state.POS.orderList;
+    // }
   },
   methods: {
-    getOrderList() {
-      console.log(this.onSubmitItems);
+    async getOrderList() {
+      console.log(await this.invoiceReciept);
+      await this.invoiceReciept.orderList.forEach(item => {
+        this.orders.push({
+          product_name: item.product_name,
+          quantity: item.quantity,
+          total: item.total
+        });
+      });
+      this.VAT = this.invoiceReciept.VAT;
+      this.VATSales = this.invoiceReciept.VATSales;
+      this.VatExempt = this.invoiceReciept.VatExempt;
+      this.totalDue = this.invoiceReciept.totalDue;
+    },
+    makePDF() {
+      console.log("test");
+      window.html2canvas = html2canvas;
+      var doc = new jsPDF("p", "pt", "a4");
+      doc.html(document.querySelector("#invoice-POS"), {
+        callback: pdf => {
+          pdf.save("test.pdf");
+        }
+      });
+    },
+    exportToPDF() {
+      // html2pdf(this.$refs.document, {
+      //   margin: 1,
+      //   filename: "document.pdf",
+      //   image: { type: "jpeg", quality: 0.98 },
+      //   html2canvas: { dpi: 192, letterRendering: true },
+      //   jsPDF: { unit: "in", format: "letter", orientation: "landscape" }
+      // });
+      //window.print();
+      var element = document.getElementById("invoice-POS");
+      var opt = {
+        margin: 1,
+        filename: "myfile.pdf",
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      };
+      html2pdf()
+        .set(opt)
+        .from(element)
+        .save();
     }
   }
 };
@@ -90,7 +181,7 @@ export default {
   box-shadow: 0 0 1in -0.25in rgba(0, 0, 0, 0.5);
   padding: 2mm;
   margin: 0 auto;
-  width: 44mm;
+  width: 50.8mm;
   background: #fff;
 }
 ::selection {
@@ -111,6 +202,11 @@ h2 {
 h3 {
   font-size: 1.2em;
   font-weight: 300;
+  line-height: 2em;
+}
+h4 {
+  font-size: 1.3em;
+  font-weight: 800;
   line-height: 2em;
 }
 p {
@@ -184,7 +280,11 @@ td {
 .itemtext {
   font-size: 0.5em;
 }
-
+.itemtextTotal {
+  font-size: 0.5em;
+  /* background: #eee; */
+  border-bottom: 1px solid #eee;
+}
 #legalcopy {
   margin-top: 5mm;
 }
