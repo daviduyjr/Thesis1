@@ -1,6 +1,7 @@
 const { compareSync } = require('bcryptjs');
 const { roles } = require('../../../config/roles');
 
+const Category = require('../../../models/inventory/Category');
 const ProductDetails = require('../../../models/inventory/ProductDetails');
 const ProductInventory = require('../../../models/inventory/ProductInventory');
 const Users = require('../../../models/User');
@@ -42,7 +43,7 @@ module.exports = {
         total_amount: Number(totalDue.replace(/\₱|,/g, '')),
         cash: Number(cash),
         change: Number(change),
-        customer: customer,
+        customer: customer.id_no,
         isDiscounted: isDiscounted,
         adminId: adminId,
         cashierId,
@@ -64,7 +65,34 @@ module.exports = {
   },
 
   getTransactionById: async (req, res, next) => {
-    console.log(req.params.id);
+    try {
+      const id = req.params.id;
+
+      const trans = await Transaction.findOne({ order_no: id })
+        .populate({
+          path: 'list_of_orders.prodId',
+          model: ProductDetails,
+          select: ['_id', 'product_name', 'SRP'],
+          populate: { path: 'category', select: 'category_name', model: Category },
+        })
+        .populate({
+          path: 'cashierId',
+          model: Users,
+          select: ['name', 'role'],
+        })
+        .populate({
+          path: 'customer',
+          model: Customer,
+          select: ['full_name', 'type'],
+        });
+      if (trans == null) {
+        res.status(200).json({ errMsg: "Transaction doesn't exist.", success: false });
+        return;
+      }
+      res.status(200).json({ data: trans, success: true });
+    } catch (err) {
+      res.status(200).json({ errMsg: "Transaction doesn't exist.", success: false });
+    }
   },
 };
 

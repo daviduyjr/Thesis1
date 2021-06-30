@@ -32,6 +32,7 @@ module.exports = {
 
   AddCustomer: async (req, res, next) => {
     try {
+      const custType = req.body.customer.type;
       const checkIfExisting = await Customer.findOne({ id_no: req.body.customer.id_no });
 
       if (checkIfExisting) {
@@ -43,7 +44,7 @@ module.exports = {
       }
 
       const newCustomer = new Customer({
-        id_no: req.body.customer.id_no,
+        _id: `${custType}-${req.body.customer.id_no}`,
         full_name: req.body.customer.full_name,
         type: req.body.customer.type,
       });

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const CustomerSchema = new Schema({
-  id_no: {
+  _id: {
     type: String,
     required: true,
   },
@@ -13,7 +13,7 @@ const CustomerSchema = new Schema({
   type: {
     type: String,
     default: 'none',
-    enum: ['none', 'senior', 'PWD'],
+    enum: ['none', 'SENIOR', 'PWD'],
     required: true,
   },
   date_created: {

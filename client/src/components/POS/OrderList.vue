@@ -812,7 +812,7 @@ export default {
     // naka select na ng customer na eligible for discount
     async customerSelected(item) {
       this.isDiscount = true;
-      this.customer.id_no = item.id_no;
+      this.customer.id_no = item._id;
       this.customer.full_name = item.full_name;
       this.customer.custType = item.type;
 

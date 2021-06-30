@@ -74,6 +74,7 @@
                 <b-form-group class="mb-1 mt-1" v-slot="{ ariaDescribedBy }">
                   <small class="text-muted">Type</small>
                   <b-form-radio-group
+                    @change="addCustTypeChange"
                     v-model="addCustType"
                     :options="radioOptions"
                     :aria-describedby="ariaDescribedBy"
@@ -245,7 +246,7 @@ export default {
         pageOptions: [5, 10, 15, { value: 100, text: "Show a lot" }],
         fields: [
           {
-            key: "id_no",
+            key: "_id",
             label: "Id",
             sortable: true
           },
@@ -298,7 +299,7 @@ export default {
       const res = await list.filter(data => data.type == type);
       res.forEach(data => {
         this.customers.push({
-          id_no: data.id_no,
+          _id: data._id,
           full_name: data.full_name,
           type: data.type
         });
@@ -306,7 +307,7 @@ export default {
     },
     async selectCustomer(item) {
       const customer = await {
-        id_no: item.id_no,
+        _id: item._id,
         full_name: item.full_name,
         type: item.type
       };
@@ -319,15 +320,22 @@ export default {
       console.log(this.radioSelected);
       this.getCustomer(this.radioSelected);
     },
+    async addCustTypeChange() {},
     async saveAndSelect() {
-      console.log("saveAndSelect");
+      // console.log("saveAndSelect", `${this.addCustType}-${this.id_no}`);
       const list = this.customerListState;
+
       const bytype = await list.filter(data => data.type == this.addCustType);
-      const res = await bytype.filter(data => data.id_no == this.id_no);
+      const res = await bytype.filter(
+        data => data._id == `${this.addCustType}-${this.id_no}`
+      );
 
       if (res.length > 0) {
+        console.log("list", this.customers);
+        await this.getCustomer(this.addCustType);
+        this.radioSelected = this.addCustType;
         $("#idErrorMsg").text("Customer Already Exist");
-        this.table.filter = this.id_no;
+        this.table.filter = `${this.addCustType}-${this.id_no}`;
         return;
       } else {
         $("#idErrorMsg").text("");
