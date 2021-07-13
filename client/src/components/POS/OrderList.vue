@@ -420,7 +420,7 @@
       ref="returnModalModal"
       :header-bg-variant="modal.headerBgVariant"
       :header-text-variant="modal.headerTextVariant"
-      size="md"
+      size="lg"
       :no-close-on-backdrop="modal.closeOnBackdrop"
       @hide="prodOutlookHide"
     >
@@ -838,7 +838,7 @@ export default {
       const vatExemptSales = Number(
         this.priceNoDiscount.VATSales.replace(/\₱|,/g, "")
       );
-      const VAT = Number(this.priceNoDiscount.VAT.replace(/\₱|,/g, ""));
+      //const VAT = Number(this.priceNoDiscount.VAT.replace(/\₱|,/g, ""));
       const seniorDiscount = vatExemptSales * 0.2;
       const totalDueWithDisc = vatExemptSales - seniorDiscount;
 

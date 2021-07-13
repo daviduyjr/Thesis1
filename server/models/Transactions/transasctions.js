@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const transactionSchema = new Schema({
   order_no: { type: String, required: true },
-  list_of_orders: [{ prodId: { type: String }, quantity: Number, total: Number }],
+  list_of_orders: [{ prodId: { type: String }, quantity: Number, total: Number, isVoid: { type: Boolean, default: false } }],
   VAT: { type: Number, required: false },
   VATSales: { type: Number, required: false },
   VatExempt: { type: Number, required: false },

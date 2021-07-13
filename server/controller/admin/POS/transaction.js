@@ -13,11 +13,11 @@ module.exports = {
   payment: async (req, res, next) => {
     try {
       const { orderNo, VATSales, VatExempt, VAT, discount, totalDue, cash, change, cashierId, adminId, customer, isDiscounted } = req.body.data;
-      console.log('cash', cash, 'change', change);
+      console.log('cash', cash, 'change', change, 'total', parseFloat(totalDue.replace(/\₱|,/g, '')));
       let orders = [];
       await req.body.data.orderList.forEach(async (item) => {
         try {
-          const test = Number(item.quantity);
+          const quantity = Number(item.quantity);
 
           orders.push({
             prodId: item.id,
@@ -25,14 +25,14 @@ module.exports = {
             total: Number(item.total.replace(/\₱|,/g, '')),
           });
 
-          await ProductInventory.update({ prodId: item.id }, { $inc: { stock_onhand: -test } }).then((data) => {
+          await ProductInventory.update({ prodId: item.id }, { $inc: { stock_onhand: -quantity } }).then((data) => {
             console.log(data);
           });
         } catch (err) {
           console.log(err);
         }
       });
-      console.log('orders', orders);
+      //console.log('orders', orders);
       const newTransaction = await new Transaction({
         order_no: orderNo,
         list_of_orders: orders,
@@ -89,7 +89,8 @@ module.exports = {
         res.status(200).json({ errMsg: "Transaction doesn't exist.", success: false });
         return;
       }
-      res.status(200).json({ data: trans, success: true });
+      console.log(trans);
+      res.status(200).json({ trans: trans, success: true });
     } catch (err) {
       res.status(200).json({ errMsg: "Transaction doesn't exist.", success: false });
     }

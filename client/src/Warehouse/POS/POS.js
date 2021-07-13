@@ -89,7 +89,8 @@ const actions = {
       let res = await axios.get(
         `http://localhost:5000/api/admin/transactionId/${id}`
       );
-      console.log(res.data);
+      //console.log(res.data);
+      return res;
     } catch (err) {}
   }
 };
