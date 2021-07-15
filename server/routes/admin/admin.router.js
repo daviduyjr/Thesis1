@@ -76,4 +76,6 @@ router.post('/posSecurity', securityPOS.checkIfAdmin);
 router.post('/payment', transaction.payment);
 
 router.get('/transactionId/:id', transaction.getTransactionById);
+
+router.put('/returnItems', transaction.returnItems);
 module.exports = router;

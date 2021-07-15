@@ -290,6 +290,11 @@ export default {
         selectMode: "multi",
         selected: [],
         toRefund: {},
+        priceNoDiscount: {
+          VATSales: "",
+          VAT: "",
+          totalDue: ""
+        },
         fields: [
           { key: "actions", label: "Actions" },
           // {
@@ -342,9 +347,13 @@ export default {
       // ]
     };
   },
-  computed: {},
+  computed: {
+    getCashierDetails() {
+      return this.$store.state.Auth.user;
+    }
+  },
   methods: {
-    ...mapActions(["getTransactionById"]),
+    ...mapActions(["getTransactionById", "returnItems"]),
     getValidationState({ dirty, validated, valid = null }) {
       return dirty || validated ? valid : null;
     },
@@ -354,6 +363,7 @@ export default {
       this.orderList = [];
       this.table.selected = [];
       this.toRefund = {};
+      this.customer = {};
       const id = this.id;
       const res = await this.getTransactionById(this.id);
       //console.log(res);
@@ -419,10 +429,12 @@ export default {
 
       this.refundTotal = this.convertToPeso(total);
     },
+    //para sa checkbox sa table
     async checkboxSelected(value, index, item) {
       if (value == true) {
         this.table.selected.push(item);
         this.onRowSelected(item);
+
         //console.log(this.table.selected);
         return;
       }
@@ -441,6 +453,7 @@ export default {
         return true;
       }
     },
+
     convertToPeso(amount) {
       const Peso = amount.toLocaleString("en-PH", {
         style: "currency",
@@ -463,16 +476,23 @@ export default {
         this.errMsg = "";
       }
     },
-    refundBtn() {
+    async refundBtn() {
+      this.toRefund = {};
       const refundAmount = this.refundTotal;
+      const cashier = this.getCashierDetails;
       if (refundAmount == "₱ 0.00") {
         this.errMsg = "No items selected.";
         return;
       }
+
       this.toRefund = {
+        order_no: this.id,
         items: this.table.selected,
-        refundTotal: Number(this.refundTotal.replace(/\₱|,/g, ""))
+        refundTotal: Number(this.refundTotal.replace(/\₱|,/g, "")),
+        isDiscount: this.isDiscount,
+        customer: this.customer.id_no ? this.customer.id_no : "none"
       };
+      await this.returnItems(this.toRefund);
       //console.log(this.toRefund);
     },
     onBlur(event) {

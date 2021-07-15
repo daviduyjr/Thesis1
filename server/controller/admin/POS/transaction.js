@@ -64,6 +64,28 @@ module.exports = {
     }
   },
 
+  returnItems: async (req, res, next) => {
+    try {
+      await req.body.data.items.forEach(async (data) => {
+        const updatedItems = await Transaction.findOneAndUpdate(
+          { order_no: req.body.data.order_no, list_of_orders: { $elemMatch: { prodId: data.prodId } } },
+          { $set: { 'list_of_orders.$.isVoid': true } },
+          { new: true },
+          (err, doc) => {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            return doc;
+          }
+        );
+        // console.log('updatedItems', updatedItems);
+      });
+      // console.log('test', test);
+    } catch (err) {
+      console.log(err);
+    }
+  },
   getTransactionById: async (req, res, next) => {
     try {
       const id = req.params.id;

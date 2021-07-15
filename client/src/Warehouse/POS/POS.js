@@ -84,6 +84,13 @@ const actions = {
     } catch (err) {}
   },
 
+  async returnItems({ commit }, data) {
+    try {
+      let res = await axios.put("http://localhost:5000/api/admin/returnItems", {
+        data
+      });
+    } catch (err) {}
+  },
   async getTransactionById({ commit }, id) {
     try {
       let res = await axios.get(
